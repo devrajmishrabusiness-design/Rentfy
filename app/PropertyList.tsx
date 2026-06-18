@@ -9,28 +9,66 @@ export default function PropertyList({
   properties: any[];
 }) {
   const [search, setSearch] = useState("");
+  const [propertyType, setPropertyType] = useState("all");
 
-  const filteredProperties = properties.filter((property) =>
-    property.city?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProperties = properties.filter((property) => {
+    const cityMatch = property.city
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+
+    const typeMatch =
+      propertyType === "all" ||
+      property.property_type?.toLowerCase() ===
+        propertyType.toLowerCase();
+
+    return cityMatch && typeMatch;
+  });
 
   return (
     <>
-      <div className="max-w-md mx-auto mb-8">
-        <input
-          type="text"
-          placeholder="Search by city..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-3 border rounded-lg"
-        />
+      <div className="max-w-4xl mx-auto mb-8">
+        <div className="grid md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            placeholder="Search by city..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
+
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          >
+            <option value="all">
+              All Property Types
+            </option>
+
+            <option value="apartment">
+              Apartment
+            </option>
+
+            <option value="flat">
+              Flat
+            </option>
+
+            <option value="villa">
+              Villa
+            </option>
+
+            <option value="house">
+              House
+            </option>
+          </select>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
         {filteredProperties.map((property) => (
           <div
             key={property.id}
-            className="bg-white rounded-xl shadow p-4"
+            className="bg-white rounded-xl shadow hover:shadow-lg transition p-4"
           >
             <img
               src={property.image_url}
@@ -42,7 +80,7 @@ export default function PropertyList({
               {property.title}
             </h2>
 
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600 mt-2 line-clamp-2">
               {property.description}
             </p>
 
@@ -66,17 +104,17 @@ export default function PropertyList({
             >
               View Details
             </Link>
-
-            <a
-              href="https://wa.me/919084061619"
-              target="_blank"
-              className="block mt-2 w-full bg-green-600 text-white py-2 rounded-lg text-center"
-            >
-              WhatsApp Agency
-            </a>
           </div>
         ))}
       </div>
+
+      {filteredProperties.length === 0 && (
+        <div className="text-center mt-10">
+          <h2 className="text-2xl font-semibold">
+            No properties found
+          </h2>
+        </div>
+      )}
     </>
   );
 }

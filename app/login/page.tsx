@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -17,17 +17,18 @@ export default function LoginPage() {
   }, [router]);
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: "http://localhost:3000/login",
-      },
+      password: "@abhi.mishra16",
     });
+
+    console.log("LOGIN ERROR:", error);
 
     if (error) {
       alert(error.message);
     } else {
-      alert("Check your email for the login link!");
+      alert("LOGIN SUCCESS");
+      router.push("/dashboard");
     }
   };
 
@@ -50,7 +51,7 @@ export default function LoginPage() {
           onClick={handleLogin}
           className="w-full bg-blue-600 text-white py-3 rounded-lg"
         >
-          Send Login Link
+          Login
         </button>
       </div>
     </main>

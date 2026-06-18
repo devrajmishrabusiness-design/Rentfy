@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-browser";
 
 export default function AddProperty() {
   const [form, setForm] = useState({
@@ -41,20 +41,40 @@ export default function AddProperty() {
       imageUrl = data.publicUrl;
     }
 
-    const { error } = await supabase.from("properties").insert([
-      {
-        title: form.title,
-        description: form.description,
-        rent: Number(form.rent),
-        city: form.city,
-        location: form.location,
-        property_type: form.property_type,
-        bedrooms: Number(form.bedrooms),
-        bathrooms: Number(form.bathrooms),
-        image_url: imageUrl,
-        agency_id: "9130ca86-e920-4d47-9665-b53120741138",
-      },
-    ]);
+    const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  alert("Please login first");
+  return;
+}
+
+const { data: agency, error: agencyError } = await supabase
+  .from("agencies")
+  .select("id")
+  .eq("auth_user_id", user.id)
+  .single();
+
+if (agencyError || !agency) {
+  alert("Agency not found");
+  return;
+}
+
+const { error } = await supabase.from("properties").insert([
+  {
+    title: form.title,
+    description: form.description,
+    rent: Number(form.rent),
+    city: form.city,
+    location: form.location,
+    property_type: form.property_type,
+    bedrooms: Number(form.bedrooms),
+    bathrooms: Number(form.bathrooms),
+    image_url: imageUrl,
+    agency_id: agency.id,
+  },
+]);
 
     if (error) {
       alert(error.message);

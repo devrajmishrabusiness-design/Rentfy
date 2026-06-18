@@ -1,12 +1,45 @@
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import DeleteButton from "../DeleteButton";
+import { createClient } from "@/lib/supabase-server";
 
 export default async function Dashboard() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(); 
+
+  console.log("USER:", user);
+  if (!user) {
+  return (
+    <main className="p-8">
+      <h1 className="text-2xl font-bold text-red-600">
+        USER IS NULL
+      </h1>
+    </main>
+  );
+}
+
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("*")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!agency) {
+    return (
+      <main className="p-8">
+        <h1 className="text-2xl font-bold text-red-600">
+          Agency not found
+        </h1>
+      </main>
+    );
+  }
+
   const { data: properties, error } = await supabase
     .from("properties")
     .select("*")
-    .eq("agency_id", "9130ca86-e920-4d47-9665-b53120741138");
+    .eq("agency_id", agency.id);
 
   if (error) {
     return (

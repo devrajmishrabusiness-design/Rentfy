@@ -17,7 +17,15 @@ export default async function PropertyPage({
     return <div className="p-8">Property not found</div>;
   }
 
-  const whatsappUrl = `https://web.whatsapp.com/send?phone=919084061619&text=${encodeURIComponent(
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("*")
+    .eq("id", property.agency_id)
+    .single();
+
+  const phone = agency?.phone || "9084061619";
+
+  const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(
     `Hi, I am interested in ${property.title} listed on Rentfy.`
   )}`;
 
@@ -51,13 +59,30 @@ export default async function PropertyPage({
         <p>🚿 {property.bathrooms} Bathrooms</p>
       </div>
 
-      <div className="mt-8 p-4 border rounded-lg bg-gray-50">
-        <h2 className="text-xl font-bold mb-3">
+      <div className="mt-8 p-6 border rounded-xl bg-gray-50">
+        <h2 className="text-xl font-bold mb-4">
           Agency Information
         </h2>
 
-        <p>Agency: Rentfy Properties</p>
-        <p>Phone: 9084061619</p>
+        <p>
+          <strong>Agency:</strong>{" "}
+          {agency?.agency_name || "Rentfy Partner"}
+        </p>
+
+        <p>
+          <strong>Owner:</strong>{" "}
+          {agency?.owner_name || "N/A"}
+        </p>
+
+        <p>
+          <strong>Phone:</strong>{" "}
+          {agency?.phone || "N/A"}
+        </p>
+
+        <p>
+          <strong>City:</strong>{" "}
+          {agency?.city || "N/A"}
+        </p>
 
         <a
           href={whatsappUrl}
