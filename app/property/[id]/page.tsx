@@ -1,3 +1,4 @@
+import ImageGallery from "@/app/ImageGallery";
 import { supabase } from "@/lib/supabase";
 
 export default async function PropertyPage({
@@ -22,7 +23,15 @@ export default async function PropertyPage({
     .select("*")
     .eq("id", property.agency_id)
     .single();
-
+  const { data: images } = await supabase
+    .from("property_images")
+    .select("*")
+    .eq("property_id", property.id);
+    
+  console.log("PROPERTY ID:", property.id);
+  console.log("IMAGES:", images);
+  const imageUrls =
+  images?.map((img) => img.image_url) || [];
   const phone = agency?.phone || "9084061619";
 
   const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(
@@ -31,13 +40,13 @@ export default async function PropertyPage({
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
-      <img
-        src={property.image_url}
-        alt={property.title}
-        className="w-full rounded-lg"
+        
+      <ImageGallery
+        images={imageUrls}
+        title={property.title}
       />
 
-      <h1 className="text-4xl font-bold mt-6">
+       <h1 className="text-4xl font-bold mt-6">
         {property.title}
       </h1>
 
@@ -53,10 +62,31 @@ export default async function PropertyPage({
         {property.description}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-2">
         <p>🏠 {property.property_type}</p>
         <p>🛏️ {property.bedrooms} Bedrooms</p>
         <p>🚿 {property.bathrooms} Bathrooms</p>
+
+        {property.furnishing && (
+          <p>🛋️ Furnishing: {property.furnishing}</p>
+        )}
+
+        <p>
+          🚗 Parking:{" "}
+          {property.parking ? "Available" : "Not Available"}
+        </p>
+
+        {property.available_from && (
+          <p>
+            📅 Available From: {property.available_from}
+          </p>
+        )}
+
+        {property.contact_number && (
+          <p>
+            📞 Contact Number: {property.contact_number}
+          </p>
+        )}
       </div>
 
       <div className="mt-8 p-6 border rounded-xl bg-gray-50">

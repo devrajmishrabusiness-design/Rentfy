@@ -13,23 +13,29 @@ export default function AddProperty() {
     property_type: "",
     bedrooms: "",
     bathrooms: "",
+    furnishing: "",
+    parking: false,
+    available_from: "",
+    contact_number: "",
   });
 
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<FileList | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let imageUrl = "";
+    let uploadedImages: string[] = [];
 
-    if (file) {
-      const fileName = `${Date.now()}-${file.name}`;
+    if (files && files.length > 0) {
+      for (const file of Array.from(files)) {
+        const fileName = `${Date.now()}-${file.name}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("property-images")
-        .upload(fileName, file);
+        const { error: uploadError } = await supabase.storage
+          .from("property-images")
+          .upload(fileName, file);
 
-      if (uploadError) {
+        if (uploadError) {
         alert(uploadError.message);
         return;
       }
@@ -38,48 +44,69 @@ export default function AddProperty() {
         .from("property-images")
         .getPublicUrl(fileName);
 
-      imageUrl = data.publicUrl;
+      uploadedImages.push(data.publicUrl);
     }
+
+    imageUrl = uploadedImages[0];
+  }
 
     const {
-  data: { user },
-} = await supabase.auth.getUser();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-if (!user) {
-  alert("Please login first");
-  return;
-}
-
-const { data: agency, error: agencyError } = await supabase
-  .from("agencies")
-  .select("id")
-  .eq("auth_user_id", user.id)
-  .single();
-
-if (agencyError || !agency) {
-  alert("Agency not found");
-  return;
-}
-
-const { error } = await supabase.from("properties").insert([
-  {
-    title: form.title,
-    description: form.description,
-    rent: Number(form.rent),
-    city: form.city,
-    location: form.location,
-    property_type: form.property_type,
-    bedrooms: Number(form.bedrooms),
-    bathrooms: Number(form.bathrooms),
-    image_url: imageUrl,
-    agency_id: agency.id,
-  },
-]);
-
-    if (error) {
-      alert(error.message);
+    if (!user) {
+      alert("Please login first");
       return;
     }
+
+    const { data: agency, error: agencyError } = await supabase
+      .from("agencies")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (agencyError || !agency) {
+      alert("Agency not found");
+      return;
+    }
+
+    const { data: property, error } = await supabase
+      .from("properties")
+      .insert([
+       {
+         title: form.title,
+         description: form.description,
+         rent: Number(form.rent),
+         city: form.city,
+         location: form.location,
+         property_type: form.property_type,
+         bedrooms: Number(form.bedrooms),
+         bathrooms: Number(form.bathrooms),
+         furnishing: form.furnishing,
+         parking: form.parking,
+         available_from: form.available_from,
+         contact_number: form.contact_number,
+         image_url: imageUrl,
+         cover_image_url: imageUrl,
+         agency_id: agency.id,
+       },
+    ])
+    .select()
+    .single();
+
+   if (error) {
+     alert(error.message);
+     return;
+   }
+
+   for (const image of uploadedImages) {
+   await supabase.from("property_images").insert([
+     {
+       property_id: property.id,
+       image_url: image,
+     },
+   ]);
+ }
 
     alert("Property Added Successfully!");
     window.location.href = "/dashboard";
@@ -93,6 +120,7 @@ const { error } = await supabase.from("properties").insert([
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <input
             required
             placeholder="Title"
@@ -174,15 +202,66 @@ const { error } = await supabase.from("properties").insert([
             }
           />
 
+          <select
+            className="w-full border p-3 rounded"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                furnishing: e.target.value,
+              })
+            }
+          >
+            <option value="">Select Furnishing</option>
+            <option value="Unfurnished">Unfurnished</option>
+            <option value="Semi Furnished">Semi Furnished</option>
+            <option value="Fully Furnished">Fully Furnished</option>
+          </select>
+
+          <select
+            className="w-full border p-3 rounded"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                parking: e.target.value === "true",
+              })
+            }
+          >
+            <option value="false">No Parking</option>
+            <option value="true">Parking Available</option>
+          </select>
+
+          <input
+            type="date"
+            className="w-full border p-3 rounded"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                available_from: e.target.value,
+              })
+            }
+          />
+
+          <input
+            placeholder="Contact Number"
+            className="w-full border p-3 rounded"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                contact_number: e.target.value,
+              })
+            }
+          />
+
           <input
             type="file"
             accept="image/*"
+            multiple
             required
             className="w-full border p-3 rounded"
             onChange={(e) =>
-              setFile(e.target.files?.[0] || null)
-            }
-          />
+               setFiles(e.target.files)
+           }
+         />
 
           <button
             type="submit"
@@ -190,6 +269,7 @@ const { error } = await supabase.from("properties").insert([
           >
             Add Property
           </button>
+
         </form>
       </div>
     </main>

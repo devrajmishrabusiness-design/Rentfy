@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -19,10 +20,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password: "@abhi.mishra16",
+      password,
     });
-
-    console.log("LOGIN ERROR:", error);
 
     if (error) {
       alert(error.message);
@@ -44,6 +43,14 @@ export default function LoginPage() {
           placeholder="Agency Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-3 rounded mb-4"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full border p-3 rounded mb-4"
         />
 

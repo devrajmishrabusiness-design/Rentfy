@@ -10,6 +10,9 @@ export default function PropertyList({
 }) {
   const [search, setSearch] = useState("");
   const [propertyType, setPropertyType] = useState("all");
+  const [bedrooms, setBedrooms] = useState("all");
+  const [furnishing, setFurnishing] = useState("all");
+  const [parking, setParking] = useState("all");
 
   const filteredProperties = properties.filter((property) => {
     const cityMatch = property.city
@@ -21,16 +24,35 @@ export default function PropertyList({
       property.property_type?.toLowerCase() ===
         propertyType.toLowerCase();
 
-    return cityMatch && typeMatch;
+    const bedroomMatch =
+      bedrooms === "all" ||
+      String(property.bedrooms) === bedrooms;
+
+    const furnishingMatch =
+      furnishing === "all" ||
+      property.furnishing === furnishing;
+
+    const parkingMatch =
+      parking === "all" ||
+      String(property.parking) === parking;
+
+    return (
+      cityMatch &&
+      typeMatch &&
+      bedroomMatch &&
+      furnishingMatch &&
+      parkingMatch
+    );
   });
 
   return (
     <>
-      <div className="max-w-4xl mx-auto mb-8">
-        <div className="grid md:grid-cols-2 gap-4">
+      <div className="max-w-6xl mx-auto mb-8">
+        <div className="grid md:grid-cols-5 gap-4">
+
           <input
             type="text"
-            placeholder="Search by city..."
+            placeholder="Search City"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full p-3 border rounded-lg"
@@ -41,26 +63,46 @@ export default function PropertyList({
             onChange={(e) => setPropertyType(e.target.value)}
             className="w-full p-3 border rounded-lg"
           >
-            <option value="all">
-              All Property Types
-            </option>
-
-            <option value="apartment">
-              Apartment
-            </option>
-
-            <option value="flat">
-              Flat
-            </option>
-
-            <option value="villa">
-              Villa
-            </option>
-
-            <option value="house">
-              House
-            </option>
+            <option value="all">All Types</option>
+            <option value="apartment">Apartment</option>
+            <option value="flat">Flat</option>
+            <option value="villa">Villa</option>
+            <option value="house">House</option>
           </select>
+
+          <select
+            value={bedrooms}
+            onChange={(e) => setBedrooms(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          >
+            <option value="all">All Bedrooms</option>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4+ BHK</option>
+          </select>
+
+          <select
+            value={furnishing}
+            onChange={(e) => setFurnishing(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          >
+            <option value="all">Any Furnishing</option>
+            <option value="Unfurnished">Unfurnished</option>
+            <option value="Semi Furnished">Semi Furnished</option>
+            <option value="Fully Furnished">Fully Furnished</option>
+          </select>
+
+          <select
+            value={parking}
+            onChange={(e) => setParking(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          >
+            <option value="all">Parking Any</option>
+            <option value="true">Parking Available</option>
+            <option value="false">No Parking</option>
+          </select>
+
         </div>
       </div>
 
@@ -96,6 +138,14 @@ export default function PropertyList({
               <p>🏠 {property.property_type}</p>
               <p>🛏️ {property.bedrooms} Bedrooms</p>
               <p>🚿 {property.bathrooms} Bathrooms</p>
+
+              {property.furnishing && (
+                <p>🛋️ {property.furnishing}</p>
+              )}
+
+              <p>
+                🚗 {property.parking ? "Parking Available" : "No Parking"}
+              </p>
             </div>
 
             <Link

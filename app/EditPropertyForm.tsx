@@ -12,11 +12,18 @@ export default function EditPropertyForm({
   const router = useRouter();
 
   const [form, setForm] = useState({
-    title: property.title,
-    description: property.description,
-    rent: property.rent,
-    city: property.city,
-    location: property.location,
+    title: property.title || "",
+    description: property.description || "",
+    rent: property.rent || "",
+    city: property.city || "",
+    location: property.location || "",
+    property_type: property.property_type || "",
+    bedrooms: property.bedrooms || "",
+    bathrooms: property.bathrooms || "",
+    furnishing: property.furnishing || "",
+    parking: property.parking || false,
+    available_from: property.available_from || "",
+    contact_number: property.contact_number || "",
   });
 
   const handleUpdate = async () => {
@@ -28,16 +35,24 @@ export default function EditPropertyForm({
         rent: Number(form.rent),
         city: form.city,
         location: form.location,
+        property_type: form.property_type,
+        bedrooms: Number(form.bedrooms),
+        bathrooms: Number(form.bathrooms),
+        furnishing: form.furnishing,
+        parking: form.parking,
+        available_from: form.available_from,
+        contact_number: form.contact_number,
       })
       .eq("id", property.id);
 
     if (error) {
       alert(error.message);
-    } else {
-      alert("Property Updated!");
-      router.push("/dashboard");
-      router.refresh();
+      return;
     }
+
+    alert("Property Updated Successfully!");
+    router.push("/dashboard");
+    router.refresh();
   };
 
   return (
@@ -48,6 +63,7 @@ export default function EditPropertyForm({
           setForm({ ...form, title: e.target.value })
         }
         className="w-full border p-3 rounded"
+        placeholder="Title"
       />
 
       <textarea
@@ -56,6 +72,7 @@ export default function EditPropertyForm({
           setForm({ ...form, description: e.target.value })
         }
         className="w-full border p-3 rounded"
+        placeholder="Description"
       />
 
       <input
@@ -64,6 +81,7 @@ export default function EditPropertyForm({
           setForm({ ...form, rent: e.target.value })
         }
         className="w-full border p-3 rounded"
+        placeholder="Rent"
       />
 
       <input
@@ -72,6 +90,7 @@ export default function EditPropertyForm({
           setForm({ ...form, city: e.target.value })
         }
         className="w-full border p-3 rounded"
+        placeholder="City"
       />
 
       <input
@@ -80,6 +99,79 @@ export default function EditPropertyForm({
           setForm({ ...form, location: e.target.value })
         }
         className="w-full border p-3 rounded"
+        placeholder="Location"
+      />
+
+      <input
+        value={form.property_type}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            property_type: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+        placeholder="Property Type"
+      />
+
+      <input
+        value={form.bedrooms}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            bedrooms: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+        placeholder="Bedrooms"
+      />
+
+      <input
+        value={form.bathrooms}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            bathrooms: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+        placeholder="Bathrooms"
+      />
+
+      <input
+        value={form.furnishing}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            furnishing: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+        placeholder="Furnishing"
+      />
+
+      <input
+        type="date"
+        value={form.available_from}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            available_from: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+      />
+
+      <input
+        value={form.contact_number}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            contact_number: e.target.value,
+          })
+        }
+        className="w-full border p-3 rounded"
+        placeholder="Contact Number"
       />
 
       <button
