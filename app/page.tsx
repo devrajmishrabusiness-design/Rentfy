@@ -5,9 +5,15 @@ import Link from "next/link";
 
 export default async function Home() {
   const { data: properties } = await supabase
-    .from("properties")
-    .select("*");
-
+     .from("properties")
+     .select(`
+      *,
+      agencies!inner (
+       verified
+      )
+    `)
+      .eq("agencies.verified", true)
+      .eq("status", "approved");
   return (
     <main className="min-h-screen bg-gray-100">
       <Navbar />
@@ -30,7 +36,13 @@ export default async function Home() {
             >
               Agency Login
             </Link>
-
+            
+            <Link
+               href="/signup"
+               className="bg-purple-600 text-white px-6 py-3 rounded-lg"
+              > 
+               Agency Signup
+            </Link>
             <Link
               href="/dashboard"
               className="bg-green-600 px-6 py-3 rounded-lg font-semibold"

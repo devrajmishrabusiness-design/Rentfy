@@ -1,5 +1,44 @@
 import ImageGallery from "@/app/ImageGallery";
 import { supabase } from "@/lib/supabase";
+import ContactAgencyButton from "@/app/ContactAgencyButton";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const { data: property } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("id", id)
+    .eq("status", "approved")
+    .single();
+
+  if (!property) {
+    return {
+      title: "Property Not Found | Rentfy",
+      description: "The requested property could not be found.",
+    };
+  }
+
+  return {
+    title: `${property.title} | Rentfy`,
+    description:
+      property.description?.slice(0, 160) ||
+      `Rental property in ${property.city} listed on Rentfy.`,
+
+    openGraph: {
+      title: `${property.title} | Rentfy`,
+      description:
+        property.description?.slice(0, 160) ||
+        `Rental property in ${property.city} listed on Rentfy.`,
+      images: property.image_url ? [property.image_url] : [],
+    },
+  };
+}
 
 export default async function PropertyPage({
   params,
@@ -12,6 +51,7 @@ export default async function PropertyPage({
     .from("properties")
     .select("*")
     .eq("id", id)
+    .eq("status", "approved")
     .single();
 
   if (!property) {
@@ -23,15 +63,15 @@ export default async function PropertyPage({
     .select("*")
     .eq("id", property.agency_id)
     .single();
+
   const { data: images } = await supabase
     .from("property_images")
     .select("*")
     .eq("property_id", property.id);
-    
-  console.log("PROPERTY ID:", property.id);
-  console.log("IMAGES:", images);
+
   const imageUrls =
-  images?.map((img) => img.image_url) || [];
+    images?.map((img) => img.image_url) || [];
+
   const phone = agency?.phone || "9084061619";
 
   const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(
@@ -40,13 +80,12 @@ export default async function PropertyPage({
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
-        
       <ImageGallery
         images={imageUrls}
         title={property.title}
       />
 
-       <h1 className="text-4xl font-bold mt-6">
+      <h1 className="text-4xl font-bold mt-6">
         {property.title}
       </h1>
 
@@ -73,7 +112,9 @@ export default async function PropertyPage({
 
         <p>
           🚗 Parking:{" "}
-          {property.parking ? "Available" : "Not Available"}
+          {property.parking
+            ? "Available"
+            : "Not Available"}
         </p>
 
         {property.available_from && (
@@ -99,6 +140,12 @@ export default async function PropertyPage({
           {agency?.agency_name || "Rentfy Partner"}
         </p>
 
+        {agency?.verified && (
+          <div className="mt-2 inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+            ✅ Verified Rentfy Agency
+          </div>
+        )}
+
         <p>
           <strong>Owner:</strong>{" "}
           {agency?.owner_name || "N/A"}
@@ -114,14 +161,11 @@ export default async function PropertyPage({
           {agency?.city || "N/A"}
         </p>
 
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mt-4 bg-green-600 text-white py-3 rounded-lg text-center"
-        >
-          WhatsApp Agency
-        </a>
+        <ContactAgencyButton
+          propertyId={property.id}
+          agencyId={agency.id}
+          whatsappUrl={whatsappUrl}
+        />
       </div>
     </main>
   );

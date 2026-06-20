@@ -61,15 +61,20 @@ export default function AddProperty() {
 
     const { data: agency, error: agencyError } = await supabase
       .from("agencies")
-      .select("id")
+      .select("id, verified")
       .eq("auth_user_id", user.id)
       .single();
-
     if (agencyError || !agency) {
       alert("Agency not found");
       return;
     }
-
+    
+    if (!agency.verified) {
+      alert(
+       "Your agency is not verified yet. Please wait for Rentfy approval."
+     );
+     return;
+   }
     const { data: property, error } = await supabase
       .from("properties")
       .insert([
@@ -89,6 +94,7 @@ export default function AddProperty() {
          image_url: imageUrl,
          cover_image_url: imageUrl,
          agency_id: agency.id,
+         status: "pending",
        },
     ])
     .select()

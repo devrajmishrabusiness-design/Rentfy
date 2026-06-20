@@ -11,7 +11,7 @@ export default function Navbar() {
           Rentfy
         </Link>
 
-        <div className="flex gap-4">
+        <div className="flex gap-6 items-center">
           <Link
             href="/"
             className="hover:text-blue-600"
@@ -24,6 +24,13 @@ export default function Navbar() {
             className="hover:text-blue-600"
           >
             Agency Login
+          </Link>
+
+          <Link
+            href="/signup"
+            className="hover:text-blue-600"
+          >
+            Agency Signup
           </Link>
 
           <Link
