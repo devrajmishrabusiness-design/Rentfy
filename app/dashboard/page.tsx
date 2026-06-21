@@ -3,14 +3,14 @@ import Link from "next/link";
 import DeleteButton from "../DeleteButton";
 import { createClient } from "@/lib/supabase-server";
 import LeadStatusSelect from "../LeadStatusSelect";
+import type { Agency, Lead, Property } from "../types";
+
 export default async function Dashboard() {
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  console.log("USER:", user);
 
   if (!user) {
     return (
@@ -26,7 +26,7 @@ export default async function Dashboard() {
     .from("agencies")
     .select("*")
     .eq("auth_user_id", user.id)
-    .single();
+    .single<Agency>();
 
   if (!agency) {
     return (
@@ -41,17 +41,23 @@ export default async function Dashboard() {
   const { data: properties, error } = await supabase
     .from("properties")
     .select("*")
-    .eq("agency_id", agency.id);
+    .eq("agency_id", agency.id)
+    .returns<Property[]>();
   const { data: leads } = await supabase
      .from("leads")
      .select("*")
-     .eq("agency_id", agency.id);
+     .eq("agency_id", agency.id)
+     .returns<Lead[]>();
 
   const totalLeads = leads?.length || 0;
   const now = new Date();
 
 const leadsThisWeek =
-  leads?.filter((lead: any) => {
+  leads?.filter((lead) => {
+    if (!lead.created_at) {
+      return false;
+    }
+
     const leadDate = new Date(lead.created_at);
     return (
       now.getTime() - leadDate.getTime() <
@@ -60,7 +66,11 @@ const leadsThisWeek =
   }).length || 0;
 
 const leadsThisMonth =
-  leads?.filter((lead: any) => {
+  leads?.filter((lead) => {
+    if (!lead.created_at) {
+      return false;
+    }
+
     const leadDate = new Date(lead.created_at);
 
     return (
@@ -75,26 +85,27 @@ const leadsThisMonth =
     properties(title)
   `)
   .eq("agency_id", agency.id)
-  .order("created_at", { ascending: false });
+  .order("created_at", { ascending: false })
+  .returns<Lead[]>();
   const totalProperties = properties?.length || 0;
 
   const totalRentValue =
    properties?.reduce(
-    (sum: number, property: any) =>
-      sum + (property.rent || 0),
+    (sum, property) =>
+      sum + Number(property.rent || 0),
     0
   ) || 0;
   const propertyLeadCounts =
-  properties?.map((property: any) => ({
+  properties?.map((property) => ({
     ...property,
     leadCount:
       leads?.filter(
-        (lead: any) =>
+        (lead) =>
           lead.property_id === property.id
       ).length || 0,
   }))
   .sort(
-    (a: any, b: any) =>
+    (a, b) =>
       b.leadCount - a.leadCount
   )
   .slice(0, 5) || [];
@@ -204,7 +215,7 @@ const leadsThisMonth =
 
           {properties && properties.length > 0 ? (
             <div className="space-y-4">
-              {properties.map((property: any) => (
+              {properties.map((property) => (
                 <div
                   key={property.id}
                   className="border rounded-lg p-4 flex justify-between items-center"
@@ -253,7 +264,7 @@ const leadsThisMonth =
 
   {propertyLeadCounts.length > 0 ? (
     <div className="space-y-3">
-      {propertyLeadCounts.map((property: any) => (
+      {propertyLeadCounts.map((property) => (
         <div
           key={property.id}
           className="border rounded-lg p-4 flex justify-between"
@@ -287,7 +298,7 @@ const leadsThisMonth =
   </h2>
        {recentLeads && recentLeads.length > 0 ? (
          <div className="space-y-3">
-         {recentLeads.map((lead: any) => (
+         {recentLeads.map((lead) => (
           <div
            key={lead.id}
            className="border rounded-lg p-4"
@@ -306,15 +317,15 @@ const leadsThisMonth =
             <strong>Status:</strong>{" "}
             <LeadStatusSelect
               leadId={lead.id}
-              currentStatus={lead.status}
+              currentStatus={lead.status || "new"}
             />
           </p>
 
           <p>
             <strong>Date:</strong>{" "}
-            {new Date(
-              lead.created_at
-            ).toLocaleString()}
+            {lead.created_at
+              ? new Date(lead.created_at).toLocaleString()
+              : "Unknown"}
           </p>
         </div>
       ))}

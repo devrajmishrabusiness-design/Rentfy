@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import type { Agency } from "./types";
 
 export default function EditAgencyProfile({
   agency,
 }: {
-  agency: any;
+  agency: Agency;
 }) {
   const router = useRouter();
 

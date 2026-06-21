@@ -4,6 +4,8 @@ import VerifyAgencyButton from "@/app/VerifyAgencyButton";
 import DeletePropertyAdminButton from "@/app/DeletePropertyAdminButton";
 import ApprovePropertyButton from "@/app/ApprovePropertyButton";
 import RejectPropertyButton from "@/app/RejectPropertyButton";
+import type { Agency, Lead, Property } from "../types";
+
 export default async function AdminPage() {
   const supabase = await createClient();
   const {
@@ -18,15 +20,18 @@ if (
 }
   const { data: agencies } = await supabase
     .from("agencies")
-    .select("*");
+    .select("*")
+    .returns<Agency[]>();
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("*");
+    .select("*")
+    .returns<Property[]>();
 
   const { data: leads } = await supabase
     .from("leads")
-    .select("*");
+    .select("*")
+    .returns<Lead[]>();
 
   const totalAgencies = agencies?.length || 0;
   const totalProperties = properties?.length || 0;
@@ -87,7 +92,7 @@ if (
           {agencies && agencies.length > 0 ? (
             <div className="space-y-3">
 
-              {agencies.map((agency: any) => (
+              {agencies.map((agency) => (
                 <div
                   key={agency.id}
                   className="border rounded-lg p-4 flex justify-between items-center"
@@ -143,7 +148,7 @@ if (
   {properties && properties.length > 0 ? (
     <div className="space-y-3">
 
-      {properties.map((property: any) => (
+      {properties.map((property) => (
         <div
           key={property.id}
           className="border rounded-lg p-4 flex justify-between items-center"

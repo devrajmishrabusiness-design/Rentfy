@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Navbar from "../Navbar";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     agency_name: "",
     owner_name: "",
@@ -50,73 +54,94 @@ export default function SignupPage() {
     }
 
     alert("Agency created successfully!");
-    window.location.href = "/dashboard";
+    router.push("/dashboard");
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Agency Signup
-        </h1>
+    <main className="min-h-screen bg-slate-50 text-slate-950">
+      <Navbar />
+      <section className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-2xl rounded border border-slate-200 bg-white p-8 shadow-sm">
+          <p className="text-center text-sm font-bold uppercase tracking-wide text-emerald-700">
+            Join Rentfy
+          </p>
+          <h1 className="mt-3 text-center text-3xl font-bold">
+            Create an agency account
+          </h1>
+          <p className="mt-2 text-center text-sm text-slate-500">
+            Publish verified rental listings and manage tenant enquiries.
+          </p>
 
-        <input
-          placeholder="Agency Name"
-          className="w-full border p-3 rounded mb-3"
-          onChange={(e) =>
-            setForm({ ...form, agency_name: e.target.value })
-          }
-        />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <input
+              placeholder="Agency Name"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, agency_name: e.target.value })
+              }
+            />
 
-        <input
-          placeholder="Owner Name"
-          className="w-full border p-3 rounded mb-3"
-          onChange={(e) =>
-            setForm({ ...form, owner_name: e.target.value })
-          }
-        />
+            <input
+              placeholder="Owner Name"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, owner_name: e.target.value })
+              }
+            />
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-3 rounded mb-3"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value })
+              }
+            />
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border p-3 rounded mb-3"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+            />
 
-        <input
-          placeholder="Phone"
-          className="w-full border p-3 rounded mb-3"
-          onChange={(e) =>
-            setForm({ ...form, phone: e.target.value })
-          }
-        />
+            <input
+              placeholder="Phone"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, phone: e.target.value })
+              }
+            />
 
-        <input
-          placeholder="City"
-          className="w-full border p-3 rounded mb-4"
-          onChange={(e) =>
-            setForm({ ...form, city: e.target.value })
-          }
-        />
+            <input
+              placeholder="City"
+              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) =>
+                setForm({ ...form, city: e.target.value })
+              }
+            />
+          </div>
 
-        <button
-          onClick={handleSignup}
-          className="w-full bg-green-600 text-white py-3 rounded-lg"
-        >
-          Create Agency Account
-        </button>
-      </div>
+          <button
+            onClick={handleSignup}
+            className="mt-5 w-full rounded bg-slate-950 py-3 font-semibold text-white transition hover:bg-slate-800"
+          >
+            Create Agency Account
+          </button>
+
+          <p className="mt-5 text-center text-sm text-slate-500">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-slate-950 hover:underline"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
+      </section>
     </main>
   );
 }

@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import type { Property } from "./types";
 
 export default function EditPropertyForm({
   property,
 }: {
-  property: any;
+  property: Property;
 }) {
   const router = useRouter();
 

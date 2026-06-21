@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { Property } from "../../types";
 
 export const metadata: Metadata = {
   title: "Flats & Apartments for Rent in Noida | Rentfy",
@@ -13,7 +14,8 @@ export default async function NoidaRentPage() {
     .from("properties")
     .select("*")
     .eq("status", "approved")
-    .ilike("city", "noida");
+    .ilike("city", "noida")
+    .returns<Property[]>();
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-10">
@@ -62,7 +64,7 @@ export default async function NoidaRentPage() {
 </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {properties?.map((property: any) => (
+        {properties?.map((property) => (
           <div
             key={property.id}
             className="bg-white rounded-xl shadow p-4"

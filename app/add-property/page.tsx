@@ -25,7 +25,7 @@ export default function AddProperty() {
     e.preventDefault();
 
     let imageUrl = "";
-    let uploadedImages: string[] = [];
+    const uploadedImages: string[] = [];
 
     if (files && files.length > 0) {
       for (const file of Array.from(files)) {
