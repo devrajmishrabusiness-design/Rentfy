@@ -1,5 +1,6 @@
 export type Agency = {
   id: string;
+  auth_user_id?: string | null;
   agency_name?: string | null;
   owner_name?: string | null;
   phone?: string | null;
@@ -15,12 +16,12 @@ export type Property = {
   description?: string | null;
   image_url?: string | null;
   cover_image_url?: string | null;
-  rent?: number | string | null;
+  rent?: number | null;
   city?: string | null;
   location?: string | null;
   property_type?: string | null;
-  bedrooms?: number | string | null;
-  bathrooms?: number | string | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
   furnishing?: string | null;
   parking?: boolean | null;
   available_from?: string | null;
@@ -31,6 +32,8 @@ export type Property = {
 
 export type Lead = {
   id: string;
+  name?: string | null;
+  phone?: string | null;
   property_id?: string | null;
   agency_id?: string | null;
   source?: string | null;

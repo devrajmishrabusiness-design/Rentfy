@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
+import ErrorMessage from "./ErrorMessage";
 
 type LeadCaptureModalProps = {
   open: boolean;
@@ -183,11 +184,7 @@ function LeadCaptureForm({
             )}
           </div>
 
-          {serverError && (
-            <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {serverError}
-            </div>
-          )}
+          <ErrorMessage message={serverError} />
 
           <button
             type="submit"

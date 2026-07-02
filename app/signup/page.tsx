@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 import Footer from "../Footer";
 import ApplicationSubmitted from "../ApplicationSubmitted";
+import ErrorMessage from "../ErrorMessage";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -173,11 +174,7 @@ export default function SignupPage() {
                 />
               </div>
 
-              {error && (
-                <div className="sm:col-span-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
+              <ErrorMessage message={error} className="sm:col-span-2" />
 
               <button
                 type="submit"

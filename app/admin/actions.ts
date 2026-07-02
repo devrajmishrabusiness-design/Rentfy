@@ -15,8 +15,9 @@ import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+type RequireAdminResult = { ok: true; userId: string } | { ok: false; error: string };
 
-async function requireAdmin(): Promise<{ userId: string } | ActionResult> {
+async function requireAdmin(): Promise<RequireAdminResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -36,12 +37,12 @@ async function requireAdmin(): Promise<{ userId: string } | ActionResult> {
     return { ok: false, error: "You don't have admin access." };
   }
 
-  return { userId: user.id };
+  return { ok: true, userId: user.id };
 }
 
 export async function verifyAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
-  if ("error" in auth) return auth;
+  if (!auth.ok) return auth;
 
   const { error } = await supabaseAdmin
     .from("agencies")
@@ -56,7 +57,7 @@ export async function verifyAgency(agencyId: string): Promise<ActionResult> {
 
 export async function unverifyAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
-  if ("error" in auth) return auth;
+  if (!auth.ok) return auth;
 
   const { error } = await supabaseAdmin
     .from("agencies")
@@ -73,7 +74,7 @@ export async function deletePropertyAdmin(
   propertyId: string,
 ): Promise<ActionResult> {
   const auth = await requireAdmin();
-  if ("error" in auth) return auth;
+  if (!auth.ok) return auth;
 
   const { error } = await supabaseAdmin
     .from("properties")
@@ -88,7 +89,7 @@ export async function deletePropertyAdmin(
 
 export async function deleteAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
-  if ("error" in auth) return auth;
+  if (!auth.ok) return auth;
 
   const { error } = await supabaseAdmin
     .from("agencies")

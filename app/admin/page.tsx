@@ -9,6 +9,7 @@ import DeleteAgencyButton from "@/app/DeleteAgencyButton";
 import ApprovePropertyButton from "@/app/ApprovePropertyButton";
 import RejectPropertyButton from "@/app/RejectPropertyButton";
 import StatusBadge from "@/app/StatusBadge";
+import StatCard from "@/app/StatCard";
 import type { Agency, Lead, Property } from "../types";
 
 export default async function AdminPage() {
@@ -122,27 +123,13 @@ export default async function AdminPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="card p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--brand-muted)]">
-                    {s.label}
-                  </p>
-                  <p className="mt-2 text-3xl font-extrabold text-[var(--brand-text)]">
-                    {s.value}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--brand-muted)]">
-                    {s.sub}
-                  </p>
-                </div>
-                <span
-                  className="grid h-11 w-11 place-items-center rounded-xl bg-slate-900 text-white"
-                  aria-hidden
-                >
-                  {s.icon}
-                </span>
-              </div>
-            </div>
+            <StatCard
+              key={s.label}
+              label={s.label}
+              value={s.value}
+              sub={s.sub}
+              icon={s.icon}
+            />
           ))}
         </div>
 

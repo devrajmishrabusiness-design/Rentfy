@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Footer from "../Footer";
+import ErrorMessage from "../ErrorMessage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -87,11 +88,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              {error && (
-                <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
+              <ErrorMessage message={error} />
 
               <button
                 type="submit"

@@ -4,6 +4,7 @@ import Footer from "./Footer";
 import Link from "next/link";
 import Image from "next/image";
 import type { Property } from "./types";
+import SectionHeader from "./SectionHeader";
 
 const whyItems = [
   {
@@ -391,18 +392,12 @@ export default async function Home() {
       {/* Why RenterEasy */}
       <section id="why" className="bg-white py-20">
         <div className="container-app">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-              Why RenterEasy
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              A premium rental marketplace built on trust.
-            </h2>
-            <p className="mt-4 text-[var(--brand-muted)]">
-              We make renting in Noida &amp; NCR simple, safe and
-              predictable — for both tenants and verified agencies.
-            </p>
-          </div>
+          <SectionHeader
+            eyebrow="Why RenterEasy"
+            title="A premium rental marketplace built on trust."
+            description="We make renting in Noida & NCR simple, safe and predictable — for both tenants and verified agencies."
+            align="center"
+          />
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {whyItems.map((item) => (
@@ -429,14 +424,10 @@ export default async function Home() {
       <section className="py-20">
         <div className="container-app">
           <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-                How it works
-              </p>
-              <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-                Simple steps from search to contact.
-              </h2>
-            </div>
+            <SectionHeader
+              eyebrow="How it works"
+              title="Simple steps from search to contact."
+            />
             <Link href="/signup" className="btn-secondary">
               List as an agency
             </Link>
@@ -467,18 +458,11 @@ export default async function Home() {
       >
         <div className="container-app">
           <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-                Available properties
-              </p>
-              <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-                Browse current rentals
-              </h2>
-              <p className="mt-3 text-[var(--brand-muted)]">
-                Use the filters to narrow the list and open a property for
-                full details.
-              </p>
-            </div>
+            <SectionHeader
+              eyebrow="Available properties"
+              title="Browse current rentals"
+              description="Use the filters to narrow the list and open a property for full details."
+            />
           </div>
 
           <PropertyList properties={properties || []} />
@@ -489,14 +473,10 @@ export default async function Home() {
       <section className="py-20">
         <div className="container-app">
           <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-                Popular areas
-              </p>
-              <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-                Explore top Noida sectors
-              </h2>
-            </div>
+            <SectionHeader
+              eyebrow="Popular areas"
+              title="Explore top Noida sectors"
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -544,14 +524,11 @@ export default async function Home() {
       {/* Testimonials */}
       <section className="bg-white py-20">
         <div className="container-app">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-              Testimonials
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              Loved by tenants and agencies
-            </h2>
-          </div>
+          <SectionHeader
+            eyebrow="Testimonials"
+            title="Loved by tenants and agencies"
+            align="center"
+          />
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {testimonials.map((t) => (

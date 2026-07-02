@@ -7,6 +7,7 @@ import DeleteButton from "../DeleteButton";
 import LeadStatusSelect from "../LeadStatusSelect";
 import PropertyCard from "../PropertyCard";
 import StatusBadge from "../StatusBadge";
+import StatCard from "../StatCard";
 
 const monthLabels = [
   "Jan",
@@ -304,30 +305,18 @@ export default async function Dashboard() {
         {/* Stats */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="card p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--brand-muted)]">
-                    {s.label}
-                  </p>
-                  <p className="mt-2 text-3xl font-extrabold text-[var(--brand-text)]">
-                    {s.value}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--brand-muted)]">
-                    {s.sub}
-                  </p>
-                </div>
-                <span
-                  className="grid h-11 w-11 place-items-center rounded-xl bg-slate-900 text-white"
-                  aria-hidden
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="12" cy="12" r="9" />
-                    <polyline points="12 7 12 12 15 14" />
-                  </svg>
-                </span>
-              </div>
-            </div>
+            <StatCard
+              key={s.label}
+              label={s.label}
+              value={s.value}
+              sub={s.sub}
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="12" cy="12" r="9" />
+                  <polyline points="12 7 12 12 15 14" />
+                </svg>
+              }
+            />
           ))}
         </div>
 
