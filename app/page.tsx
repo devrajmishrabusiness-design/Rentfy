@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import PropertyList from "./PropertyList";
 import Footer from "./Footer";
 import Link from "next/link";
@@ -228,7 +228,10 @@ const trustItems = [
   },
 ];
 
+export const revalidate = 60;
+
 export default async function Home() {
+  const supabase = await createClient();
   const { data: properties } = await supabase
     .from("properties")
     .select(

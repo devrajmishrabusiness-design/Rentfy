@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LeadStatusSelect({
   leadId,
@@ -9,9 +10,10 @@ export default function LeadStatusSelect({
   leadId: string;
   currentStatus: string;
 }) {
+  const router = useRouter();
   const updateStatus = async (status: string) => {
     await supabase.from("leads").update({ status }).eq("id", leadId);
-    window.location.reload();
+    router.refresh();
   };
 
   return (

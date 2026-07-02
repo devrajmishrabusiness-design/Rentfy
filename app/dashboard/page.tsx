@@ -187,8 +187,12 @@ export default async function Dashboard() {
     .returns<Property[]>();
   const { data: leads } = await supabase
     .from("leads")
-    .select("*")
+    .select(`
+      *,
+      properties(title)
+    `)
     .eq("agency_id", agency.id)
+    .order("created_at", { ascending: false })
     .returns<Lead[]>();
 
   const totalLeads = leads?.length || 0;
@@ -211,18 +215,7 @@ export default async function Dashboard() {
       );
     }).length || 0;
 
-  const { data: recentLeads } = await supabase
-    .from("leads")
-    .select(
-      `
-      *,
-      properties(title)
-    `
-    )
-    .eq("agency_id", agency.id)
-    .order("created_at", { ascending: false })
-    .limit(5)
-    .returns<Lead[]>();
+  const recentLeads = leads?.slice(0, 5) || [];
 
   const totalProperties = properties?.length || 0;
   const approvedCount =
