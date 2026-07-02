@@ -166,15 +166,6 @@ export default async function PropertyPage({
                     {property.location}, {property.city}
                   </p>
                 </div>
-
-                <div className="text-right">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
-                    Monthly Rent
-                  </p>
-                  <p className="mt-1 text-4xl font-extrabold text-[var(--brand-primary)]">
-                    ₹{Number(property.rent).toLocaleString("en-IN")}
-                  </p>
-                </div>
               </div>
 
               {property.description && (
@@ -233,8 +224,8 @@ export default async function PropertyPage({
                       key={a.key}
                       className={`flex items-center gap-3 rounded-2xl border p-4 transition-all ${
                         active
-                          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                          : "border-[var(--brand-border)] bg-slate-50 opacity-60"
+                          ? "border-orange-200 bg-orange-50 text-[var(--brand-primary)]"
+                          : "border-[var(--brand-border)] bg-stone-50 opacity-60"
                       }`}
                     >
                       <span className="text-xl" aria-hidden>
@@ -284,7 +275,7 @@ export default async function PropertyPage({
           {/* Sticky contact card */}
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="card p-6">
-              <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50 p-5 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-stone-50 to-orange-50 p-5 text-center">
                 <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-primary)]">
                   Rental price
                 </p>

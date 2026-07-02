@@ -15,7 +15,7 @@ export default function ImageGallery({
 
   if (!images || images.length === 0) {
     return (
-      <div className="mb-10 grid h-72 w-full place-items-center rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50 text-sm font-medium text-[var(--brand-muted)]">
+      <div className="mb-10 grid h-72 w-full place-items-center rounded-2xl bg-gradient-to-br from-stone-50 to-orange-50 text-sm font-medium text-[var(--brand-muted)]">
         No photos available
       </div>
     );
@@ -42,6 +42,7 @@ export default function ImageGallery({
           width={1600}
           height={900}
           unoptimized
+          priority
           onClick={() => setFullscreen(true)}
           className="h-[420px] w-full cursor-pointer object-cover transition-transform duration-500 hover:scale-[1.01] sm:h-[480px]"
         />
@@ -49,6 +50,33 @@ export default function ImageGallery({
         <div className="absolute right-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
           {currentIndex + 1} / {images.length}
         </div>
+
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              aria-label="Previous image"
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
+              className="absolute left-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-xl text-black shadow-md backdrop-blur transition hover:bg-white"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              aria-label="Next image"
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+              className="absolute right-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-xl text-black shadow-md backdrop-blur transition hover:bg-white"
+            >
+              ›
+            </button>
+          </>
+        )}
       </div>
 
       {images.length > 1 && (
@@ -66,7 +94,7 @@ export default function ImageGallery({
             >
               <Image
                 src={image}
-                alt={title}
+                alt={`Photo ${images.indexOf(image) + 1} of ${images.length}`}
                 width={240}
                 height={160}
                 unoptimized
@@ -81,6 +109,9 @@ export default function ImageGallery({
         <div
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 animate-fade-in"
           onClick={() => setFullscreen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image gallery fullscreen"
         >
           <button
             type="button"

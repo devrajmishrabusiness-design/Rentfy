@@ -35,7 +35,7 @@ export default function PropertyCard({
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       aria-label={`View ${property.title || "property"}`}
-      className="card-hover group relative flex h-full cursor-pointer flex-col overflow-hidden"
+      className="card-hover group relative flex h-full cursor-pointer flex-col overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
     >
       <div className="relative h-52 w-full overflow-hidden bg-[var(--brand-background)]">
         {property.image_url ? (
@@ -48,7 +48,7 @@ export default function PropertyCard({
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center bg-gradient-to-br from-slate-50 to-indigo-50 text-sm font-medium text-[var(--brand-muted)]">
+          <div className="grid h-full w-full place-items-center bg-gradient-to-br from-stone-50 to-orange-50 text-sm font-medium text-[var(--brand-muted)]">
             No image available
           </div>
         )}
@@ -106,10 +106,8 @@ export default function PropertyCard({
           </span>
         </p>
 
-        <p className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">
-          ₹{(property.rent != null ? Number(property.rent) : 0).toLocaleString(
-            "en-IN"
-          )}
+        <p className="mt-2 text-2xl font-extrabold text-[var(--brand-text)]">
+          ₹{(Number(property.rent) || 0).toLocaleString("en-IN")}
           <span className="text-sm font-medium text-[var(--brand-muted)]">
             /month
           </span>
@@ -145,7 +143,7 @@ export default function PropertyCard({
             className="inline-flex items-center gap-1 text-sm font-bold text-[var(--brand-primary)] transition group-hover:gap-2"
           >
             View details
-            <span aria-hidden>→</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
           </Link>
 
           {actions && (

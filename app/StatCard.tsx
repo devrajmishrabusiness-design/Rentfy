@@ -25,7 +25,7 @@ export default function StatCard({
         </div>
         {icon && (
           <span
-            className="grid h-11 w-11 place-items-center rounded-xl bg-slate-900 text-white"
+            className="grid h-11 w-11 place-items-center rounded-xl bg-orange-100 text-[var(--brand-primary)]"
             aria-hidden
           >
             {icon}

@@ -37,7 +37,7 @@ export default async function Dashboard() {
       <main className="min-h-screen bg-[var(--brand-background)]">
         <section className="container-app py-24 text-center">
           <div className="mx-auto max-w-md card p-10">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-indigo-50 text-indigo-700">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-orange-50 text-[var(--brand-primary)]">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <rect x="3" y="11" width="18" height="11" rx="2" />
                 <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -71,7 +71,7 @@ export default async function Dashboard() {
       <main className="min-h-screen bg-[var(--brand-background)]">
         <section className="container-app py-24 text-center">
           <div className="mx-auto max-w-md card p-10">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-indigo-50 text-indigo-700">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-orange-50 text-[var(--brand-primary)]">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01" />
               </svg>
@@ -341,7 +341,7 @@ export default async function Dashboard() {
                   className="flex h-full flex-col items-center justify-end gap-1"
                 >
                   <div
-                    className="w-full rounded-t-lg bg-gradient-to-t from-indigo-700 to-indigo-400 transition-all"
+                    className="w-full rounded-t-lg bg-gradient-to-t from-[var(--brand-primary)] to-orange-400 transition-all"
                     style={{
                       height: `${(m.count / maxMonthly) * 100 || 4}%`,
                     }}
