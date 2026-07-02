@@ -1,10 +1,22 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "./Navbar";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "Rentfy - Rental Properties in Noida & NCR",
+  title: "RenterEasy - Verified Rental Properties in Noida & NCR",
   description:
-    "Find verified rental apartments, flats, houses, and villas in Noida and NCR. Browse properties from verified real estate agencies on Rentfy.",
+    "Find verified rental apartments, flats, houses, and villas in Noida and NCR. Browse properties from verified real estate agencies on RenterEasy.",
 
   keywords: [
     "rent property noida",
@@ -12,18 +24,18 @@ export const metadata: Metadata = {
     "apartments for rent noida",
     "rental homes noida",
     "houses for rent noida",
-    "rentfy",
+    "renterseasy",
     "property rental marketplace",
     "verified rental properties",
   ],
 
-  metadataBase: new URL("https://rentfy.in"),
+  metadataBase: new URL("https://renterseasy.in"),
 
   openGraph: {
-    title: "Rentfy - Rental Properties in Noida & NCR",
+    title: "RenterEasy - Verified Rental Properties in Noida & NCR",
     description:
       "Find verified rental properties from trusted agencies.",
-    siteName: "Rentfy",
+    siteName: "RenterEasy",
     type: "website",
   },
 };
@@ -33,8 +45,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-[var(--brand-background)]">
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

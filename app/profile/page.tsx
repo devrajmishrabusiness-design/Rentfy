@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase-server";
 import EditAgencyProfile from "@/app/EditAgencyProfile";
+import Footer from "@/app/Footer";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -10,8 +11,16 @@ export default async function ProfilePage() {
 
   if (!user) {
     return (
-      <main className="p-8">
-        <h1>Please login first</h1>
+      <main className="min-h-screen bg-[var(--brand-background)]">
+        <section className="container-app py-24 text-center">
+          <div className="mx-auto max-w-md card p-10">
+            <h1 className="text-2xl font-extrabold">Please login first</h1>
+            <p className="mt-2 text-[var(--brand-muted)]">
+              Sign in to edit your agency profile.
+            </p>
+          </div>
+        </section>
+        <Footer />
       </main>
     );
   }
@@ -24,37 +33,60 @@ export default async function ProfilePage() {
 
   if (!agency) {
     return (
-      <main className="p-8">
-        <h1>Agency not found</h1>
+      <main className="min-h-screen bg-[var(--brand-background)]">
+        <section className="container-app py-24 text-center">
+          <div className="mx-auto max-w-md card p-10">
+            <h1 className="text-2xl font-extrabold">Agency not found</h1>
+            <p className="mt-2 text-[var(--brand-muted)]">
+              We couldn&apos;t find your agency profile.
+            </p>
+          </div>
+        </section>
+        <Footer />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
-        <h1 className="text-3xl font-bold mb-6">
-          Edit Agency Profile
-        </h1>
-
-        <EditAgencyProfile agency={agency} />
-
-        <div className="mt-8 border-t pt-6">
-          <h2 className="text-xl font-bold mb-4">
-            Account Information
-          </h2>
-
-          <div className="space-y-3">
-            <p>
-              <strong>Email:</strong> {agency.email}
-            </p>
-
-            <p>
-              <strong>Agency ID:</strong> {agency.id}
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="container-app py-12">
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-6">
+            <span className="badge-info mb-2">Profile</span>
+            <h1 className="text-3xl font-extrabold text-[var(--brand-text)]">
+              Edit agency profile
+            </h1>
+            <p className="mt-1 text-[var(--brand-muted)]">
+              Keep your details up to date so tenants can reach you.
             </p>
           </div>
+
+          <div className="card p-7">
+            <EditAgencyProfile agency={agency} />
+          </div>
+
+          <div className="mt-6 card p-7">
+            <h2 className="text-xl font-extrabold">Account information</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
+                  Email
+                </p>
+                <p className="mt-1 text-sm font-bold">{agency.email}</p>
+              </div>
+              <div className="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
+                  Agency ID
+                </p>
+                <p className="mt-1 break-all text-xs font-mono font-bold text-[var(--brand-muted)]">
+                  {agency.id}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+      <Footer />
     </main>
   );
 }

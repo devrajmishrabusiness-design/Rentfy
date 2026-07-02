@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Making yourself an admin
+
+Admin is a normal signed-in user whose `agencies.is_admin = true`. To bootstrap:
+
+1. **Run the migration.** In Supabase Dashboard → SQL Editor → New query,
+   paste and run `supabase/migrations/0001_add_is_admin.sql`. The script
+   is idempotent and will also auto-promote
+   `devrajmishrabusiness@gmail.com` if that account exists.
+2. **Add the service-role key** to `.env.local`:
+
+   ```
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
+
+   Find it under Supabase Dashboard → Settings → API → `service_role`
+   (secret). Never expose this key in client code or commit it.
+3. **Restart the dev server** (`npm run dev`) so the new env var loads.
+4. **Sign in** at `/login` with the admin email, then visit `/admin`.
+
+To promote a different account later, run in the SQL editor:
+
+```sql
+UPDATE public.agencies
+SET is_admin = true
+WHERE lower(email) = lower('you@example.com');
+```

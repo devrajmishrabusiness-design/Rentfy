@@ -18,8 +18,16 @@ export default function EditAgencyProfile({
     phone: agency.phone || "",
     city: agency.city || "",
   });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+
     const { error } = await supabase
       .from("agencies")
       .update({
@@ -30,59 +38,95 @@ export default function EditAgencyProfile({
       })
       .eq("id", agency.id);
 
+    setSaving(false);
+
     if (error) {
-      alert(error.message);
+      setError(error.message);
       return;
     }
 
-    alert("Profile Updated Successfully!");
+    setSaved(true);
     router.refresh();
   };
 
   return (
-    <div className="space-y-4">
-      <input
-        value={form.agency_name}
-        onChange={(e) =>
-          setForm({ ...form, agency_name: e.target.value })
-        }
-        placeholder="Agency Name"
-        className="w-full border p-3 rounded"
-      />
+    <form onSubmit={handleUpdate} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="agency_name" className="label">
+            Agency name
+          </label>
+          <input
+            id="agency_name"
+            value={form.agency_name}
+            onChange={(e) =>
+              setForm({ ...form, agency_name: e.target.value })
+            }
+            placeholder="Agency Name"
+            className="input"
+          />
+        </div>
 
-      <input
-        value={form.owner_name}
-        onChange={(e) =>
-          setForm({ ...form, owner_name: e.target.value })
-        }
-        placeholder="Owner Name"
-        className="w-full border p-3 rounded"
-      />
+        <div>
+          <label htmlFor="owner_name" className="label">
+            Owner name
+          </label>
+          <input
+            id="owner_name"
+            value={form.owner_name}
+            onChange={(e) =>
+              setForm({ ...form, owner_name: e.target.value })
+            }
+            placeholder="Owner Name"
+            className="input"
+          />
+        </div>
 
-      <input
-        value={form.phone}
-        onChange={(e) =>
-          setForm({ ...form, phone: e.target.value })
-        }
-        placeholder="Phone"
-        className="w-full border p-3 rounded"
-      />
+        <div>
+          <label htmlFor="phone" className="label">
+            Phone
+          </label>
+          <input
+            id="phone"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            placeholder="Phone"
+            className="input"
+          />
+        </div>
 
-      <input
-        value={form.city}
-        onChange={(e) =>
-          setForm({ ...form, city: e.target.value })
-        }
-        placeholder="City"
-        className="w-full border p-3 rounded"
-      />
+        <div>
+          <label htmlFor="city" className="label">
+            City
+          </label>
+          <input
+            id="city"
+            value={form.city}
+            onChange={(e) => setForm({ ...form, city: e.target.value })}
+            placeholder="City"
+            className="input"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {saved && (
+        <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          ✓ Profile updated successfully
+        </div>
+      )}
 
       <button
-        onClick={handleUpdate}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg"
+        type="submit"
+        disabled={saving}
+        className="btn-primary w-full disabled:cursor-wait"
       >
-        Save Changes
+        {saving ? "Saving..." : "Save changes"}
       </button>
-    </div>
+    </form>
   );
 }

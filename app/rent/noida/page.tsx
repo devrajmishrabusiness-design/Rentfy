@@ -1,13 +1,26 @@
 import { supabase } from "@/lib/supabase";
+import Footer from "@/app/Footer";
+import PropertyList from "@/app/PropertyList";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Property } from "../../types";
 
 export const metadata: Metadata = {
-  title: "Flats & Apartments for Rent in Noida | Rentfy",
+  title: "Flats & Apartments for Rent in Noida | RenterEasy",
   description:
     "Browse verified rental flats, apartments, houses and villas in Noida.",
 };
+
+const popularSectors = [
+  "Sector 5",
+  "Sector 18",
+  "Sector 50",
+  "Sector 51",
+  "Sector 62",
+  "Sector 70",
+  "Sector 78",
+  "Sector 137",
+];
 
 export default async function NoidaRentPage() {
   const { data: properties } = await supabase
@@ -18,78 +31,44 @@ export default async function NoidaRentPage() {
     .returns<Property[]>();
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold mb-4">
-        Flats & Apartments for Rent in Noida
-      </h1>
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="border-b border-[var(--brand-border)] bg-gradient-to-br from-slate-50 to-indigo-50 py-14">
+        <div className="container-app">
+          <span className="badge-info mb-3">Noida rentals</span>
+          <h1 className="text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
+            Flats &amp; Apartments for Rent in Noida
+          </h1>
+          <p className="mt-2 max-w-2xl text-[var(--brand-muted)]">
+            Browse verified rental properties across all sectors of Noida.
+          </p>
+        </div>
+      </section>
 
-      <p className="text-gray-600 mb-8">
-        Browse verified rental properties in Noida.
-      </p>
-       
-      <div className="mb-10">
-  <h2 className="text-2xl font-semibold mb-4">
-    Popular Areas in Noida
-  </h2>
-
-  <div className="flex flex-wrap gap-3">
-    <Link
-      href="/rent/noida/sector-5"
-      className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg"
-    >
-      Sector 5
-    </Link>
-
-    <Link
-      href="/rent/noida/sector-51"
-      className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg"
-    >
-      Sector 51
-    </Link>
-
-    <Link
-      href="/rent/noida/sector-62"
-      className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg"
-    >
-      Sector 62
-    </Link>
-
-    <Link
-      href="/rent/noida/sector-70"
-      className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg"
-    >
-      Sector 70
-    </Link>
-  </div>
-</div>
-
-      <div className="grid md:grid-cols-3 gap-6">
-        {properties?.map((property) => (
-          <div
-            key={property.id}
-            className="bg-white rounded-xl shadow p-4"
-          >
-            <h2 className="text-xl font-semibold">
-              {property.title}
-            </h2>
-
-            <p className="text-green-600 font-bold mt-2">
-              ₹{property.rent}/month
-            </p>
-
-            <p>
-              {property.location}, {property.city}
-            </p>
-
-            <Link
-              href={`/property/${property.id}`}
-              className="block mt-4 bg-blue-600 text-white py-2 rounded text-center"
-            >
-              View Property
-            </Link>
+      <section className="container-app py-12">
+        <div className="mb-10">
+          <h2 className="text-2xl font-extrabold text-[var(--brand-text)]">
+            Popular areas in Noida
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {popularSectors.map((sector) => {
+              const slug = sector.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <Link
+                  key={sector}
+                  href={`/rent/noida/${slug}`}
+                  className="rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition-all hover:-translate-y-0.5 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+                >
+                  {sector}
+                </Link>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+
+        <PropertyList properties={properties || []} />
+      </section>
+
+      <Footer />
     </main>
   );
 }

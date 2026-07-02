@@ -13,9 +13,7 @@ export default function RejectPropertyButton({
   const rejectProperty = async () => {
     const { error } = await supabase
       .from("properties")
-      .update({
-        status: "rejected",
-      })
+      .update({ status: "rejected" })
       .eq("id", propertyId);
 
     if (!error) {
@@ -25,8 +23,9 @@ export default function RejectPropertyButton({
 
   return (
     <button
+      type="button"
       onClick={rejectProperty}
-      className="bg-red-600 text-white px-4 py-2 rounded"
+      className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 transition hover:bg-amber-200"
     >
       Reject
     </button>

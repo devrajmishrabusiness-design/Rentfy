@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Navbar from "../Navbar";
+import Footer from "../Footer";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,71 +21,100 @@ export default function LoginPage() {
     });
   }, [router]);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    setLoading(false);
+
     if (error) {
-      alert(error.message);
-    } else {
-      alert("LOGIN SUCCESS");
-      router.push("/dashboard");
+      setError(error.message);
+      return;
     }
+
+    router.push("/dashboard");
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <Navbar />
-      <section className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md rounded border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-center text-sm font-bold uppercase tracking-wide text-emerald-700">
-            Agency access
-          </p>
-          <h1 className="mt-3 text-center text-3xl font-bold">
-            Login to Rentfy
-          </h1>
-          <p className="mt-2 text-center text-sm text-slate-500">
-            Manage your listings, profile, and rental leads.
-          </p>
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="card p-8">
+            <div className="mb-6 text-center">
+              <span className="badge-info mx-auto">Agency access</span>
+              <h1 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)]">
+                Welcome back to RenterEasy
+              </h1>
+              <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                Manage your listings, profile and rental leads.
+              </p>
+            </div>
 
-          <div className="mt-6 space-y-4">
-            <input
-              type="email"
-              placeholder="Agency Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-            />
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="label">
+                  Agency email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  placeholder="you@agency.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input"
+                />
+              </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-            />
+              <div>
+                <label htmlFor="password" className="label">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input"
+                />
+              </div>
+
+              {error && (
+                <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full disabled:cursor-wait"
+              >
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-[var(--brand-muted)]">
+              New agency?{" "}
+              <Link
+                href="/signup"
+                className="font-bold text-[var(--brand-primary)] hover:underline"
+              >
+                Create an account
+              </Link>
+            </p>
           </div>
-
-          <button
-            onClick={handleLogin}
-            className="mt-5 w-full rounded bg-slate-950 py-3 font-semibold text-white transition hover:bg-slate-800"
-          >
-            Login
-          </button>
-
-          <p className="mt-5 text-center text-sm text-slate-500">
-            New agency?{" "}
-            <Link
-              href="/signup"
-              className="font-semibold text-slate-950 hover:underline"
-            >
-              Create an account
-            </Link>
-          </p>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

@@ -1,27 +1,45 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { verifyAgency } from "@/app/admin/actions";
 
 export default function VerifyAgencyButton({
   agencyId,
 }: {
   agencyId: string;
 }) {
-  const verifyAgency = async () => {
-    await supabase
-      .from("agencies")
-      .update({ verified: true })
-      .eq("id", agencyId);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-    window.location.reload();
+  const handleVerify = () => {
+    setError(null);
+    startTransition(async () => {
+      const result = await verifyAgency(agencyId);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      router.refresh();
+    });
   };
 
   return (
-    <button
-      onClick={verifyAgency}
-      className="bg-green-600 text-white px-4 py-2 rounded"
-    >
-      Verify Agency
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleVerify}
+        disabled={isPending}
+        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-success)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-md active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+      >
+        {isPending ? "Verifying…" : "Verify"}
+      </button>
+      {error && (
+        <p className="text-xs font-medium text-[var(--brand-error)]">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

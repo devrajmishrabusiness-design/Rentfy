@@ -14,7 +14,11 @@ export default function ImageGallery({
   const [fullscreen, setFullscreen] = useState(false);
 
   if (!images || images.length === 0) {
-    return null;
+    return (
+      <div className="mb-10 grid h-72 w-full place-items-center rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50 text-sm font-medium text-[var(--brand-muted)]">
+        No photos available
+      </div>
+    );
   }
 
   const currentIndex = images.indexOf(selectedImage);
@@ -30,45 +34,66 @@ export default function ImageGallery({
   };
 
   return (
-    <div className="mb-8">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Photos</h2>
+    <div className="mb-10">
+      <div className="relative overflow-hidden rounded-3xl bg-stone-100">
+        <Image
+          src={selectedImage}
+          alt={title}
+          width={1600}
+          height={900}
+          unoptimized
+          onClick={() => setFullscreen(true)}
+          className="h-[420px] w-full cursor-pointer object-cover transition-transform duration-500 hover:scale-[1.01] sm:h-[480px]"
+        />
 
-        <span className="text-gray-500">{images.length} Photos</span>
+        <div className="absolute right-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
+          {currentIndex + 1} / {images.length}
+        </div>
       </div>
 
-      <Image
-        src={selectedImage}
-        alt={title}
-        width={1200}
-        height={675}
-        unoptimized
-        onClick={() => setFullscreen(true)}
-        className="h-[450px] w-full cursor-pointer rounded-xl object-cover shadow"
-      />
-
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        {images.map((image) => (
-          <Image
-            key={image}
-            src={image}
-            alt={title}
-            width={240}
-            height={160}
-            unoptimized
-            onClick={() => setSelectedImage(image)}
-            className={`h-24 w-full cursor-pointer rounded-lg object-cover hover:opacity-80 ${
-              selectedImage === image ? "border-4 border-blue-600" : "border"
-            }`}
-          />
-        ))}
-      </div>
+      {images.length > 1 && (
+        <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-3">
+          {images.map((image) => (
+            <button
+              key={image}
+              type="button"
+              onClick={() => setSelectedImage(image)}
+              className={`relative overflow-hidden rounded-2xl transition-all duration-200 ${
+                selectedImage === image
+                  ? "ring-4 ring-[var(--brand-primary)] ring-offset-2"
+                  : "opacity-80 hover:opacity-100"
+              }`}
+            >
+              <Image
+                src={image}
+                alt={title}
+                width={240}
+                height={160}
+                unoptimized
+                className="h-20 w-full object-cover sm:h-24"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {fullscreen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 animate-fade-in"
           onClick={() => setFullscreen(false)}
         >
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFullscreen(false);
+            }}
+            className="absolute right-6 top-6 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+          >
+            ✕
+          </button>
+
           <button
             type="button"
             aria-label="Previous image"
@@ -76,9 +101,9 @@ export default function ImageGallery({
               e.stopPropagation();
               prevImage();
             }}
-            className="absolute left-4 text-5xl text-white"
+            className="absolute left-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
           >
-            &lsaquo;
+            ‹
           </button>
 
           <Image
@@ -87,7 +112,7 @@ export default function ImageGallery({
             width={1600}
             height={1000}
             unoptimized
-            className="max-h-[95%] max-w-[95%] object-contain"
+            className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
           />
 
           <button
@@ -97,9 +122,9 @@ export default function ImageGallery({
               e.stopPropagation();
               nextImage();
             }}
-            className="absolute right-4 text-5xl text-white"
+            className="absolute right-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
           >
-            &rsaquo;
+            ›
           </button>
         </div>
       )}

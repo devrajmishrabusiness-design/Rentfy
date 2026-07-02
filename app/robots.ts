@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://rentfy.in/sitemap.xml",
+    sitemap: "https://rentereasy.in/sitemap.xml",
   };
 }

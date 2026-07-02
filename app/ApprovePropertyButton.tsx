@@ -13,9 +13,7 @@ export default function ApprovePropertyButton({
   const approveProperty = async () => {
     const { error } = await supabase
       .from("properties")
-      .update({
-        status: "approved",
-      })
+      .update({ status: "approved" })
       .eq("id", propertyId);
 
     if (!error) {
@@ -25,8 +23,9 @@ export default function ApprovePropertyButton({
 
   return (
     <button
+      type="button"
       onClick={approveProperty}
-      className="bg-green-600 text-white px-4 py-2 rounded"
+      className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-200"
     >
       Approve
     </button>

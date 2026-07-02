@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import EditPropertyForm from "@/app/EditPropertyForm";
+import Footer from "@/app/Footer";
 
 export default async function EditPropertyPage({
   params,
@@ -15,18 +16,35 @@ export default async function EditPropertyPage({
     .single();
 
   if (!property) {
-    return <div>Property not found</div>;
+    return (
+      <main className="min-h-screen bg-[var(--brand-background)]">
+        <div className="container-app py-32 text-center">
+          <p className="text-2xl font-bold">Property not found</p>
+        </div>
+        <Footer />
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 className="text-3xl font-bold mb-6">
-          Edit Property
-        </h1>
-
-        <EditPropertyForm property={property} />
-      </div>
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="container-app py-12">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-6">
+            <span className="badge-info mb-2">Edit property</span>
+            <h1 className="text-3xl font-extrabold text-[var(--brand-text)]">
+              Edit rental details
+            </h1>
+            <p className="mt-1 text-[var(--brand-muted)]">
+              Updates may trigger a re-review before they go live.
+            </p>
+          </div>
+          <div className="card p-7">
+            <EditPropertyForm property={property} />
+          </div>
+        </div>
+      </section>
+      <Footer />
     </main>
   );
 }

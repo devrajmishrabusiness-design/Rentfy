@@ -6,6 +6,7 @@ export type Agency = {
   city?: string | null;
   email?: string | null;
   verified?: boolean | null;
+  is_admin?: boolean | null;
 };
 
 export type Property = {

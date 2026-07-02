@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Navbar from "../Navbar";
+import Footer from "../Footer";
+import ApplicationSubmitted from "../ApplicationSubmitted";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [form, setForm] = useState({
     agency_name: "",
     owner_name: "",
@@ -16,132 +15,192 @@ export default function SignupPage() {
     phone: "",
     city: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = async () => {
-    const { data, error } = await supabase.auth.signUp({
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
     });
 
-    if (error) {
-      alert(error.message);
+    if (signUpError || !data.user) {
+      setError(signUpError?.message ?? "Signup failed. Please try again.");
+      setLoading(false);
       return;
     }
 
     const user = data.user;
 
-    if (!user) {
-      alert("User creation failed");
-      return;
-    }
+    const { error: agencyError } = await supabase.from("agencies").insert([
+      {
+        agency_name: form.agency_name,
+        owner_name: form.owner_name,
+        email: form.email,
+        phone: form.phone,
+        city: form.city,
+        auth_user_id: user.id,
+        verified: false,
+      },
+    ]);
 
-    const { error: agencyError } = await supabase
-      .from("agencies")
-      .insert([
-        {
-          agency_name: form.agency_name,
-          owner_name: form.owner_name,
-          email: form.email,
-          phone: form.phone,
-          city: form.city,
-          auth_user_id: user.id,
-        },
-      ]);
+    setLoading(false);
 
     if (agencyError) {
-      alert(agencyError.message);
+      setError(agencyError.message);
       return;
     }
 
-    alert("Agency created successfully!");
-    router.push("/dashboard");
+    setSubmitted(true);
   };
 
+  if (submitted) {
+    return <ApplicationSubmitted />;
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <Navbar />
-      <section className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
-        <div className="w-full max-w-2xl rounded border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-center text-sm font-bold uppercase tracking-wide text-emerald-700">
-            Join Rentfy
-          </p>
-          <h1 className="mt-3 text-center text-3xl font-bold">
-            Create an agency account
-          </h1>
-          <p className="mt-2 text-center text-sm text-slate-500">
-            Publish verified rental listings and manage tenant enquiries.
-          </p>
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-2xl">
+          <div className="card p-8">
+            <div className="mb-6 text-center">
+              <span className="badge-info mx-auto">Join RenterEasy</span>
+              <h1 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)]">
+                Create your agency account
+              </h1>
+              <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                Publish verified rental listings and manage tenant enquiries
+                in one place.
+              </p>
+            </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <input
-              placeholder="Agency Name"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, agency_name: e.target.value })
-              }
-            />
+            <form onSubmit={handleSignup} className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label htmlFor="agency_name" className="label">
+                  Agency name
+                </label>
+                <input
+                  id="agency_name"
+                  required
+                  placeholder="e.g. Noida Realty Hub"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, agency_name: e.target.value })
+                  }
+                />
+              </div>
 
-            <input
-              placeholder="Owner Name"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, owner_name: e.target.value })
-              }
-            />
+              <div>
+                <label htmlFor="owner_name" className="label">
+                  Owner name
+                </label>
+                <input
+                  id="owner_name"
+                  required
+                  placeholder="e.g. Aman Verma"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, owner_name: e.target.value })
+                  }
+                />
+              </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
-            />
+              <div>
+                <label htmlFor="phone" className="label">
+                  Phone
+                </label>
+                <input
+                  id="phone"
+                  required
+                  placeholder="98765 43210"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, phone: e.target.value })
+                  }
+                />
+              </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, password: e.target.value })
-              }
-            />
+              <div>
+                <label htmlFor="email" className="label">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  placeholder="you@agency.com"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, email: e.target.value })
+                  }
+                />
+              </div>
 
-            <input
-              placeholder="Phone"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, phone: e.target.value })
-              }
-            />
+              <div>
+                <label htmlFor="password" className="label">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  placeholder="Minimum 6 characters"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                />
+              </div>
 
-            <input
-              placeholder="City"
-              className="w-full rounded border border-slate-300 p-3 outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
-              onChange={(e) =>
-                setForm({ ...form, city: e.target.value })
-              }
-            />
+              <div className="sm:col-span-2">
+                <label htmlFor="city" className="label">
+                  City
+                </label>
+                <input
+                  id="city"
+                  required
+                  placeholder="e.g. Noida"
+                  className="input"
+                  onChange={(e) =>
+                    setForm({ ...form, city: e.target.value })
+                  }
+                />
+              </div>
+
+              {error && (
+                <div className="sm:col-span-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary sm:col-span-2 disabled:cursor-wait"
+              >
+                {loading ? "Submitting application..." : "Create agency account"}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-[var(--brand-muted)]">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-bold text-[var(--brand-primary)] hover:underline"
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
-
-          <button
-            onClick={handleSignup}
-            className="mt-5 w-full rounded bg-slate-950 py-3 font-semibold text-white transition hover:bg-slate-800"
-          >
-            Create Agency Account
-          </button>
-
-          <p className="mt-5 text-center text-sm text-slate-500">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-slate-950 hover:underline"
-            >
-              Login
-            </Link>
-          </p>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }
