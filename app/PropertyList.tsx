@@ -16,6 +16,8 @@ export default function PropertyList({
   const [bedrooms, setBedrooms] = useState("all");
   const [furnishing, setFurnishing] = useState("all");
   const [parking, setParking] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sort, setSort] = useState("recommended");
 
   const filteredProperties = properties.filter((property) => {
     const q = search.toLowerCase();
@@ -30,7 +32,10 @@ export default function PropertyList({
       property.property_type?.toLowerCase() === propertyType.toLowerCase();
 
     const bedroomMatch =
-      bedrooms === "all" || String(property.bedrooms) === bedrooms;
+      bedrooms === "all" ||
+      (bedrooms === "4"
+        ? Number(property.bedrooms) >= 4
+        : String(property.bedrooms) === bedrooms);
 
     const furnishingMatch =
       furnishing === "all" || property.furnishing === furnishing;
@@ -43,22 +48,67 @@ export default function PropertyList({
     );
   });
 
+  const displayedProperties = [...filteredProperties].sort((a, b) => {
+    if (sort === "rent-low") return Number(a.rent ?? 0) - Number(b.rent ?? 0);
+    if (sort === "rent-high") return Number(b.rent ?? 0) - Number(a.rent ?? 0);
+    return 0;
+  });
+
+  const activeFilterCount = [propertyType, bedrooms, furnishing, parking].filter(
+    (value) => value !== "all"
+  ).length;
+
+  const resetFilters = () => {
+    setSearch("");
+    setPropertyType("all");
+    setBedrooms("all");
+    setFurnishing("all");
+    setParking("all");
+    setSort("recommended");
+  };
+
   return (
     <div className="space-y-8">
-      <div className="sticky top-[72px] z-30 -mx-4 rounded-none border-y border-[var(--brand-border)] bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:mx-0 sm:rounded-3xl sm:border sm:px-5 sm:shadow-sm">
-        <div className="grid gap-3 md:grid-cols-5">
-          <div className="md:col-span-1">
-            <label className="label text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              Search
-            </label>
+      <div className="rounded-2xl border border-[var(--brand-border)] bg-white p-3 shadow-sm sm:p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--brand-muted)]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input
               type="text"
-              placeholder="City, area or title"
+              aria-label="Search properties"
+              placeholder="Search city, area or property"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input"
+              className="h-11 w-full rounded-xl border border-[var(--brand-border)] bg-white py-2 pl-10 pr-3 text-sm outline-none transition focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-orange-100"
             />
           </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((open) => !open)}
+              aria-expanded={filtersOpen}
+              className={`inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition sm:flex-none ${filtersOpen || activeFilterCount ? "border-orange-200 bg-orange-50 text-[var(--brand-primary)]" : "border-[var(--brand-border)] text-[var(--brand-text)]"}`}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+            </button>
+
+            <label className="relative inline-flex h-11 flex-1 items-center rounded-xl border border-[var(--brand-border)] bg-white sm:flex-none">
+              <svg className="pointer-events-none absolute left-3" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+              <span className="sr-only">Sort properties</span>
+              <select value={sort} onChange={(e) => setSort(e.target.value)} className="h-full w-full appearance-none bg-transparent pl-9 pr-8 text-sm font-semibold text-[var(--brand-text)] outline-none">
+                <option value="recommended">Recommended</option>
+                <option value="rent-low">Rent: low to high</option>
+                <option value="rent-high">Rent: high to low</option>
+              </select>
+              <svg className="pointer-events-none absolute right-3" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="m6 9 6 6 6-6"/></svg>
+            </label>
+          </div>
+        </div>
+
+        {filtersOpen && (
+          <div className="mt-3 grid gap-3 border-t border-[var(--brand-border)] pt-3 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in">
 
           <div>
             <label className="label text-xs uppercase tracking-wider text-[var(--brand-muted)]">
@@ -124,15 +174,22 @@ export default function PropertyList({
               <option value="false">Not Available</option>
             </select>
           </div>
-        </div>
 
-        <p className="mt-3 text-xs font-medium text-[var(--brand-muted)]">
-          Showing <span className="font-bold text-[var(--brand-text)]">{filteredProperties.length}</span> of {properties.length} properties
+          <div className="flex items-end sm:col-span-2 lg:col-span-4">
+            <button type="button" onClick={resetFilters} className="text-sm font-bold text-[var(--brand-primary)] hover:underline">
+              Clear all filters
+            </button>
+          </div>
+        </div>
+        )}
+
+        <p className="mt-2 px-1 text-xs font-medium text-[var(--brand-muted)]">
+          <span className="font-bold text-[var(--brand-text)]">{displayedProperties.length}</span> properties found
         </p>
       </div>
 
       {showSkeleton ? (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
@@ -151,7 +208,7 @@ export default function PropertyList({
             </div>
           ))}
         </div>
-      ) : filteredProperties.length === 0 ? (
+      ) : displayedProperties.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-[var(--brand-border)] bg-white px-6 py-16 text-center">
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[var(--brand-background)] text-2xl">
             🏠
@@ -163,21 +220,15 @@ export default function PropertyList({
             Try changing a filter or searching a different city or locality.
           </p>
           <button
-            onClick={() => {
-              setSearch("");
-              setPropertyType("all");
-              setBedrooms("all");
-              setFurnishing("all");
-              setParking("all");
-            }}
+            onClick={resetFilters}
             className="btn-secondary mt-6"
           >
             Reset filters
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-3">
-          {filteredProperties.map((property) => (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {displayedProperties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>

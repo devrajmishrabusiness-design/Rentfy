@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import ErrorMessage from "./ErrorMessage";
 
@@ -13,9 +13,69 @@ type LeadCaptureModalProps = {
   onSuccess: (data: { name: string; phone: string }) => void;
   propertyTitle?: string;
   agencyName?: string;
+  /**
+   * When provided, the lead is written with this `renter_id` (logged-in
+   * renter flow). The form is shown in this case only as a fallback —
+   * see `renterSkipForm` for the path that skips the form entirely.
+   */
+  renterId?: string | null;
+  /**
+   * When true AND `renterProfile` is provided, the form is skipped and
+   * the modal just writes the lead silently and calls `onSuccess` with
+   * the renter's name + verified phone. Used when the renter is
+   * already onboarded (has full_name).
+   */
+  renterSkipForm?: boolean;
+  renterProfile?: { full_name: string | null; phone_number: string } | null;
 };
 
 const PHONE_REGEX = /^[0-9+\-\s()]{7,20}$/;
+
+function RenterLeadCapture({
+  propertyId,
+  agencyId,
+  source,
+  onSuccess,
+  renterId,
+  renterProfile,
+}: LeadCaptureModalProps) {
+  const started = useRef(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (started.current || !renterId || !renterProfile?.full_name) return;
+    started.current = true;
+    const fullName = renterProfile.full_name;
+
+    void (async () => {
+      const { error: insertError } = await supabase.from("leads").insert({
+        property_id: propertyId,
+        agency_id: agencyId,
+        name: fullName,
+        phone: renterProfile.phone_number,
+        status: "New",
+        source,
+        renter_id: renterId,
+        created_at: new Date().toISOString(),
+      });
+
+      if (insertError) {
+        setError(insertError.message);
+        return;
+      }
+      onSuccess({ name: fullName, phone: renterProfile.phone_number });
+    })();
+  }, [agencyId, onSuccess, propertyId, renterId, renterProfile, source]);
+
+  return (
+    <div className="px-6 py-8 text-center">
+      <p id="lead-modal-title" className="font-semibold text-[var(--brand-text)]">
+        {error ? "We couldn't save your enquiry." : "Connecting you with the agency..."}
+      </p>
+      <ErrorMessage message={error} />
+    </div>
+  );
+}
 
 function LeadCaptureForm({
   propertyId,
@@ -24,6 +84,7 @@ function LeadCaptureForm({
   onSuccess,
   propertyTitle,
   agencyName,
+  renterId,
 }: LeadCaptureModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -61,6 +122,7 @@ function LeadCaptureForm({
         status: "New",
         source,
         created_at: new Date().toISOString(),
+        ...(renterId ? { renter_id: renterId } : {}),
       });
 
       if (error) {
@@ -260,7 +322,11 @@ export default function LeadCaptureModal(props: LeadCaptureModalProps) {
           </svg>
         </button>
 
-        <LeadCaptureForm key={`${props.source}-${props.propertyId}`} {...props} />
+        {props.renterSkipForm && props.renterProfile?.full_name ? (
+          <RenterLeadCapture key={`${props.source}-${props.propertyId}`} {...props} />
+        ) : (
+          <LeadCaptureForm key={`${props.source}-${props.propertyId}`} {...props} />
+        )}
       </div>
     </div>
   );

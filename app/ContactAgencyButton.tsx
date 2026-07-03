@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LeadCaptureModal from "./LeadCaptureModal";
+import { useRenterSession, RENTER_PENDING_EVENT } from "./renter/useRenterSession";
+import { setPendingAction } from "./renter/pendingAction";
 
 export default function ContactAgencyButton({
   propertyId,
@@ -21,11 +23,33 @@ export default function ContactAgencyButton({
   const [modalOpen, setModalOpen] = useState(false);
   const [source, setSource] = useState<"whatsapp" | "contact">("whatsapp");
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
+  const { profile, openAuthDialog } = useRenterSession();
 
   const open = (src: "whatsapp" | "contact") => {
     setSource(src);
+    if (!profile) {
+      setPendingAction({ kind: "contact", propertyId, agencyId, source: src });
+      void openAuthDialog("contact");
+      return;
+    }
     setModalOpen(true);
   };
+
+  useEffect(() => {
+    const replay = (event: Event) => {
+      const action = (event as CustomEvent).detail;
+      if (
+        action?.kind === "contact" &&
+        action.propertyId === propertyId &&
+        action.agencyId === agencyId
+      ) {
+        setSource(action.source);
+        setModalOpen(true);
+      }
+    };
+    window.addEventListener(RENTER_PENDING_EVENT, replay);
+    return () => window.removeEventListener(RENTER_PENDING_EVENT, replay);
+  }, [propertyId, agencyId]);
 
   const handleSuccess = () => {
     if (source === "whatsapp") {
@@ -100,6 +124,9 @@ export default function ContactAgencyButton({
         onSuccess={handleSuccess}
         propertyTitle={propertyTitle}
         agencyName={agencyName}
+        renterId={profile?.id}
+        renterProfile={profile}
+        renterSkipForm={Boolean(profile?.full_name)}
       />
     </div>
   );

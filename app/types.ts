@@ -39,7 +39,35 @@ export type Lead = {
   source?: string | null;
   status?: string | null;
   created_at?: string | null;
+  renter_id?: string | null;
   properties?: {
     title?: string | null;
   } | null;
+};
+
+export type RenterProfile = {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  /** Contact number shared with an agency when the renter makes an enquiry. */
+  phone_number: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RenterFavorite = {
+  renter_id: string;
+  property_id: string;
+  created_at: string;
+};
+
+export type AgencyReview = {
+  id: string;
+  renter_id: string;
+  agency_id: string;
+  reviewer_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
 };

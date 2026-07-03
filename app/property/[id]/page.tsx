@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import ContactAgencyButton from "@/app/ContactAgencyButton";
 import Footer from "@/app/Footer";
 import StatusBadge from "@/app/StatusBadge";
+import AgencyReviews from "@/app/renter/AgencyReviews";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -269,6 +270,7 @@ export default async function PropertyPage({
                   </p>
                 </div>
               </div>
+              {agency?.id && <AgencyReviews agencyId={agency.id} />}
             </div>
           </div>
 

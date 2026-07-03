@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import type { Property } from "./types";
+import FavoriteButton from "./renter/FavoriteButton";
 
 export default function PropertyCard({
   property,
@@ -78,6 +79,16 @@ export default function PropertyCard({
             </span>
           )}
         </div>
+
+        {!actions && (
+          <div className="absolute right-3 top-3" onClick={(e) => e.stopPropagation()}>
+            <FavoriteButton
+              propertyId={property.id}
+              label={`Save ${property.title || "property"}`}
+              className="grid h-10 w-10 place-items-center rounded-full bg-white/95 text-[var(--brand-text)] shadow-md transition hover:text-rose-500 disabled:opacity-60"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
