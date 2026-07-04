@@ -4,6 +4,8 @@ import ContactAgencyButton from "@/app/ContactAgencyButton";
 import Footer from "@/app/Footer";
 import StatusBadge from "@/app/StatusBadge";
 import AgencyReviews from "@/app/renter/AgencyReviews";
+import SimilarListings from "@/app/SimilarListings";
+import ScheduleVisitButton from "@/app/renter/ScheduleVisitButton";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -300,6 +302,14 @@ export default async function PropertyPage({
                 />
               </div>
 
+              <div className="mt-3">
+                <ScheduleVisitButton
+                  propertyId={property.id}
+                  agencyId={agency?.id || ""}
+                  propertyTitle={property.title}
+                />
+              </div>
+
               <div className="mt-5 space-y-2 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-4 text-sm">
                 <p className="flex items-center justify-between">
                   <span className="text-[var(--brand-muted)]">Type</span>
@@ -323,6 +333,17 @@ export default async function PropertyPage({
           </aside>
         </div>
       </div>
+
+      {/* Similar Listings */}
+      <section className="container-app py-12">
+        <SimilarListings
+          currentPropertyId={property.id}
+          currentPropertyCity={property.city}
+          currentPropertyType={property.property_type}
+          currentPropertyBedrooms={property.bedrooms}
+          currentPropertyRent={property.rent}
+        />
+      </section>
 
       <Footer />
     </main>

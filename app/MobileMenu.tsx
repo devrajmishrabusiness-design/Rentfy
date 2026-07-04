@@ -3,11 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 
+interface NavItem {
+  label: string;
+  href: string;
+}
+
+interface MobileMenuProps {
+  navItems: NavItem[];
+  showProfileButton?: boolean;
+  profileButton?: React.ReactNode;
+}
+
 export default function MobileMenu({
   navItems,
-}: {
-  navItems: { label: string; href: string }[];
-}) {
+  showProfileButton = false,
+  profileButton,
+}: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -46,7 +57,7 @@ export default function MobileMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full border-b border-[var(--brand-border)] bg-white p-4 shadow-lg animate-fade-in-up">
+        <div className="absolute right-0 top-full mt-2 w-64 border-b border-[var(--brand-border)] bg-white p-4 shadow-lg animate-fade-in-up rounded-b-2xl rounded-tr-2xl">
           <div className="flex flex-col gap-2">
             {navItems.map((item) => (
               <Link
@@ -59,6 +70,12 @@ export default function MobileMenu({
               </Link>
             ))}
           </div>
+          
+          {showProfileButton && profileButton && (
+            <div className="mt-4 pt-4 border-t border-[var(--brand-border)]">
+              {profileButton}
+            </div>
+          )}
         </div>
       )}
     </div>

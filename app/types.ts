@@ -28,6 +28,10 @@ export type Property = {
   contact_number?: string | null;
   agency_id?: string | null;
   status?: string | null;
+  area_sqft?: number | null;
+  views_count?: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export type Lead = {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Property } from "./types";
 import SectionHeader from "./SectionHeader";
+import HeroSearch from "./HeroSearch";
 
 const whyItems = [
   {
@@ -281,6 +282,11 @@ export default async function Home() {
               <Link href="/signup" className="btn-secondary">
                 List as an agency
               </Link>
+            </div>
+
+            {/* Hero Search Bar */}
+            <div className="mt-8">
+              <HeroSearch />
             </div>
 
             <div className="mt-10 grid max-w-xl grid-cols-3 gap-6 border-t border-[var(--brand-border)] pt-6">

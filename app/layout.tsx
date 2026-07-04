@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "./Navbar";
 import RenterAuthDialog from "./renter/RenterAuthDialog";
 import { RenterSessionProvider } from "./renter/RenterSessionProvider";
+import { ToastProvider } from "./Toast";
+import { ConfirmProvider } from "./ConfirmDialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,11 +54,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--brand-background)]">
-        <RenterSessionProvider>
-          <Navbar />
-          {children}
-          <RenterAuthDialog />
-        </RenterSessionProvider>
+        <ToastProvider>
+          <ConfirmProvider>
+            <RenterSessionProvider>
+              <Navbar />
+              {children}
+              <RenterAuthDialog />
+            </RenterSessionProvider>
+          </ConfirmProvider>
+        </ToastProvider>
       </body>
     </html>
   );
