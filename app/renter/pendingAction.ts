@@ -34,11 +34,18 @@ export type PendingAction =
       propertyId: string;
       next: "add" | "remove";
       createdAt: number;
+    }
+  | {
+      kind: "visit";
+      propertyId: string;
+      agencyId: string;
+      createdAt: number;
     };
 
 export type PendingActionInput =
   | Omit<Extract<PendingAction, { kind: "contact" }>, "createdAt">
-  | Omit<Extract<PendingAction, { kind: "favorite" }>, "createdAt">;
+  | Omit<Extract<PendingAction, { kind: "favorite" }>, "createdAt">
+  | Omit<Extract<PendingAction, { kind: "visit" }>, "createdAt">;
 
 export function setPendingAction(action: PendingActionInput) {
   if (typeof window === "undefined") return;

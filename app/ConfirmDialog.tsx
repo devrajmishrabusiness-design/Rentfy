@@ -81,15 +81,18 @@ function ConfirmModal({
 
   const variantStyles: Record<ConfirmVariant, { bg: string; text: string; btn: string }> = {
     danger: {
-      bg: "bg-red-100 text-red-600",
+      bg: "bg-red-100",
+      text: "text-red-600",
       btn: "bg-red-500 hover:bg-red-600 text-white",
     },
     warning: {
-      bg: "bg-amber-100 text-amber-600",
+      bg: "bg-amber-100",
+      text: "text-amber-600",
       btn: "bg-amber-500 hover:bg-amber-600 text-white",
     },
     info: {
-      bg: "bg-blue-100 text-blue-600",
+      bg: "bg-blue-100",
+      text: "text-blue-600",
       btn: "bg-blue-500 hover:bg-blue-600 text-white",
     },
   };

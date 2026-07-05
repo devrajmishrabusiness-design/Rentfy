@@ -17,3 +17,15 @@ export {
 // Plugin adapter
 export { createTitlePlugin } from "./title-plugin";
 export type { TitleAnalyzerOptions as TitlePluginOptions } from "./title-plugin";
+
+// Meta Description Analyzer
+export {
+  analyzeDescription,
+  type MetaDescriptionAnalyzerOptions,
+  type MetaDescriptionAnalysis,
+  type DuplicateDescriptionEntry,
+  type DuplicateDescriptionStore,
+} from "./meta-description-analyzer";
+
+export { createMetaDescriptionPlugin } from "./meta-description-plugin";
+export type { MetaDescriptionAnalyzerOptions as MetaDescriptionPluginOptions } from "./meta-description-plugin";

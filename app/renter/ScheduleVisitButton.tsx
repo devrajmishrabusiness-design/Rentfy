@@ -21,7 +21,7 @@ export default function ScheduleVisitButton({
   const openModal = () => {
     if (!profile) {
       setPendingAction({ kind: "visit", propertyId, agencyId });
-      void openAuthDialog("visit");
+      void openAuthDialog("general");
       return;
     }
     setModalOpen(true);
