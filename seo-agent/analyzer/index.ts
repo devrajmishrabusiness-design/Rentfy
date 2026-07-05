@@ -29,3 +29,13 @@ export {
 
 export { createMetaDescriptionPlugin } from "./meta-description-plugin";
 export type { MetaDescriptionAnalyzerOptions as MetaDescriptionPluginOptions } from "./meta-description-plugin";
+
+// URL Analyzer
+export {
+  analyzeUrl,
+  type UrlAnalyzerOptions,
+  type UrlAnalysis,
+} from "./url-analyzer";
+
+export { createUrlPlugin } from "./url-plugin";
+export type { UrlAnalyzerOptions as UrlPluginOptions } from "./url-plugin";
