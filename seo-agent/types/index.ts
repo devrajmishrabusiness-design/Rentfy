@@ -116,6 +116,7 @@ export interface PageSignals {
   hasOpenGraph?: boolean;
   hasTwitterCard?: boolean;
   hasJsonLd?: boolean;
+  schemaJsonLd?: string | object;
   hasSitemap?: boolean;
   hasRobotsTxt?: boolean;
   language?: string;

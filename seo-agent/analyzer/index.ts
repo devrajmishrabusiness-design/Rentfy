@@ -51,3 +51,13 @@ export {
 
 export { createImagePlugin } from "./image-plugin";
 export type { ImageAnalyzerOptions as ImagePluginOptions } from "./image-plugin";
+
+// Schema Analyzer
+export {
+  analyzeSchema,
+  type SchemaAnalyzerOptions,
+  type SchemaAnalysis,
+} from "./schema-analyzer";
+
+export { createSchemaPlugin } from "./schema-plugin";
+export type { SchemaAnalyzerOptions as SchemaPluginOptions } from "./schema-plugin";
