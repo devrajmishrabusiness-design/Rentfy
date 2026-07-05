@@ -39,3 +39,15 @@ export {
 
 export { createUrlPlugin } from "./url-plugin";
 export type { UrlAnalyzerOptions as UrlPluginOptions } from "./url-plugin";
+
+// Image Analyzer
+export {
+  analyzeImages,
+  type ImageAnalyzerOptions,
+  type ImageAnalyzerInput,
+  type ImageMetadata,
+  type ImageAnalysis,
+} from "./image-analyzer";
+
+export { createImagePlugin } from "./image-plugin";
+export type { ImageAnalyzerOptions as ImagePluginOptions } from "./image-plugin";
