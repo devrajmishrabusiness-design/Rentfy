@@ -107,6 +107,8 @@ export interface PageSignals {
   h1Count?: number;
   h2Count?: number;
   h3Count?: number;
+  headings?: Array<{ level: number; text: string; id?: string }>;
+  content?: string;
   wordCount?: number;
   internalLinks?: number;
   externalLinks?: number;

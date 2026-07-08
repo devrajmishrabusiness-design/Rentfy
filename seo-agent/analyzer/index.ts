@@ -61,3 +61,24 @@ export {
 
 export { createSchemaPlugin } from "./schema-plugin";
 export type { SchemaAnalyzerOptions as SchemaPluginOptions } from "./schema-plugin";
+
+// Heading Analyzer
+export {
+  analyzeHeadings,
+  type HeadingAnalyzerOptions,
+  type HeadingAnalysis,
+  type Heading,
+} from "./heading-analyzer";
+
+export { createHeadingPlugin } from "./heading-plugin";
+export type { HeadingAnalyzerOptions as HeadingPluginOptions } from "./heading-plugin";
+
+// Keyword Analyzer
+export {
+  analyzeKeywords,
+  type KeywordAnalyzerOptions,
+  type KeywordAnalysis,
+} from "./keyword-analyzer";
+
+export { createKeywordPlugin } from "./keyword-plugin";
+export type { KeywordAnalyzerOptions as KeywordPluginOptions } from "./keyword-plugin";

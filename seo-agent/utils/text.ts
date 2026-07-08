@@ -18,6 +18,7 @@ export const stripHtml = (html: string): string => {
 
 /**
  * Collapse whitespace and lowercase for keyword / slug comparison.
+ * Handles Unicode characters properly.
  */
 export const normalize = (text: string): string =>
   (text || "")
