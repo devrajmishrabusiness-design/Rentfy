@@ -162,15 +162,3 @@ export const dataOutput = <TInput, TOutput>(
   kind: "data",
   value,
 });
-
-/**
- * Compile-time helper that constrains which capabilities a plugin may
- * declare given its declared input/output, without forcing a string
- * literal. Exists mostly for documentation:
- *
- *   declareModule("analyzer", { input: PageSignals, output: SeoCheckResult });
- *
- * No runtime side effects — purely type information at the consumer's
- * site.
- */
-export const declareCapability = <T extends PluginCapability>(cap: T): T => cap;

@@ -27,7 +27,7 @@ export type { HeadingAnalyzerOptions, Heading } from "./heading-analyzer";
 export const createHeadingPlugin = (
   opts: HeadingAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.heading",
     name: "Heading Analyzer",
     version: "0.1.0",
@@ -45,10 +45,8 @@ export const createHeadingPlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.heading", name: "Heading Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

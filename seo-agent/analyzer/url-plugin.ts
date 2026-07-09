@@ -26,7 +26,7 @@ export type { UrlAnalyzerOptions } from "./url-analyzer";
 export const createUrlPlugin = (
   opts: UrlAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.url",
     name: "URL Analyzer",
     version: "0.1.0",
@@ -44,10 +44,8 @@ export const createUrlPlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.url", name: "URL Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

@@ -103,7 +103,6 @@ export {
   analyzerOutput,
   artifactOutput,
   dataOutput,
-  declareCapability,
   // Context
   buildConfig,
   createPluginState,
@@ -119,8 +118,74 @@ export {
   type DuplicateTitleStore,
 } from "./analyzer";
 
+// -------- Analyzer: meta description --------
+export {
+  analyzeDescription,
+  createMetaDescriptionPlugin,
+  type MetaDescriptionAnalyzerOptions,
+  type MetaDescriptionAnalysis,
+  type DuplicateDescriptionEntry,
+  type DuplicateDescriptionStore,
+} from "./analyzer";
+
+// -------- Analyzer: url --------
+export {
+  analyzeUrl,
+  createUrlPlugin,
+  type UrlAnalyzerOptions,
+  type UrlAnalysis,
+} from "./analyzer";
+
+// -------- Analyzer: image --------
+export {
+  analyzeImages,
+  createImagePlugin,
+  type ImageAnalyzerOptions,
+  type ImageAnalyzerInput,
+  type ImageMetadata,
+  type ImageAnalysis,
+} from "./analyzer";
+
+// -------- Analyzer: schema --------
+export {
+  analyzeSchema,
+  createSchemaPlugin,
+  type SchemaAnalyzerOptions,
+  type SchemaAnalysis,
+} from "./analyzer";
+
+// -------- Analyzer: heading --------
+export {
+  analyzeHeadings,
+  createHeadingPlugin,
+  type HeadingAnalyzerOptions,
+  type HeadingAnalysis,
+  type Heading,
+} from "./analyzer";
+
+// -------- Analyzer: keyword --------
+export {
+  analyzeKeywords,
+  createKeywordPlugin,
+  type KeywordAnalyzerOptions,
+  type KeywordAnalysis,
+} from "./analyzer";
+
+// -------- Report --------
+export {
+  generateReport,
+  validateReportInput,
+  createReportPlugin,
+  type ReportInput,
+  type ReportOptions,
+  type ReportMetadata,
+  type SeoReportOutput,
+  type ExecutionInfo,
+  type ReportPluginPayload,
+} from "./report";
+
 /**
  * Version of the SEO Agent contract.
  * Bump when there are breaking changes to public types.
  */
-export const SEO_AGENT_VERSION = "0.4.0-analyzer-title";
+export const SEO_AGENT_VERSION = "0.5.0-analyzers-report";

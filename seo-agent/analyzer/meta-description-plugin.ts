@@ -26,7 +26,7 @@ export type { MetaDescriptionAnalyzerOptions } from "./meta-description-analyzer
 export const createMetaDescriptionPlugin = (
   opts: MetaDescriptionAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.meta-description",
     name: "Meta Description Analyzer",
     version: "0.1.0",
@@ -42,10 +42,8 @@ export const createMetaDescriptionPlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.meta-description", name: "Meta Description Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

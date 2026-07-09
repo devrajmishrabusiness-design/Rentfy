@@ -36,12 +36,27 @@ const lowerPriorityFirst = (
 };
 
 /**
+ * Map a capability to its default phase. Mirrors the mapping used by
+ * the engine when computing the phase for a `run(...)` call so that
+ * `selectPlugins` and `engine.run` agree on the expected phase for
+ * every capability.
+ */
+const capabilityToPhase: Record<PluginCapability, PluginPhase> = {
+  analyzer: "analyze",
+  generator: "generate",
+  crawler: "crawl",
+  report: "report",
+};
+
+/**
  * Choose the plugins that should run for a given phase.
  *
  * Selection rules:
  *   1. Must match the requested capability.
- *   2. Must have an effective phase equal to `phase`.
- *   3. Must be enabled in the engine config.
+ *   2. Effective phase (`p.phase` or the capability's default phase)
+ *      must equal the requested `phase`.
+ *   3. Must be enabled by default (per the plugin declaration).
+ *   4. Must be enabled in the supplied engine config.
  *
  * Returned plugins are ordered ascending by priority (lower runs first).
  * Ties fall back to insertion order in the registry, which the engine
@@ -53,9 +68,10 @@ export const selectPlugins = (
   phase: PluginPhase,
   config: EngineConfig
 ): SeoPlugin[] => {
+  const expectedPhase = capabilityToPhase[capability];
   return candidate
     .filter((p) => p.capability === capability)
-    .filter((p) => (p.phase ?? (p.capability as PluginPhase)) === phase)
+    .filter((p) => (p.phase ?? expectedPhase) === phase)
     .filter((p) => (p.enabledByDefault ?? true))
     .filter((p) => config.enabledPlugins.has(p.id))
     .slice()

@@ -9,21 +9,22 @@
  * (`image-plugin.ts`) converts into a `SeoCheckResult`.
  */
 
-import type { SeoIssue, ScoreBreakdown } from "../types";
+import type { SeoIssue, ScoreBreakdown, ImageMetadata } from "../types";
+import {
+  dedupeSeverity,
+  calculateScore,
+  calculateScoreBreakdown,
+  mergeAnalyzerOptions,
+} from "../utils/analyzer-helpers";
+
+// Re-export for backward compatibility — the type was originally
+// declared here. Consumers that imported `ImageMetadata` from
+// `./image-analyzer` continue to resolve it without breaking.
+export type { ImageMetadata } from "../types";
 
 /* ----------------------------------------------------------------
  * Configuration
  * ---------------------------------------------------------------- */
-
-export interface ImageMetadata {
-  src: string;
-  alt?: string;
-  width?: number;
-  height?: number;
-  fileSize?: number;
-  format?: string;
-  isHero?: boolean;
-}
 
 export interface ImageAnalyzerInput {
   images: ImageMetadata[];
@@ -606,104 +607,5 @@ const checkFileSize = (images: ImageMetadata[], opts: RequiredAnalyzerOptions): 
  * ---------------------------------------------------------------- */
 
 function mergeOptions(opts: ImageAnalyzerOptions): RequiredAnalyzerOptions {
-  return {
-    minImageCount: opts.minImageCount ?? defaults.minImageCount,
-    recommendedImageCount: opts.recommendedImageCount ?? defaults.recommendedImageCount,
-    minDimension: opts.minDimension ?? defaults.minDimension,
-    maxFileSize: opts.maxFileSize ?? defaults.maxFileSize,
-    allowedFormats: opts.allowedFormats ?? [...defaults.allowedFormats],
-    requireHero: opts.requireHero ?? defaults.requireHero,
-  };
-}
-
-function dedupeSeverity(issues: SeoIssue[]): SeoIssue[] {
-  const map = new Map<string, SeoIssue[]>();
-  for (const issue of issues) {
-    const list = map.get(issue.id) ?? [];
-    list.push(issue);
-    map.set(issue.id, list);
-  }
-
-  const result: SeoIssue[] = [];
-  for (const list of map.values()) {
-    if (list.length === 1) {
-      result.push(list[0]);
-      continue;
-    }
-    const severityOrder: Record<string, number> = {
-      critical: 3,
-      warning: 2,
-      info: 1,
-      success: 0,
-    };
-    const best = list.reduce((prev, curr) =>
-      (severityOrder[curr.severity] ?? 0) > (severityOrder[prev.severity] ?? 0)
-        ? curr
-        : prev
-    );
-    result.push(best);
-  }
-  return result;
-}
-
-function calculateScore(issues: SeoIssue[], passed: boolean): number {
-  if (passed) return 100;
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  let penalty = 0;
-  for (const issue of issues) {
-    penalty += severityPenalty[issue.severity] ?? 5;
-  }
-
-  return Math.max(0, 100 - penalty);
-}
-
-function calculateScoreBreakdown(issues: SeoIssue[]): ScoreBreakdown {
-  const categoryScores: Record<string, number> = {
-    meta: 100,
-    headings: 100,
-    content: 100,
-    performance: 100,
-    accessibility: 100,
-    mobile: 100,
-    "structured-data": 100,
-    links: 100,
-    images: 100,
-    keywords: 100,
-    technical: 100,
-  };
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  for (const issue of issues) {
-    const penalty = severityPenalty[issue.severity] ?? 5;
-    const current = categoryScores[issue.category] ?? 100;
-    categoryScores[issue.category] = Math.max(0, current - penalty);
-  }
-
-  const byCategory: Record<string, number> = {};
-  for (const cat of Object.keys(categoryScores)) {
-    byCategory[cat] = categoryScores[cat];
-  }
-
-  return {
-    overall: calculateScore(issues, false),
-    byCategory: byCategory as ScoreBreakdown["byCategory"],
-    passed: issues.filter((i) => i.severity === "success").length,
-    failed: issues.filter((i) => i.severity === "critical").length,
-    warnings: issues.filter((i) => i.severity === "warning").length,
-    passedChecks: issues.length,
-    totalChecks: issues.length,
-  };
+  return mergeAnalyzerOptions(opts, defaults);
 }

@@ -26,16 +26,20 @@ export type { ImageAnalyzerOptions } from "./image-analyzer";
 export const createImagePlugin = (
   opts: ImageAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.image",
     name: "Image Analyzer",
     version: "0.1.0",
     capability: "analyzer",
-    priority: 13,
+    priority: 14,
     run: ({ payload }) => {
-      // Construct image analyzer input from PageSignals
+      // Forward the image list from the engine payload. When the
+      // crawl layer has not produced a detailed image list, we fall
+      // back to an empty array — which surfaces as the IMG-001
+      // "No images found" issue, exactly as the analyzer rules
+      // expect.
       const input: ImageAnalyzerInput = {
-        images: [],
+        images: payload.images ?? [],
       };
 
       const analysis = analyzeImages(input, opts);
@@ -47,10 +51,8 @@ export const createImagePlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.image", name: "Image Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

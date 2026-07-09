@@ -5,9 +5,42 @@ import { supabase } from "@/lib/supabase-browser";
 import Footer from "../Footer";
 import PropertyFormFields from "../PropertyFormFields";
 import ErrorMessage from "../ErrorMessage";
+import SeoAnalysisPanel from "../SeoAnalysisPanel";
+
+/**
+ * Compute whether the form has enough data for the SEO analyzer to
+ * produce a meaningful report. Mirrors the route's hard requirements
+ * (`validatePropertyInput` + the analyzer's taste fields) without
+ * duplicating engine logic — we only gate the UI call.
+ */
+function canRunSeoAnalysis(form: PropertyFormState): boolean {
+  const filled = (v: unknown): v is string =>
+    typeof v === "string" && v.trim().length > 0;
+  return (
+    filled(form.title) &&
+    filled(form.description) &&
+    filled(form.city) &&
+    filled(form.location)
+  );
+}
+
+interface PropertyFormState {
+  title: string;
+  description: string;
+  rent: string;
+  city: string;
+  location: string;
+  property_type: string;
+  bedrooms: string;
+  bathrooms: string;
+  furnishing: string;
+  parking: boolean;
+  available_from: string;
+  contact_number: string;
+}
 
 export default function AddProperty() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<PropertyFormState>({
     title: "",
     description: "",
     rent: "",
@@ -198,6 +231,21 @@ export default function AddProperty() {
                   Upload multiple high-quality photos for best results.
                 </p>
               </div>
+
+              <SeoAnalysisPanel
+                property={{
+                  title: form.title,
+                  description: form.description,
+                  city: form.city,
+                  location: form.location,
+                  property_type: form.property_type,
+                  rent: form.rent,
+                  bedrooms: form.bedrooms,
+                  bathrooms: form.bathrooms,
+                }}
+                canAnalyze={canRunSeoAnalysis(form)}
+                disabledReason="Fill in title, description, city, and location to enable SEO analysis."
+              />
 
               <ErrorMessage message={error} />
 

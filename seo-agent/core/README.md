@@ -83,32 +83,39 @@ export const metaDescriptionPlugin = definePlugin({
   priority: 50,                            // runs before less-important checks
   run: ({ payload }) => {
     if (!payload.metaDescription) {
-      return analyzerOutput(this, {
-        checkId: "meta-description-length",
-        summary: "Missing meta description",
-        issues: [{
-          id: "meta-description-missing",
-          title: "Meta description missing",
-          description: "Pages without a meta description rank worse in SERPs.",
-          severity: "critical",
-          category: "meta",
-          recommendation: "Add a 120–160 character meta description.",
-        }],
-        passed: false,
-      });
+      return analyzerOutput(
+        { id: "meta-description-length", name: "Meta description length", capability: "analyzer" } as SeoPlugin,
+        {
+          checkId: "meta-description-length",
+          summary: "Missing meta description",
+          issues: [{
+            id: "meta-description-missing",
+            title: "Meta description missing",
+            description: "Pages without a meta description rank worse in SERPs.",
+            severity: "critical",
+            category: "meta",
+            recommendation: "Add a 120–160 character meta description.",
+          }],
+          passed: false,
+        },
+      );
     }
-    return analyzerOutput(this, {
-      checkId: "meta-description-length",
-      summary: "Meta description present",
-      issues: [],
-      passed: true,
-    });
+    return analyzerOutput(
+      { id: "meta-description-length", name: "Meta description length", capability: "analyzer" } as SeoPlugin,
+      {
+        checkId: "meta-description-length",
+        summary: "Meta description present",
+        issues: [],
+        passed: true,
+      },
+    );
   },
 });
 ```
 
-> Implementations of analyzers/crawlers/etc. will be added in
-> subsequent tasks. The example above is illustrative only.
+> Implementations of analyzers/crawlers/etc. have been shipped
+> (7 analyzers + report). The illustrative example above shows the
+> `definePlugin` adapter pattern in general usage.
 
 ---
 

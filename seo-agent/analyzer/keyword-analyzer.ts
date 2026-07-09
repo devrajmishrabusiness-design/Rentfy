@@ -1,5 +1,5 @@
-/**
- * Keyword Analyzer — pure rules.
+﻿/**
+ * Keyword Analyzer â€” pure rules.
  *
  * Every function in this file is stateless, side-effect-free, and
  * deterministic. They are designed to be unit-testable without any
@@ -11,6 +11,12 @@
 
 import type { SeoIssue, ScoreBreakdown } from "../types";
 import { normalize, stripHtml, countWords } from "../utils/text";
+import {
+  dedupeSeverity,
+  calculateScore,
+  calculateScoreBreakdown,
+  mergeAnalyzerOptions,
+} from "../utils/analyzer-helpers";
 
 /* ----------------------------------------------------------------
  * Configuration
@@ -261,7 +267,7 @@ const calculateStdDev = (values: number[]): number => {
 };
 
 /* ----------------------------------------------------------------
- * Public API — analyze keywords
+ * Public API â€” analyze keywords
  * ---------------------------------------------------------------- */
 
 export const analyzeKeywords = (
@@ -766,23 +772,7 @@ function mergeOptions(opts: KeywordAnalyzerOptions & {
   headings?: Array<{ level: number; text: string }>;
   targetKeywords?: string[];
 }): RequiredAnalyzerOptions {
-  return {
-    primaryKeyword: opts.primaryKeyword ?? defaults.primaryKeyword,
-    secondaryKeywords: opts.secondaryKeywords ?? [...defaults.secondaryKeywords],
-    minDensity: opts.minDensity ?? defaults.minDensity,
-    maxDensity: opts.maxDensity ?? defaults.maxDensity,
-    idealDensity: opts.idealDensity ?? defaults.idealDensity,
-    minOccurrences: opts.minOccurrences ?? defaults.minOccurrences,
-    maxOccurrencesPerParagraph: opts.maxOccurrencesPerParagraph ?? defaults.maxOccurrencesPerParagraph,
-    requireInTitle: opts.requireInTitle ?? defaults.requireInTitle,
-    requireInH1: opts.requireInH1 ?? defaults.requireInH1,
-    requireInMeta: opts.requireInMeta ?? defaults.requireInMeta,
-    requireInUrl: opts.requireInUrl ?? defaults.requireInUrl,
-    requireRelatedKeywords: opts.requireRelatedKeywords ?? defaults.requireRelatedKeywords,
-    minRelatedKeywordCount: opts.minRelatedKeywordCount ?? defaults.minRelatedKeywordCount,
-    stopwords: opts.stopwords ?? [...defaults.stopwords],
-    minContentLength: opts.minContentLength ?? defaults.minContentLength,
-  };
+  return mergeAnalyzerOptions(opts, defaults);
 }
 
 function finalize(
@@ -830,104 +820,5 @@ function finalize(
     score,
     scoreBreakdown,
     issues: dedupeSeverity(issues),
-  };
-}
-
-/** If the same ID appears twice, keep the highest severity. */
-function dedupeSeverity(issues: SeoIssue[]): SeoIssue[] {
-  const map = new Map<string, SeoIssue[]>();
-  for (const issue of issues) {
-    const list = map.get(issue.id) ?? [];
-    list.push(issue);
-    map.set(issue.id, list);
-  }
-
-  const result: SeoIssue[] = [];
-  for (const list of map.values()) {
-    if (list.length === 1) {
-      result.push(list[0]);
-      continue;
-    }
-    const severityOrder: Record<string, number> = {
-      critical: 3,
-      warning: 2,
-      info: 1,
-      success: 0,
-    };
-    const best = list.reduce((prev, curr) =>
-      (severityOrder[curr.severity] ?? 0) > (severityOrder[prev.severity] ?? 0)
-        ? curr
-        : prev
-    );
-    result.push(best);
-  }
-  return result;
-}
-
-/**
- * Calculate numeric score (0-100) based on issues.
- */
-function calculateScore(issues: SeoIssue[], passed: boolean): number {
-  if (passed) return 100;
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  let penalty = 0;
-  for (const issue of issues) {
-    penalty += severityPenalty[issue.severity] ?? 5;
-  }
-
-  return Math.max(0, 100 - penalty);
-}
-
-/**
- * Calculate score breakdown by category.
- */
-function calculateScoreBreakdown(issues: SeoIssue[]): ScoreBreakdown {
-  const categoryScores: Record<string, number> = {
-    meta: 100,
-    headings: 100,
-    content: 100,
-    performance: 100,
-    accessibility: 100,
-    mobile: 100,
-    "structured-data": 100,
-    links: 100,
-    images: 100,
-    keywords: 100,
-    technical: 100,
-  };
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  for (const issue of issues) {
-    const penalty = severityPenalty[issue.severity] ?? 5;
-    const current = categoryScores[issue.category] ?? 100;
-    categoryScores[issue.category] = Math.max(0, current - penalty);
-  }
-
-  const byCategory: Record<string, number> = {};
-  for (const cat of Object.keys(categoryScores)) {
-    byCategory[cat] = categoryScores[cat];
-  }
-
-  return {
-    overall: calculateScore(issues, false),
-    byCategory: byCategory as ScoreBreakdown["byCategory"],
-    passed: issues.filter((i) => i.severity === "success").length,
-    failed: issues.filter((i) => i.severity === "critical").length,
-    warnings: issues.filter((i) => i.severity === "warning").length,
-    passedChecks: issues.length,
-    totalChecks: issues.length,
   };
 }

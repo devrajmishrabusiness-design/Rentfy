@@ -1,5 +1,5 @@
-/**
- * Heading Analyzer — pure rules.
+﻿/**
+ * Heading Analyzer â€” pure rules.
  *
  * Every function in this file is stateless, side-effect-free, and
  * deterministic. They are designed to be unit-testable without any
@@ -11,6 +11,12 @@
 
 import type { SeoIssue, ScoreBreakdown } from "../types";
 import { normalize } from "../utils/text";
+import {
+  dedupeSeverity,
+  calculateScore,
+  calculateScoreBreakdown,
+  mergeAnalyzerOptions,
+} from "../utils/analyzer-helpers";
 
 /* ----------------------------------------------------------------
  * Configuration
@@ -84,7 +90,7 @@ const GENERIC_TERMS = new Set([
 ]);
 
 /* ----------------------------------------------------------------
- * Public API — analyze headings
+ * Public API â€” analyze headings
  * ---------------------------------------------------------------- */
 
 export interface HeadingAnalysis {
@@ -296,7 +302,7 @@ export const analyzeHeadings = (
 };
 
 /* ----------------------------------------------------------------
- * Internals — each rule as a pure function
+ * Internals â€” each rule as a pure function
  * ---------------------------------------------------------------- */
 
 const missingH1Issue = (): SeoIssue => ({
@@ -543,7 +549,7 @@ const checkHierarchy = (headings: Heading[]): SeoIssue[] => {
     const curr = headings[i].level;
     const diff = curr - prev;
 
-    // Going down more than 1 level is a skip (e.g., H1 → H3)
+    // Going down more than 1 level is a skip (e.g., H1 â†’ H3)
     if (diff > 1) {
       skippedTransitions.push({ from: prev, to: curr });
     }
@@ -552,7 +558,7 @@ const checkHierarchy = (headings: Heading[]): SeoIssue[] => {
   if (skippedTransitions.length > 0) {
     const examples = skippedTransitions
       .slice(0, 3)
-      .map((t) => `H${t.from} → H${t.to}`)
+      .map((t) => `H${t.from} â†’ H${t.to}`)
       .join(", ");
     issues.push({
       id: "HDG-006",
@@ -763,7 +769,7 @@ const getSkippedLevels = (headings: Heading[]): number[] => {
     const prev = headings[i - 1].level;
     const curr = headings[i].level;
     if (curr - prev > 1) {
-      // Record the skipped levels (e.g., H1 → H3 skips level 2)
+      // Record the skipped levels (e.g., H1 â†’ H3 skips level 2)
       for (let level = prev + 1; level < curr; level++) {
         if (!skipped.includes(level)) {
           skipped.push(level);
@@ -779,22 +785,7 @@ const getSkippedLevels = (headings: Heading[]): number[] => {
  * ---------------------------------------------------------------- */
 
 function mergeOptions(opts: HeadingAnalyzerOptions): RequiredAnalyzerOptions {
-  return {
-    requireH1: opts.requireH1 ?? defaults.requireH1,
-    maxH1Count: opts.maxH1Count ?? defaults.maxH1Count,
-    minH1Length: opts.minH1Length ?? defaults.minH1Length,
-    maxH1Length: opts.maxH1Length ?? defaults.maxH1Length,
-    minH2Count: opts.minH2Count ?? defaults.minH2Count,
-    recommendedH2Count: opts.recommendedH2Count ?? defaults.recommendedH2Count,
-    targetKeywords: opts.targetKeywords ?? [...defaults.targetKeywords],
-    city: opts.city ?? defaults.city,
-    locality: opts.locality ?? defaults.locality,
-    propertyType: opts.propertyType ?? defaults.propertyType,
-    requireKeywordInH1: opts.requireKeywordInH1 ?? defaults.requireKeywordInH1,
-    allowDuplicateHeadings:
-      opts.allowDuplicateHeadings ?? defaults.allowDuplicateHeadings,
-    minHeadingLength: opts.minHeadingLength ?? defaults.minHeadingLength,
-  };
+  return mergeAnalyzerOptions(opts, defaults);
 }
 
 function finalize(
@@ -842,104 +833,5 @@ function finalize(
     score,
     scoreBreakdown,
     issues: dedupeSeverity(issues),
-  };
-}
-
-/** If the same ID appears twice, keep the highest severity. */
-function dedupeSeverity(issues: SeoIssue[]): SeoIssue[] {
-  const map = new Map<string, SeoIssue[]>();
-  for (const issue of issues) {
-    const list = map.get(issue.id) ?? [];
-    list.push(issue);
-    map.set(issue.id, list);
-  }
-
-  const result: SeoIssue[] = [];
-  for (const list of map.values()) {
-    if (list.length === 1) {
-      result.push(list[0]);
-      continue;
-    }
-    const severityOrder: Record<string, number> = {
-      critical: 3,
-      warning: 2,
-      info: 1,
-      success: 0,
-    };
-    const best = list.reduce((prev, curr) =>
-      (severityOrder[curr.severity] ?? 0) > (severityOrder[prev.severity] ?? 0)
-        ? curr
-        : prev
-    );
-    result.push(best);
-  }
-  return result;
-}
-
-/**
- * Calculate numeric score (0-100) based on issues.
- */
-function calculateScore(issues: SeoIssue[], passed: boolean): number {
-  if (passed) return 100;
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  let penalty = 0;
-  for (const issue of issues) {
-    penalty += severityPenalty[issue.severity] ?? 5;
-  }
-
-  return Math.max(0, 100 - penalty);
-}
-
-/**
- * Calculate score breakdown by category.
- */
-function calculateScoreBreakdown(issues: SeoIssue[]): ScoreBreakdown {
-  const categoryScores: Record<string, number> = {
-    meta: 100,
-    headings: 100,
-    content: 100,
-    performance: 100,
-    accessibility: 100,
-    mobile: 100,
-    "structured-data": 100,
-    links: 100,
-    images: 100,
-    keywords: 100,
-    technical: 100,
-  };
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  for (const issue of issues) {
-    const penalty = severityPenalty[issue.severity] ?? 5;
-    const current = categoryScores[issue.category] ?? 100;
-    categoryScores[issue.category] = Math.max(0, current - penalty);
-  }
-
-  const byCategory: Record<string, number> = {};
-  for (const cat of Object.keys(categoryScores)) {
-    byCategory[cat] = categoryScores[cat];
-  }
-
-  return {
-    overall: calculateScore(issues, false),
-    byCategory: byCategory as ScoreBreakdown["byCategory"],
-    passed: issues.filter((i) => i.severity === "success").length,
-    failed: issues.filter((i) => i.severity === "critical").length,
-    warnings: issues.filter((i) => i.severity === "warning").length,
-    passedChecks: issues.length,
-    totalChecks: issues.length,
   };
 }

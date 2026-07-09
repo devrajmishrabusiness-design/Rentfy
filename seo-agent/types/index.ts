@@ -94,6 +94,23 @@ export interface AnalysisResult {
 }
 
 /**
+ * Metadata for a single image discovered on a page. Used by the
+ * Image Analyzer via `PageSignals.images` and by `ImageAnalyzerInput`.
+ *
+ * Defined here (rather than in the image analyzer) because it is part
+ * of the shared `PageSignals` contract that the engine payload carries.
+ */
+export interface ImageMetadata {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  fileSize?: number;
+  format?: string;
+  isHero?: boolean;
+}
+
+/**
  * Page-level signals extracted during a crawl.
  * Each field maps to a single SEO consideration.
  */
@@ -115,6 +132,12 @@ export interface PageSignals {
   brokenLinks?: number;
   imagesWithoutAlt?: number;
   imagesTotal?: number;
+  /**
+   * Detailed image list (one entry per detected <img>). Consumed by
+   * the Image Analyzer plugin when present; absent when only the
+   * aggregate counters are available.
+   */
+  images?: ImageMetadata[];
   hasOpenGraph?: boolean;
   hasTwitterCard?: boolean;
   hasJsonLd?: boolean;

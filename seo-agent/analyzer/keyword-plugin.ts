@@ -29,12 +29,12 @@ export type { KeywordAnalyzerOptions } from "./keyword-analyzer";
 export const createKeywordPlugin = (
   opts: KeywordAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.keyword",
     name: "Keyword Analyzer",
     version: "0.1.0",
     capability: "analyzer",
-    priority: 14,
+    priority: 16,
     run: ({ payload }) => {
       const analysis = analyzeKeywords(payload.content, {
         ...opts,
@@ -54,10 +54,8 @@ export const createKeywordPlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.keyword", name: "Keyword Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

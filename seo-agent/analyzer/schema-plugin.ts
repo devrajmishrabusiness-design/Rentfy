@@ -27,12 +27,12 @@ export type { SchemaAnalyzerOptions } from "./schema-analyzer";
 export const createSchemaPlugin = (
   opts: SchemaAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.schema",
     name: "Schema Analyzer",
     version: "0.1.0",
     capability: "analyzer",
-    priority: 12,
+    priority: 15,
     run: ({ payload }) => {
       const analysis = analyzeSchema(payload.schemaJsonLd, opts);
 
@@ -49,10 +49,8 @@ export const createSchemaPlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.schema", name: "Schema Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };

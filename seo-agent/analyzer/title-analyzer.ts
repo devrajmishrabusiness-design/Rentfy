@@ -10,6 +10,13 @@
  */
 
 import type { SeoIssue, ScoreBreakdown } from "../types";
+import {
+  dedupeSeverity,
+  calculateScore,
+  calculateScoreBreakdown,
+  simpleHash,
+  mergeAnalyzerOptions,
+} from "../utils/analyzer-helpers";
 
 /* ----------------------------------------------------------------
  * Configuration
@@ -325,47 +332,7 @@ const checkKeywords = (
  * ---------------------------------------------------------------- */
 
 function mergeOptions(opts: TitleAnalyzerOptions): RequiredAnalyzerOptions {
-  return {
-    idealLength: opts.idealLength ?? defaults.idealLength,
-    lenTolerance: opts.lenTolerance ?? defaults.lenTolerance,
-    minLength: opts.minLength ?? defaults.minLength,
-    maxLength: opts.maxLength ?? defaults.maxLength,
-    targetKeywords: opts.targetKeywords ?? [...defaults.targetKeywords],
-    brandSuffix: opts.brandSuffix ?? defaults.brandSuffix,
-    enforceBrand: opts.enforceBrand ?? defaults.enforceBrand,
-    duplicateTitleStore: opts.duplicateTitleStore ?? defaults.duplicateTitleStore,
-  };
-}
-
-/** If the same ID appears twice, keep the highest severity. */
-function dedupeSeverity(issues: SeoIssue[]): SeoIssue[] {
-  const map = new Map<string, SeoIssue[]>();
-  for (const issue of issues) {
-    const list = map.get(issue.id) ?? [];
-    list.push(issue);
-    map.set(issue.id, list);
-  }
-
-  const result: SeoIssue[] = [];
-  for (const list of map.values()) {
-    if (list.length === 1) {
-      result.push(list[0]);
-      continue;
-    }
-    const severityOrder: Record<string, number> = {
-      critical: 3,
-      warning: 2,
-      info: 1,
-      success: 0,
-    };
-    const best = list.reduce((prev, curr) =>
-      (severityOrder[curr.severity] ?? 0) > (severityOrder[prev.severity] ?? 0)
-        ? curr
-        : prev
-    );
-    result.push(best);
-  }
-  return result;
+  return mergeAnalyzerOptions(opts, defaults);
 }
 
 function slugify(text: string): string {
@@ -400,104 +367,6 @@ function finalize(
     missingKeywords: missing,
     duplicateTitle,
   };
-}
-
-/**
- * Calculate numeric score (0-100) based on issues.
- * 100 = perfect, deductions based on severity weights.
- */
-function calculateScore(issues: SeoIssue[], passed: boolean): number {
-  if (passed) return 100;
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  let penalty = 0;
-  for (const issue of issues) {
-    penalty += severityPenalty[issue.severity] ?? 5;
-  }
-
-  return Math.max(0, 100 - penalty);
-}
-
-/**
- * Calculate score breakdown by category for detailed reporting.
- */
-function calculateScoreBreakdown(issues: SeoIssue[]): ScoreBreakdown {
-  const categoryScores: Record<string, number> = {
-    meta: 100,
-    headings: 100,
-    content: 100,
-    performance: 100,
-    accessibility: 100,
-    mobile: 100,
-    "structured-data": 100,
-    links: 100,
-    images: 100,
-    keywords: 100,
-    technical: 100,
-  };
-
-  const categoryCounts: Record<string, number> = {
-    meta: 0,
-    headings: 0,
-    content: 0,
-    performance: 0,
-    accessibility: 0,
-    mobile: 0,
-    "structured-data": 0,
-    links: 0,
-    images: 0,
-    keywords: 0,
-    technical: 0,
-  };
-
-  const severityPenalty: Record<string, number> = {
-    critical: 25,
-    warning: 10,
-    info: 2,
-    success: 0,
-  };
-
-  for (const issue of issues) {
-    const penalty = severityPenalty[issue.severity] ?? 5;
-    const current = categoryScores[issue.category] ?? 100;
-    categoryScores[issue.category] = Math.max(0, current - penalty);
-    categoryCounts[issue.category] = (categoryCounts[issue.category] ?? 0) + 1;
-  }
-
-  const byCategory: Record<string, number> = {};
-  for (const cat of Object.keys(categoryScores)) {
-    byCategory[cat] = categoryScores[cat];
-  }
-
-  return {
-    overall: calculateScore(issues, false),
-    byCategory: byCategory as ScoreBreakdown["byCategory"],
-    passed: issues.filter(i => i.severity === "success").length,
-    failed: issues.filter(i => i.severity === "critical").length,
-    warnings: issues.filter(i => i.severity === "warning").length,
-    passedChecks: issues.length,
-    totalChecks: issues.length,
-  };
-}
-
-/**
- * Simple hash for duplicate title detection (non-cryptographic).
- * In production, use a proper hash like SHA-256.
- */
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash |= 0;
-  }
-  return Math.abs(hash).toString(36);
 }
 
 /* ----------------------------------------------------------------

@@ -36,7 +36,6 @@ export {
   analyzerOutput,
   artifactOutput,
   dataOutput,
-  declareCapability,
 } from "./plugin";
 
 // Context helpers

@@ -17,7 +17,7 @@ export type { TitleAnalyzerOptions } from "./title-analyzer";
  *
  * @example
  *   const plugin = createTitlePlugin({
- *     brandSuffix: " | RenterEasy",
+ *     brandSuffix: " | Rentfy",
  *     enforceBrand: true,
  *     targetKeywords: ["rent", "Noida", "apartment"],
  *   });
@@ -26,7 +26,7 @@ export type { TitleAnalyzerOptions } from "./title-analyzer";
 export const createTitlePlugin = (
   opts: TitleAnalyzerOptions = {}
 ): SeoPlugin<PageSignals, SeoCheckResult> => {
-  return definePlugin<PageSignals, SeoCheckResult>({
+  const plugin: SeoPlugin<PageSignals, SeoCheckResult> = definePlugin<PageSignals, SeoCheckResult>({
     id: "analyzer.title",
     name: "Title Analyzer",
     version: "0.1.0",
@@ -42,10 +42,8 @@ export const createTitlePlugin = (
         passed: analysis.passed,
       };
 
-      return analyzerOutput(
-        { id: "analyzer.title", name: "Title Analyzer", version: "0.1.0", capability: "analyzer" } as any,
-        checkResult
-      );
+      return analyzerOutput(plugin, checkResult);
     },
   });
+  return plugin;
 };
