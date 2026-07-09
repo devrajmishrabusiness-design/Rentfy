@@ -21,6 +21,8 @@ export default function ProfileDropdown({
   isAgency,
   isVerifiedAgency,
 }: ProfileDropdownProps) {
+  void userName;
+  void userInitial;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();

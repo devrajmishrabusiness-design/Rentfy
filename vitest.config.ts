@@ -9,6 +9,9 @@ export default defineConfig({
       'seo-agent/**/*.test.ts',
       'lib/seo/**/*.test.ts',
       'app/api/seo/**/*.test.ts',
+      'lib/crawler/**/*.test.ts',
+      'app/api/crawler/**/*.test.ts',
+      'crawler/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',

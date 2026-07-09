@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { analyzeDescription, type MetaDescriptionAnalyzerOptions } from "../meta-description-analyzer";
+import { analyzeDescription } from "../meta-description-analyzer";
 
 describe("Meta Description Analyzer", () => {
   describe("MD-001: Meta Description Exists", () => {
@@ -19,7 +19,7 @@ describe("Meta Description Analyzer", () => {
     });
 
     it("returns critical issue when description is null (treated as undefined)", () => {
-      const result = analyzeDescription(null as any);
+      const result = analyzeDescription(null);
       // null becomes "" after ?? "", so it's treated as empty, not missing
       expect(result.issues[0].id).toBe("MD-002");
       expect(result.issues[0].severity).toBe("critical");
@@ -389,7 +389,7 @@ describe("Meta Description Analyzer", () => {
     });
 
     it("handles null input gracefully", () => {
-      expect(() => analyzeDescription(null as any)).not.toThrow();
+      expect(() => analyzeDescription(null)).not.toThrow();
     });
   });
 

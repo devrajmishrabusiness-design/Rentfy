@@ -435,7 +435,7 @@ export interface PluginOutput<TValue = unknown> {
  * - `skip`              — treat this phase as a no-op for this plugin.
  * - `abort`             — fail the entire engine run with an error.
  */
-export type PluginHook<TPayload = unknown> =
+export type PluginHook =
   | { kind: "continue" }
   | { kind: "skip"; reason?: string }
   | { kind: "abort"; error: Error };
@@ -477,7 +477,7 @@ export interface SeoPlugin<TInput = unknown, TOutput = unknown> {
    * Optional capability / phase guard. If it returns `abort` or `skip`,
    * the plugin is bypassed for this run.
    */
-  readonly condition?: (input: PluginInput) => PluginHook<TInput>;
+  readonly condition?: (input: PluginInput) => PluginHook;
   /** Main execution. Must be pure with respect to its input — should not mutate `input.payload`. */
   readonly run: (input: PluginInput<TInput>) => PluginOutput<TOutput> | Promise<PluginOutput<TOutput>>;
   /** Optional cleanup hook. Runs after the pipeline completes (or aborts). */

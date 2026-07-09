@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Auto-generated Claude Code helper files (CJS, not part of app build)
+    ".claude/**",
+    // Test coverage output
+    "coverage/**",
   ]),
 ]);
 

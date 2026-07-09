@@ -30,6 +30,7 @@ import type {
   EngineConfig,
   PluginCapability,
   PluginPhase,
+  PluginState,
   SeoPlugin,
 } from "../../types";
 
@@ -420,7 +421,7 @@ describe("evaluateCondition", () => {
     const result = evaluateCondition(p, {
       payload: {},
       config: {} as EngineConfig,
-      state: {} as any,
+      state: {} as PluginState,
       capability: "analyzer",
       phase: "analyze",
     });
@@ -438,7 +439,7 @@ describe("evaluateCondition", () => {
     const result = evaluateCondition(p, {
       payload: {},
       config: {} as EngineConfig,
-      state: {} as any,
+      state: {} as PluginState,
       capability: "generator",
       phase: "generate",
     });

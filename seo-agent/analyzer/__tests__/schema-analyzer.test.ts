@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  analyzeSchema,
-  type SchemaAnalysis,
-  type SchemaAnalyzerOptions,
-} from "../schema-analyzer";
+import { analyzeSchema } from "../schema-analyzer";
 
 /* ----------------------------------------------------------------
  * 1. Core Functionality - Schema Exists
@@ -28,7 +24,7 @@ describe("Core Functionality", () => {
   });
 
   it("returns missing issue when schema is null", () => {
-    const result = analyzeSchema(null as any);
+    const result = analyzeSchema(null as unknown as object);
     expect(result.issues.some((i) => i.id === "SCH-001")).toBe(true);
     expect(result.issues.find((i) => i.id === "SCH-001")?.severity).toBe(
       "critical"
@@ -742,7 +738,7 @@ describe("Edge Cases", () => {
 
   it("handles circular references gracefully (no infinite loop)", () => {
     // Create a schema with a self-reference
-    const schemaObj: any = {
+    const schemaObj: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
       name: "Test",
@@ -769,7 +765,7 @@ describe("Edge Cases", () => {
   });
 
   it("handles large schemas (1000+ properties)", () => {
-    const largeSchema: any = {
+    const largeSchema: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
       name: "Test",

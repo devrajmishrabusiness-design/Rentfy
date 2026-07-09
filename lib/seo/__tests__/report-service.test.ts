@@ -12,10 +12,11 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock supabase-admin
+// Mock supabase-admin with properly typed mock
+const mockFrom = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/supabase-admin", () => ({
   supabaseAdmin: {
-    from: vi.fn(),
+    from: mockFrom,
   },
 }));
 
@@ -97,7 +98,7 @@ describe("upsertReport", () => {
       single: vi.fn().mockResolvedValue({ data: mockSeoReport, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockUpsert);
+    mockFrom.mockReturnValue(mockUpsert);
 
     const result = await upsertReport({
       propertyId: "prop-123",
@@ -117,7 +118,7 @@ describe("upsertReport", () => {
       single: vi.fn().mockResolvedValue({ data: mockSeoReport, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockUpsert);
+    mockFrom.mockReturnValue(mockUpsert);
 
     const result = await upsertReport({
       propertyId: "prop-123",
@@ -144,7 +145,7 @@ describe("upsertReport", () => {
       single: vi.fn().mockResolvedValue({ data: null, error: mockError }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockUpsert);
+    mockFrom.mockReturnValue(mockUpsert);
 
     await expect(
       upsertReport({
@@ -168,7 +169,7 @@ describe("getReportByPropertyId", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: mockSeoReport, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     const result = await getReportByPropertyId("prop-123");
 
@@ -184,7 +185,7 @@ describe("getReportByPropertyId", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     const result = await getReportByPropertyId("non-existent");
 
@@ -199,7 +200,7 @@ describe("getReportByPropertyId", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: mockError }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     await expect(getReportByPropertyId("prop-123")).rejects.toThrow(
       "Database error"
@@ -225,7 +226,7 @@ describe("getReportsByAgency", () => {
       order: vi.fn().mockReturnThis(),
     };
 
-    (supabaseAdmin.from as any)
+    mockFrom
       .mockReturnValueOnce(mockProperties)
       .mockReturnValueOnce(mockReports);
 
@@ -249,7 +250,7 @@ describe("getReportsByAgency", () => {
       then: vi.fn((resolve) => resolve({ data: [], error: null })),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockProperties);
+    mockFrom.mockReturnValue(mockProperties);
 
     const result = await getReportsByAgency("agency-123");
 
@@ -268,7 +269,7 @@ describe("getReportsByAgency", () => {
       }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockProperties);
+    mockFrom.mockReturnValue(mockProperties);
 
     await expect(getReportsByAgency("agency-123")).rejects.toThrow(
       "Database error"
@@ -289,7 +290,7 @@ describe("hasReport", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: { id: "report-uuid" }, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     const result = await hasReport("prop-123");
 
@@ -304,7 +305,7 @@ describe("hasReport", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     const result = await hasReport("prop-123");
 
@@ -319,7 +320,7 @@ describe("hasReport", () => {
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: new Error("DB error") }),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockSelect);
+    mockFrom.mockReturnValue(mockSelect);
 
     const result = await hasReport("prop-123");
 
@@ -338,7 +339,7 @@ describe("deleteReport", () => {
       eq: vi.fn().mockReturnThis(),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockDelete);
+    mockFrom.mockReturnValue(mockDelete);
 
     await deleteReport("prop-123");
 
@@ -354,7 +355,7 @@ describe("deleteReport", () => {
       eq: vi.fn().mockReturnThis(),
     };
 
-    (supabaseAdmin.from as any).mockReturnValue(mockDelete);
+    mockFrom.mockReturnValue(mockDelete);
 
     // Simulate error by making the chain throw
     mockDelete.eq.mockReturnValue({

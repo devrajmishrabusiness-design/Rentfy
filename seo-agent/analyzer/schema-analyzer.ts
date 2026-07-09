@@ -1,5 +1,5 @@
-﻿/**
- * Schema Analyzer â€” pure rules.
+/**
+ * Schema Analyzer — pure rules.
  *
  * Every function in this file is stateless, side-effect-free, and
  * deterministic. They are designed to be unit-testable without any
@@ -65,7 +65,7 @@ interface SchemaObject {
 }
 
 /* ----------------------------------------------------------------
- * Public API â€” analyze a single schema
+ * Public API — analyze a single schema
  * ---------------------------------------------------------------- */
 
 export interface SchemaAnalysis {
@@ -136,7 +136,7 @@ export const analyzeSchema = (
   if (typeof schemaJsonLd === "string") {
     try {
       schemaObj = JSON.parse(schemaJsonLd) as SchemaObject;
-    } catch (e) {
+    } catch {
       // SCH-002: Valid JSON
       issues.push(invalidJsonIssue());
       errorCount++;
@@ -185,7 +185,7 @@ export const analyzeSchema = (
 
   for (const schema of schemas) {
     // SCH-003: Valid @context
-    const contextCheck = checkContext(schema, options);
+    const contextCheck = checkContext(schema);
     issues.push(contextCheck);
 
     // SCH-004: Valid Schema Type
@@ -202,7 +202,7 @@ export const analyzeSchema = (
     }
 
     // SCH-005: Has Required Properties
-    const requiredCheck = checkRequiredProperties(schema, options);
+    const requiredCheck = checkRequiredProperties(schema);
     issues.push(requiredCheck);
 
     // SCH-006: Has Address
@@ -262,7 +262,7 @@ export const analyzeSchema = (
 };
 
 /* ----------------------------------------------------------------
- * Internals â€” each rule as a pure function
+ * Internals — each rule as a pure function
  * ---------------------------------------------------------------- */
 
 const schemaMissingIssue = (): SeoIssue => ({
@@ -299,8 +299,7 @@ const validJsonIssue = (): SeoIssue => ({
 });
 
 const checkContext = (
-  schema: SchemaObject,
-  _opts: RequiredAnalyzerOptions
+  schema: SchemaObject
 ): SeoIssue => {
   const context = schema["@context"];
 
@@ -350,7 +349,7 @@ const checkContext = (
 
 const checkSchemaType = (
   schema: SchemaObject,
-  opts: RequiredAnalyzerOptions
+  options: RequiredAnalyzerOptions
 ): SeoIssue => {
   const schemaType = schema["@type"];
 
@@ -370,7 +369,7 @@ const checkSchemaType = (
 
   // Handle array of types
   const types = Array.isArray(schemaType) ? schemaType : [schemaType];
-  const allowedTypes = opts.allowedTypes;
+  const allowedTypes = options.allowedTypes;
 
   const hasValidType = types.some((type) =>
     allowedTypes.includes(type as string)
@@ -407,8 +406,7 @@ const checkSchemaType = (
 };
 
 const checkRequiredProperties = (
-  schema: SchemaObject,
-  _opts: RequiredAnalyzerOptions
+  schema: SchemaObject
 ): SeoIssue => {
   const hasName = !!schema["name"] && String(schema["name"]).trim().length > 0;
   const hasDescription =
@@ -444,11 +442,8 @@ const checkRequiredProperties = (
   };
 };
 
-const checkAddress = (
-  schema: SchemaObject,
-  opts: RequiredAnalyzerOptions
-): SeoIssue => {
-  if (!opts.requireAddress) {
+const checkAddress = (schema: SchemaObject, options: RequiredAnalyzerOptions): SeoIssue => {
+  if (!options.requireAddress) {
     return {
       id: "SCH-006",
       title: "Address check disabled",
@@ -538,9 +533,9 @@ const checkAddress = (
 
 const checkPrice = (
   schema: SchemaObject,
-  opts: RequiredAnalyzerOptions
+  options: RequiredAnalyzerOptions
 ): SeoIssue => {
-  if (!opts.requirePrice) {
+  if (!options.requirePrice) {
     return {
       id: "SCH-007",
       title: "Price check disabled",
@@ -609,9 +604,9 @@ const checkPrice = (
 
 const checkGeo = (
   schema: SchemaObject,
-  opts: RequiredAnalyzerOptions
+  options: RequiredAnalyzerOptions
 ): SeoIssue => {
-  if (!opts.requireGeo) {
+  if (!options.requireGeo) {
     return {
       id: "SCH-008",
       title: "Geo coordinates check disabled",
@@ -692,9 +687,9 @@ const checkGeo = (
 
 const checkImages = (
   schema: SchemaObject,
-  opts: RequiredAnalyzerOptions
+  options: RequiredAnalyzerOptions
 ): SeoIssue => {
-  if (!opts.requireImages) {
+  if (!options.requireImages) {
     return {
       id: "SCH-009",
       title: "Images check disabled",

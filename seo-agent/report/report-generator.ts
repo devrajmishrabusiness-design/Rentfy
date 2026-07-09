@@ -8,7 +8,7 @@
  */
 
 import type { SeoCheckResult, SeoIssue, IssueCategory, SeverityLevel } from "../types";
-import { scoreCheck, aggregateScores, topIssues as computeTopIssues } from "../utils/scoring";
+import { aggregateScores, topIssues as computeTopIssues } from "../utils/scoring";
 import type { ReportInput, SeoReportOutput, DedupedIssue, ExecutionInfo } from "./types";
 
 const REPORT_VERSION = "1.0.0";
@@ -447,9 +447,6 @@ export const generateReport = (input: ReportInput): SeoReportOutput => {
 
   // Bucket issues by severity
   const buckets = bucketIssuesBySeverity(allIssues, options.includeSuccessIssues);
-
-  // Compute top issues (excluding success by default)
-  const nonSuccessIssues = allIssues.filter((i) => i.severity !== "success");
   const topIssuesList = computeTopIssues({ checks: dedupedChecks }, options.topIssuesLimit);
 
   // Extract recommendations

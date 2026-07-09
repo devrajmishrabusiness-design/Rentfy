@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  analyzeTitle,
-  type TitleAnalysis,
-  type TitleAnalyzerOptions,
-} from "../title-analyzer";
+import { analyzeTitle } from "../title-analyzer";
 
 /* ----------------------------------------------------------------
  * 1. Missing / Empty Titles
@@ -266,12 +262,12 @@ describe('Duplicate Title Support (Future)', () => {
   it('should accept duplicateTitleStore option without breaking', () => {
     // Future-proof: options object should not reject unknown properties
     const mockStore = {
-      register: (entry: any) => [],
-      find: (hash: string) => [],
+      register: (_entry: unknown) => { void _entry; return []; },
+      find: (_hash: string) => { void _hash; return []; },
       clear: () => {},
     };
     const result = analyzeTitle('Test Title', { 
-      // @ts-ignore - future-proofing test
+      // @ts-expect-error - future-proofing test
       duplicateTitleStore: mockStore,
     });
     expect(result).toBeDefined();

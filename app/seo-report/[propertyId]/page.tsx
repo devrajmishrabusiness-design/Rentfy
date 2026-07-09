@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { SeoReportOutput } from "@/seo-agent/report/types";
 
@@ -72,7 +72,6 @@ const NonIdealState = ({ title, body }: { title: string; body: string }) => (
 
 export default function ViewSeoReportPage() {
   const params = useParams();
-  const router = useRouter();
   const propertyId = params.propertyId as string;
 
   const [state, setState] = useState<LoadState>("loading");
@@ -81,8 +80,10 @@ export default function ViewSeoReportPage() {
 
   useEffect(() => {
     if (!propertyId) {
-      setErrorMsg("Property ID is missing.");
-      setState("error");
+      setTimeout(() => {
+        setErrorMsg("Property ID is missing.");
+        setState("error");
+      }, 0);
       return;
     }
 

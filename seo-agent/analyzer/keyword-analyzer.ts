@@ -75,22 +75,6 @@ const defaults: RequiredAnalyzerOptions = {
   minContentLength: 100,
 };
 
-const DEFAULT_STOPWORDS = new Set([
-  "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-  "of", "with", "by", "from", "as", "is", "was", "are", "were", "been",
-  "be", "have", "has", "had", "do", "does", "did", "will", "would", "could",
-  "should", "may", "might", "must", "shall", "can", "need", "dare", "ought",
-  "used", "it", "its", "this", "that", "these", "those", "i", "you", "he",
-  "she", "we", "they", "what", "which", "who", "whom", "whose", "where",
-  "when", "why", "how", "all", "each", "every", "both", "few", "more",
-  "most", "other", "some", "such", "no", "nor", "not", "only", "own",
-  "same", "so", "than", "too", "very", "just", "also", "now", "here",
-  "there", "then", "once", "if", "because", "until", "while", "about",
-  "against", "between", "into", "through", "during", "before", "after",
-  "above", "below", "up", "down", "out", "off", "over", "under", "again",
-  "further", "any", "your", "our", "their", "my", "his", "her",
-]);
-
 /* ----------------------------------------------------------------
  * Types
  * ---------------------------------------------------------------- */
@@ -284,7 +268,6 @@ export const analyzeKeywords = (
   
   // Get primary keyword from targetKeywords or primaryKeyword option
   const primaryKeyword = opts.primaryKeyword || (opts.targetKeywords && opts.targetKeywords[0]) || "";
-  const allKeywords = [primaryKeyword, ...(opts.secondaryKeywords || [])].filter(k => k && k.trim().length > 0);
   const secondaryKeywords = opts.secondaryKeywords || [];
   
   const issues: SeoIssue[] = [];
@@ -449,9 +432,6 @@ export const analyzeKeywords = (
     const paragraphs = splitIntoParagraphs(content);
     const paragraphCounts = paragraphs.map(p => countKeywordOccurrences(p, primaryKeyword));
     const maxInParagraph = paragraphCounts.length > 0 ? Math.max(...paragraphCounts, 0) : 0;
-    const avgInParagraph = paragraphCounts.length > 0 
-      ? paragraphCounts.reduce((a, b) => a + b, 0) / paragraphCounts.length 
-      : 0;
     
     if (maxInParagraph > options.maxOccurrencesPerParagraph) {
       issues.push({
@@ -480,7 +460,6 @@ export const analyzeKeywords = (
   // KW-008: Related Keywords Present
   if (options.requireRelatedKeywords && secondaryKeywords.length > 0) {
     const foundRelated = secondaryKeywords.filter(k => keywordExistsInText(content, k));
-    const missingRelated = secondaryKeywords.filter(k => !keywordExistsInText(content, k));
     
     if (foundRelated.length >= options.minRelatedKeywordCount) {
       issues.push({
@@ -545,7 +524,6 @@ export const analyzeKeywords = (
   
   // KW-010: No Duplicate Keyword Phrases
   if (primaryKeyword) {
-    const words = normalize(content).split(/\s+/);
     const hasDuplicatePhrases = checkDuplicatePhrases(content, primaryKeyword);
     
     if (hasDuplicatePhrases) {

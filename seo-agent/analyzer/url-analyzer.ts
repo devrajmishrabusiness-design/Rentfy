@@ -256,7 +256,6 @@ const checkHyphenSeparators = (slug: string): SeoIssue => {
   const hasUnderscore = /_/.test(slug);
   const hasSpace = /\s/.test(slug);
   const hasCamelCase = /[a-z][A-Z]/.test(slug);
-  const hasHyphen = /-/.test(slug);
 
   if (hasUnderscore || hasSpace || hasCamelCase) {
     let issue = "underscores";

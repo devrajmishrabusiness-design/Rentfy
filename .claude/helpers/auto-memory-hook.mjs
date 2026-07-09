@@ -392,7 +392,7 @@ try {
   }
 } catch (err) {
   // Hooks must never crash Claude Code - fail silently
-  try { dim(`Error (non-critical): ${err.message}`); } catch (_) {}
+  try { dim(`Error (non-critical): ${err.message}`); } catch (ignoreErr) { void ignoreErr; }
 }
 // Force clean exit — process.exitCode alone isn't enough if async errors override it
 process.exit(0);

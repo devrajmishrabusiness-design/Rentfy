@@ -34,7 +34,8 @@ export const createHeadingPlugin = (
     capability: "analyzer",
     priority: 13,
     run: ({ payload }) => {
-      const analysis = analyzeHeadings(payload.headings as any, opts);
+      const headings = (payload.headings ?? []).map(h => ({ ...h, level: h.level as 1 | 2 | 3 | 4 | 5 | 6 }));
+      const analysis = analyzeHeadings(headings, opts as HeadingAnalyzerOptions);
 
       const summary = `Checked heading structure (${analysis.totalHeadings} total, ${analysis.h1Count} H1, ${analysis.h2Count} H2, avg length: ${analysis.averageHeadingLength} chars)`;
 

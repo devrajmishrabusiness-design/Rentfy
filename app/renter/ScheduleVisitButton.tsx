@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRenterSession, RENTER_PENDING_EVENT } from "./useRenterSession";
+import { useRenterSession } from "./useRenterSession";
 import { setPendingAction } from "./pendingAction";
 
 interface ScheduleVisitButtonProps {
@@ -68,7 +68,6 @@ export default function ScheduleVisitButton({
 
 function ScheduleVisitModal({
   propertyId,
-  agencyId,
   propertyTitle,
   onClose,
 }: {
@@ -85,6 +84,11 @@ function ScheduleVisitModal({
   const [visitTime, setVisitTime] = useState("");
   const [visitType, setVisitType] = useState<"physical" | "video">("physical");
   const [notes, setNotes] = useState("");
+
+  // Compute static dates during render - avoids useEffect setState warning
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,9 +124,6 @@ function ScheduleVisitModal({
       setLoading(false);
     }
   };
-
-  const today = new Date().toISOString().split("T")[0];
-  const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   if (success) {
     return (

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { analyzeUrl, type UrlAnalyzerOptions } from "../url-analyzer";
+import { analyzeUrl } from "../url-analyzer";
 
 describe("URL Analyzer", () => {
   describe("URL-001: URL Exists", () => {
@@ -19,7 +19,7 @@ describe("URL Analyzer", () => {
     });
 
     it("returns critical issue when urlSlug is null", () => {
-      const result = analyzeUrl(null as any);
+      const result = analyzeUrl(null as unknown as string | undefined);
       expect(result.issues[0].id).toBe("URL-001");
       expect(result.issues[0].severity).toBe("critical");
     });
@@ -417,7 +417,7 @@ describe("URL Analyzer", () => {
     });
 
     it("handles null input gracefully", () => {
-      expect(() => analyzeUrl(null as any)).not.toThrow();
+      expect(() => analyzeUrl(null as unknown as string | undefined)).not.toThrow();
     });
   });
 

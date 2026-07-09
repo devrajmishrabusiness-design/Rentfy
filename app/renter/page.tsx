@@ -274,12 +274,12 @@ export default function RenterProfilePage() {
             >
               Account
             </button>
-            <a
+<Link
               href="/#listings"
               className="shrink-0 rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:bg-stone-200"
             >
-              Browse listings
-            </a>
+              View Listings
+            </Link>
           </div>
         </div>
       </section>

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { analyzeImages, type ImageAnalyzerOptions } from "../image-analyzer";
+import { analyzeImages } from "../image-analyzer";
 
 describe("Image Analyzer", () => {
   describe("IMG-001: Image Existence", () => {
@@ -16,7 +16,7 @@ describe("Image Analyzer", () => {
     });
 
     it("returns critical issue when images is undefined", () => {
-      const result = analyzeImages({ images: undefined as any });
+      const result = analyzeImages({ images: undefined });
       expect(result.issues.find((i) => i.id === "IMG-001")?.severity).toBe("critical");
     });
 
@@ -566,7 +566,7 @@ describe("Image Analyzer", () => {
     });
 
     it("handles null input gracefully", () => {
-      expect(() => analyzeImages({ images: null as any })).not.toThrow();
+      expect(() => analyzeImages({ images: null })).not.toThrow();
     });
 
     it("handles format distribution correctly", () => {

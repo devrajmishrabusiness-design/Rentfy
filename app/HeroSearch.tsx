@@ -22,7 +22,6 @@ export default function HeroSearch() {
   const [query, setQuery] = useState("");
   const [selectedSector, setSelectedSector] = useState("");
   const [showSectors, setShowSectors] = useState(false);
-  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -93,15 +92,13 @@ export default function HeroSearch() {
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => {
-              setFocused(true);
               if (query.length > 0 || popularSectors.length > 0) setShowSectors(true);
             }}
-            onBlur={() => setTimeout(() => setFocused(false), 200)}
+            onBlur={() => setTimeout(() => setShowSectors(false), 200)}
             placeholder="Search city, sector, or property..."
             className="h-14 w-full rounded-2xl border bg-white/95 bg-[var(--brand-background)]/50 px-12 py-3 pl-10 text-base font-medium text-[var(--brand-text)] placeholder:text-[var(--brand-muted)] outline-none transition-all duration-200 focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-orange-100 focus:ring-offset-0 shadow-sm shadow-black/5"
             autoComplete="off"
             aria-label="Search properties"
-            aria-expanded={showSectors}
             aria-controls="sector-dropdown"
           />
 
@@ -124,7 +121,7 @@ export default function HeroSearch() {
           >
             {query.trim() ? (
               <div className="px-4 py-3 text-sm text-[var(--brand-muted)]">
-                Searching for "{query}"...
+                Searching for &ldquo;{query}&rdquo;...
               </div>
             ) : (
               <>
@@ -140,6 +137,7 @@ export default function HeroSearch() {
                         type="button"
                         onClick={() => handleSectorClick(sector)}
                         role="option"
+                        aria-selected={false}
                         className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-[var(--brand-text)] transition-colors hover:bg-orange-50 hover:text-[var(--brand-primary)]"
                       >
                         <svg

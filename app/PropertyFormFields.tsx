@@ -1,9 +1,24 @@
+export interface PropertyFormState {
+  title: string;
+  description: string;
+  rent: string;
+  city: string;
+  location: string;
+  property_type: string;
+  bedrooms: string;
+  bathrooms: string;
+  furnishing: string;
+  parking: boolean;
+  available_from: string;
+  contact_number: string;
+}
+
 export default function PropertyFormFields({
   form,
   setForm,
 }: {
-  form: any;
-  setForm: (form: any) => void;
+  form: PropertyFormState;
+  setForm: (form: PropertyFormState) => void;
 }) {
   return (
     <>

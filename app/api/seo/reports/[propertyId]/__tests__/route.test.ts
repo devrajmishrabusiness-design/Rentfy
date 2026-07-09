@@ -18,7 +18,7 @@ vi.mock("@/lib/seo/report-service", () => ({
 import { GET } from "../route";
 import { getReportByPropertyId } from "@/lib/seo/report-service";
 
-const mockGetReport = getReportByPropertyId as any;
+const mockGetReport = getReportByPropertyId as ReturnType<typeof vi.fn>;
 
 const mockReport = {
   id: "report-uuid",
@@ -69,6 +69,8 @@ function createMockRequest(propertyId?: string): Request {
   return new Request(url, { method: "GET" });
 }
 
+type RouteContext = { params: Promise<{ propertyId: string }> };
+
 describe("GET /api/seo/reports/:propertyId", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -79,7 +81,7 @@ describe("GET /api/seo/reports/:propertyId", () => {
 
     const req = createMockRequest("prop-123");
     const params = { propertyId: "prop-123" };
-    const res = await GET(req as any, { params } as any);
+    const res = await GET(req as unknown as Request, { params } as unknown as RouteContext);
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -94,7 +96,7 @@ describe("GET /api/seo/reports/:propertyId", () => {
 
     const req = createMockRequest("non-existent");
     const params = { propertyId: "non-existent" };
-    const res = await GET(req as any, { params } as any);
+    const res = await GET(req as unknown as Request, { params } as unknown as RouteContext);
 
     expect(res.status).toBe(404);
     const body = await res.json();
@@ -104,7 +106,7 @@ describe("GET /api/seo/reports/:propertyId", () => {
   it("returns 400 when propertyId is missing", async () => {
     const req = createMockRequest();
     const params = { propertyId: "" };
-    const res = await GET(req as any, { params } as any);
+    const res = await GET(req as unknown as Request, { params } as unknown as RouteContext);
 
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -116,7 +118,7 @@ describe("GET /api/seo/reports/:propertyId", () => {
 
     const req = createMockRequest("prop-123");
     const params = { propertyId: "prop-123" };
-    const res = await GET(req as any, { params } as any);
+    const res = await GET(req as unknown as Request, { params } as unknown as RouteContext);
 
     expect(res.status).toBe(500);
     const body = await res.json();

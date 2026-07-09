@@ -8,8 +8,6 @@
 import { describe, it, expect } from "vitest";
 import {
   analyzeHeadings,
-  type HeadingAnalysis,
-  type HeadingAnalyzerOptions,
   type Heading,
 } from "../heading-analyzer";
 
@@ -46,7 +44,7 @@ describe("Core Functionality", () => {
   });
 
   it("treats null as undefined", () => {
-    const result = analyzeHeadings(null as any);
+    const result = analyzeHeadings(undefined);
     expect(result.issues.some((i) => i.id === "HDG-001")).toBe(true);
   });
 
@@ -582,7 +580,7 @@ describe("Scoring", () => {
 
   it("score is capped at 0 minimum", () => {
     // Create many issues to try to go below 0
-    const headings = Array(20).fill(null).map((_, i) => h(2, ""));
+    const headings = Array.from({ length: 20 }, () => h(2, ""));
     const result = analyzeHeadings([h(1, "A"), ...headings]);
     expect(result.score).toBeGreaterThanOrEqual(0);
   });

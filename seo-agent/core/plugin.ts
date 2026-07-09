@@ -7,12 +7,10 @@
  */
 
 import type {
-  PluginCapability,
   PluginHook,
-  PluginInput,
-  PluginPhase,
-  PluginOutput,
   PluginModule,
+  PluginOutput,
+  PluginPhase,
   SeoPlugin,
 } from "../types";
 

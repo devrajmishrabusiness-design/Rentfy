@@ -19,7 +19,6 @@
 import { describe, it, expect } from "vitest";
 import { generateReport, validateReportInput } from "../report-generator";
 import type { ReportInput, SeoCheckResult, SeoIssue, ExecutionInfo } from "../types";
-import type { SeoReportOutput } from "../types";
 
 const makeIssue = (overrides: Partial<SeoIssue> = {}): SeoIssue => ({
   id: "TEST-001",

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
-import type { Agency, Lead, Property, SeoReport } from "../types";
+import type { Agency, Lead, Property } from "../types";
 import Footer from "../Footer";
 import LogoutButton from "../LogoutButton";
 import DeleteButton from "../DeleteButton";
@@ -189,12 +189,12 @@ export default async function Dashboard() {
 
   // Fetch SEO reports for all properties
   const propertyIds = properties?.map((p) => p.id) ?? [];
-const { data: seoReports, error: seoError } = propertyIds.length > 0
+  const { data: seoReports } = propertyIds.length > 0
                   ? await supabase
                       .from("seo_reports")
                       .select("*")
                       .in("property_id", propertyIds)
-                  : { data: null, error: null };
+                  : { data: null as Property[] | null };
 
   // Create a map of propertyId -> seoReport for easy lookup
   const seoReportMap = new Map(

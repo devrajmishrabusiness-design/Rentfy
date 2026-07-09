@@ -43,7 +43,7 @@ export default function SimilarListings({
         if (!response.ok) throw new Error("Failed to fetch similar properties");
         const data = await response.json();
         setSimilarProperties(data.properties || []);
-      } catch (err) {
+      } catch {
         setError("Could not load similar listings");
       } finally {
         setLoading(false);

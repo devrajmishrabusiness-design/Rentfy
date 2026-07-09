@@ -19,7 +19,7 @@
  *   ./github-safe.js pr create --title "Title" --body "Complex body"
  */
 
-import { execSync, execFileSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { writeFileSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -126,7 +126,7 @@ if ((command === 'issue' || command === 'pr') &&
       process.exit(1);
     } finally {
       // Always clean up the temp file.
-      try { unlinkSync(tmpFile); } catch (_) { /* ignore cleanup errors */ }
+      try { unlinkSync(tmpFile); } catch (cleanupErr) { void cleanupErr; /* ignore cleanup errors */ }
     }
   } else {
     // No body content — execute normally (no injection risk for args).
