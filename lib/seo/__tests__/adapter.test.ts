@@ -13,7 +13,7 @@
  *     set
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   analyzePropertySeo,
   createDefaultEngine,
@@ -22,6 +22,7 @@ import {
   validatePropertyInput,
   type PropertyForSeo,
 } from "../adapter";
+import { SeoEngine } from "@/seo-agent/core";
 
 const validProperty: PropertyForSeo = {
   id: "prop-123",

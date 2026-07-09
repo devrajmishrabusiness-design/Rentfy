@@ -75,3 +75,24 @@ export type AgencyReview = {
   created_at: string;
   updated_at: string;
 };
+
+/**
+ * Stored SEO report for a property.
+ */
+export type SeoReport = {
+  id: string;
+  property_id: string;
+  overall_score: number;
+  overall_grade: "excellent" | "good" | "needs-improvement" | "poor";
+  report_json: unknown;
+  analyzer_version: string;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * Property with optional SEO report data for dashboard display.
+ */
+export type PropertyWithSeo = Property & {
+  seo_report?: SeoReport | null;
+};

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
-import type { Agency, Lead, Property } from "../types";
+import type { Agency, Lead, Property, SeoReport } from "../types";
 import Footer from "../Footer";
 import LogoutButton from "../LogoutButton";
 import DeleteButton from "../DeleteButton";
@@ -186,6 +186,26 @@ export default async function Dashboard() {
     .select("*")
     .eq("agency_id", agency.id)
     .returns<Property[]>();
+
+  // Fetch SEO reports for all properties
+  const propertyIds = properties?.map((p) => p.id) ?? [];
+const { data: seoReports, error: seoError } = propertyIds.length > 0
+                  ? await supabase
+                      .from("seo_reports")
+                      .select("*")
+                      .in("property_id", propertyIds)
+                  : { data: null, error: null };
+
+  // Create a map of propertyId -> seoReport for easy lookup
+  const seoReportMap = new Map(
+    (seoReports ?? []).map((r) => [r.property_id, r])
+  );
+
+  // Enrich properties with their SEO reports
+  const propertiesWithSeo = properties?.map((property) => ({
+    ...property,
+    seo_report: seoReportMap.get(property.id) ?? null,
+  }));
   const { data: leads } = await supabase
     .from("leads")
     .select(`
@@ -385,9 +405,9 @@ export default async function Dashboard() {
             <span className="badge-info">{totalProperties} total</span>
           </div>
 
-          {properties && properties.length > 0 ? (
+          {propertiesWithSeo && propertiesWithSeo.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {properties.map((property) => (
+              {propertiesWithSeo.map((property) => (
                 <PropertyCard
                   key={property.id}
                   property={property}
@@ -396,13 +416,31 @@ export default async function Dashboard() {
                       <span className="absolute right-3 top-3 z-10">
                         <StatusBadge status={property.status} />
                       </span>
-                      <Link
-                        href={`/edit-property/${property.id}`}
-                        className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 transition hover:bg-amber-200"
-                      >
-                        Edit
-                      </Link>
-                      <DeleteButton id={property.id} />
+                      <div className="flex flex-col gap-1">
+                        {property.seo_report ? (
+                          <Link
+                            href={`/seo-report/${property.id}`}
+                            className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-200"
+                            title="View SEO Report"
+                          >
+                            SEO: {property.seo_report.overall_score} ({property.seo_report.overall_grade})
+                          </Link>
+                        ) : (
+                          <span
+                            className="rounded-full bg-stone-100 px-3 py-1.5 text-xs font-bold text-stone-500"
+                            title="No SEO report yet"
+                          >
+                            No SEO
+                          </span>
+                        )}
+                        <Link
+                          href={`/edit-property/${property.id}`}
+                          className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 transition hover:bg-amber-200"
+                        >
+                          Edit
+                        </Link>
+                        <DeleteButton id={property.id} />
+                      </div>
                     </>
                   }
                 />

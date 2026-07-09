@@ -3,18 +3,18 @@
  *
  * Verifies HTTP-level behavior:
  *   - 200 with a structured report for valid input
+ *   - 201 with persisted report when propertyId provided
  *   - 400 for malformed JSON
  *   - 400 for missing/invalid property id
  *   - non-POST methods rejected
  *   - engine failures are returned as structured 500s (not leaked
  *     as uncaught exceptions)
+ *   - persistence failures are logged but don't fail the request
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock the adapter so route tests focus on HTTP behaviour and never
-// invoke the real engine. The real engine is exercised by the
-// adapter tests.
+// Mock the adapter and report service
 vi.mock("@/lib/seo/adapter", async () => {
   const actual = await vi.importActual<typeof import("@/lib/seo/adapter")>(
     "@/lib/seo/adapter"
@@ -25,10 +25,16 @@ vi.mock("@/lib/seo/adapter", async () => {
   };
 });
 
+vi.mock("@/lib/seo/report-service", () => ({
+  upsertReport: vi.fn(),
+}));
+
 import { POST } from "../route";
 import { analyzePropertySeo } from "@/lib/seo/adapter";
+import { upsertReport } from "@/lib/seo/report-service";
 
 const mockAnalyze = analyzePropertySeo as unknown as ReturnType<typeof vi.fn>;
+const mockUpsert = upsertReport as unknown as ReturnType<typeof vi.fn>;
 
 function makeRequest(body: unknown, method: string = "POST"): Request {
   return new Request("http://localhost/api/seo/analyze", {
@@ -47,7 +53,16 @@ const validProperty = {
   property_type: "Apartment",
 };
 
+const validPropertyWithId = {
+  ...validProperty,
+  propertyId: "prop-123",
+};
+
 describe("POST /api/seo/analyze — success", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("returns 200 with a structured report", async () => {
     const fakeReport = {
       overallScore: 85,
@@ -65,6 +80,52 @@ describe("POST /api/seo/analyze — success", () => {
     const body = await res.json();
     expect(body.report).toEqual(fakeReport);
     expect(body.runId).toBe("r1");
+    expect(body.persisted).toBe(false);
+  });
+
+  it("returns 201 with persisted report when propertyId provided", async () => {
+    const fakeReport = {
+      overallScore: 85,
+      metadata: { propertyId: "prop-123", runId: "r1" },
+      totalChecks: 7,
+    };
+    mockAnalyze.mockResolvedValueOnce({
+      ok: true,
+      report: fakeReport,
+      runId: "r1",
+    });
+    mockUpsert.mockResolvedValueOnce({ id: "report-uuid" });
+
+    const res = await POST(makeRequest(validPropertyWithId) as never);
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.report).toEqual(fakeReport);
+    expect(body.persisted).toBe(true);
+    expect(mockUpsert).toHaveBeenCalledWith({
+      propertyId: "prop-123",
+      report: fakeReport,
+      analyzerVersion: "0.1.0-core",
+    });
+  });
+
+  it("returns 200 even if persistence fails (graceful degradation)", async () => {
+    const fakeReport = {
+      overallScore: 85,
+      metadata: { propertyId: "prop-123", runId: "r1" },
+      totalChecks: 7,
+    };
+    mockAnalyze.mockResolvedValueOnce({
+      ok: true,
+      report: fakeReport,
+      runId: "r1",
+    });
+    mockUpsert.mockRejectedValueOnce(new Error("Database error"));
+
+    const res = await POST(makeRequest(validPropertyWithId) as never);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.report).toEqual(fakeReport);
+    expect(body.persisted).toBe(false);
   });
 });
 
