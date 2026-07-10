@@ -2,9 +2,10 @@ export * from './types';
 export * from './engine/base';
 export * from './plugin';
 export * from './context';
-export * from './lifecycle';
+export { DefaultLifecycleManager } from './lifecycle';
 export * from './errors';
 export * from './version';
+export * from './event-bus';
 export { SDK_VERSION, getVersion, getVersionString, getBuildDate, isCompatible, getVersionInfo } from './version';
 export { AbstractEngine } from './engine/base';
 export { DefaultPluginRegistry } from './plugin/registry';
@@ -13,5 +14,4 @@ export { DefaultEventBus } from './context/event-bus';
 export { DefaultEngineLogger } from './context/logger';
 export { DefaultPluginStorage } from './context/storage';
 export { DefaultPluginMetrics } from './context/metrics';
-export { DefaultLifecycleManager } from './lifecycle';
 //# sourceMappingURL=index.d.ts.map

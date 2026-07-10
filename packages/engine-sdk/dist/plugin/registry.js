@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultPluginRegistry = void 0;
+const errors_1 = require("../errors");
 class DefaultPluginRegistry {
     plugins = new Map();
     enabled = new Set();
     phases = new Map();
     register(plugin) {
         if (this.plugins.has(plugin.id)) {
-            throw new PluginError(plugin.id, EngineErrorCode.PLUGIN_ALREADY_REGISTERED, `Plugin '${plugin.id}' is already registered`);
+            throw new errors_1.PluginError(plugin.id, errors_1.EngineErrorCode.PLUGIN_ALREADY_REGISTERED, `Plugin '${plugin.id}' is already registered`);
         }
         this.validatePlugin(plugin);
         this.plugins.set(plugin.id, plugin);
@@ -77,7 +78,7 @@ class DefaultPluginRegistry {
         const visited = new Set();
         const recStack = new Set();
         const path = [];
-        for (const [id, plugin] of this.plugins) {
+        for (const [, plugin] of this.plugins) {
             for (const dep of plugin.dependencies || []) {
                 if (!this.plugins.has(dep)) {
                     missing.push(dep);
@@ -119,22 +120,22 @@ class DefaultPluginRegistry {
     }
     validatePlugin(plugin) {
         if (!plugin.id || typeof plugin.id !== 'string') {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid id');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid id');
         }
         if (!plugin.name || typeof plugin.name !== 'string') {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid name');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid name');
         }
         if (!plugin.version || typeof plugin.version !== 'string') {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid version');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have a valid version');
         }
         if (!plugin.execute || typeof plugin.execute !== 'function') {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have an execute function');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin must have an execute function');
         }
         if (plugin.priority !== undefined && typeof plugin.priority !== 'number') {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin priority must be a number');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin priority must be a number');
         }
         if (plugin.dependencies && !Array.isArray(plugin.dependencies)) {
-            throw new EngineError(EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin dependencies must be an array');
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.PLUGIN_REGISTRATION_FAILED, 'Plugin dependencies must be an array');
         }
     }
 }

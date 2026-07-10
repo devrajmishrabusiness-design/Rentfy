@@ -16,6 +16,8 @@ export declare enum EngineErrorCode {
     LIFECYCLE_HOOK_FAILED = "LIFECYCLE_HOOK_FAILED",
     CONFIG_VALIDATION_FAILED = "CONFIG_VALIDATION_FAILED",
     INVALID_STATE_TRANSITION = "INVALID_STATE_TRANSITION",
+    ENGINE_NOT_RUNNING = "ENGINE_NOT_RUNNING",
+    CONTEXT_CREATION_FAILED = "CONTEXT_CREATION_FAILED",
     TIMEOUT = "TIMEOUT",
     ABORTED = "ABORTED",
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
@@ -23,11 +25,13 @@ export declare enum EngineErrorCode {
 export declare class BaseEngineError extends Error {
     readonly code: EngineErrorCode;
     readonly metadata?: Record<string, unknown>;
+    readonly details?: Record<string, unknown>;
     readonly cause?: Error;
     readonly timestamp: number;
     readonly category: string;
     constructor(code: EngineErrorCode, message: string, options?: {
         metadata?: Record<string, unknown>;
+        details?: Record<string, unknown>;
         cause?: Error;
         category?: string;
     });
@@ -35,7 +39,7 @@ export declare class BaseEngineError extends Error {
     toJSON(): Record<string, unknown>;
 }
 export declare class EngineError extends BaseEngineError {
-    readonly category = "engine";
+    readonly category: string;
     constructor(code: EngineErrorCode, message: string, options?: {
         metadata?: Record<string, unknown>;
         cause?: Error;
@@ -43,7 +47,7 @@ export declare class EngineError extends BaseEngineError {
 }
 export declare class PluginError extends BaseEngineError {
     readonly pluginId: string;
-    readonly category = "plugin";
+    readonly category: string;
     constructor(pluginId: string, code: EngineErrorCode, message: string, options?: {
         metadata?: Record<string, unknown>;
         cause?: Error;
@@ -51,7 +55,7 @@ export declare class PluginError extends BaseEngineError {
     toJSON(): Record<string, unknown>;
 }
 export declare class ConfigurationError extends BaseEngineError {
-    readonly category = "configuration";
+    readonly category: string;
     constructor(code: EngineErrorCode, message: string, options?: {
         metadata?: Record<string, unknown>;
         cause?: Error;
@@ -59,7 +63,7 @@ export declare class ConfigurationError extends BaseEngineError {
 }
 export declare class LifecycleError extends BaseEngineError {
     readonly phase: string;
-    readonly category = "lifecycle";
+    readonly category: string;
     constructor(phase: string, code: EngineErrorCode, message: string, options?: {
         metadata?: Record<string, unknown>;
         cause?: Error;

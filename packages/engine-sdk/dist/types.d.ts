@@ -1,12 +1,10 @@
+import type { EngineError } from './errors';
 export interface EngineInfo {
     name: string;
     version: string;
     description?: string;
     author?: string;
     license?: string;
-}
-export interface EngineConfig {
-    [key: string]: unknown;
 }
 export interface EngineMetadata {
     name: string;
@@ -23,15 +21,32 @@ export interface EngineCapabilities {
     supportedPhases?: string[];
     customCapabilities?: Record<string, unknown>;
 }
-export type EngineStatus = 'uninitialized' | 'initializing' | 'idle' | 'running' | 'stopping' | 'stopped' | 'error';
-export interface EngineState {
-    status: EngineStatus;
-    startedAt?: Date;
-    stoppedAt?: Date;
-    currentPhase?: string;
-    error?: EngineError;
-    plugins: PluginState[];
-    metrics: EngineMetrics;
+export declare enum EngineStatus {
+    UNINITIALIZED = "uninitialized",
+    INITIALIZING = "initializing",
+    IDLE = "idle",
+    RUNNING = "running",
+    STOPPING = "stopping",
+    STOPPED = "stopped",
+    ERROR = "error"
+}
+export type PluginStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+export interface PluginMetrics {
+    executions: number;
+    successes: number;
+    failures: number;
+    averageTime: number;
+    lastExecutionTime?: number;
+}
+export interface EngineMetrics {
+    totalRuns: number;
+    successfulRuns: number;
+    failedRuns: number;
+    averageExecutionTime: number;
+    lastRunTime?: number;
+    pluginMetrics: Record<string, PluginMetrics>;
+    pluginCount?: number;
+    activePlugins?: number;
 }
 export interface PluginState {
     id: string;
@@ -41,21 +56,14 @@ export interface PluginState {
     error?: EngineError;
     executionTime?: number;
 }
-export type PluginStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-export interface EngineMetrics {
-    totalRuns: number;
-    successfulRuns: number;
-    failedRuns: number;
-    averageExecutionTime: number;
-    lastRunTime?: number;
-    pluginMetrics: Record<string, PluginMetrics>;
-}
-export interface PluginMetrics {
-    executions: number;
-    successes: number;
-    failures: number;
-    averageTime: number;
-    lastExecutionTime?: number;
+export interface EngineState {
+    status: EngineStatus;
+    startedAt?: Date;
+    stoppedAt?: Date;
+    currentPhase?: string;
+    error?: EngineError;
+    plugins: PluginState[];
+    metrics: EngineMetrics;
 }
 export interface PluginDefinition<Input = unknown, Output = unknown, Config = unknown> {
     id: string;
@@ -129,13 +137,6 @@ export interface PluginStorage {
     has(key: string): Promise<boolean>;
     keys(): Promise<string[]>;
 }
-export interface PluginMetrics {
-    executions: number;
-    successes: number;
-    failures: number;
-    averageTime: number;
-    lastExecutionTime?: number;
-}
 export interface EngineContext {
     config: EngineConfig;
     logger: PluginLogger;
@@ -144,15 +145,6 @@ export interface EngineContext {
     eventBus: EventBus;
     pluginRegistry: PluginRegistry;
     pluginExecutor: PluginExecutor;
-}
-export interface EventBus {
-    on(event: string, handler: EngineEventHandler): void;
-    off(event: string, handler: EngineEventHandler): void;
-    emit(event: EngineEvent): void;
-    once(event: string, handler: EngineEventHandler): void;
-    clear(): void;
-    getHandlerCount(event: string): number;
-    hasHandlers(event: string): boolean;
 }
 export interface PluginRegistry {
     register<Input, Output, Config>(plugin: PluginDefinition<Input, Output, Config>): void;
@@ -185,16 +177,6 @@ export interface ExecutionOptions {
     retryDelay?: number;
     onProgress?: (progress: number, message: string) => void;
 }
-export interface EngineEvents {
-    onStateChange?: (state: EngineState) => void;
-    onPhaseStart?: (phase: string, context: EngineRunContext) => void;
-    onPhaseComplete?: (phase: string, context: EngineRunContext, result: unknown) => void;
-    onPluginStart?: (pluginId: string, context: EngineRunContext) => void;
-    onPluginComplete?: (pluginId: string, context: EngineRunContext, result: unknown) => void;
-    onPluginError?: (pluginId: string, context: EngineRunContext, error: EngineError) => void;
-    onError?: (error: EngineError, context: EngineRunContext) => void;
-    onComplete?: (context: EngineRunContext, result: EngineResult) => void;
-}
 export interface EngineRunContext {
     engineId: string;
     engineVersion: string;
@@ -211,6 +193,16 @@ export interface EngineResult<Output = unknown> {
     executionTime: number;
     pluginResults: Record<string, PluginResult>;
     metadata: Record<string, unknown>;
+}
+export interface EngineEvents {
+    onStateChange?: (state: EngineState) => void;
+    onPhaseStart?: (phase: string, context: EngineRunContext) => void;
+    onPhaseComplete?: (phase: string, context: EngineRunContext, result: unknown) => void;
+    onPluginStart?: (pluginId: string, context: EngineRunContext) => void;
+    onPluginComplete?: (pluginId: string, context: EngineRunContext, result: unknown) => void;
+    onPluginError?: (pluginId: string, context: EngineRunContext, error: EngineError) => void;
+    onError?: (error: EngineError, context: EngineRunContext) => void;
+    onComplete?: (context: EngineRunContext, result: EngineResult) => void;
 }
 export interface EngineHooks {
     beforeRun?: (context: EngineRunContext) => Promise<void>;
@@ -231,11 +223,16 @@ export interface EngineOptions {
     logger?: PluginLogger;
     storage?: PluginStorage;
 }
+export interface EngineConfig {
+    [key: string]: unknown;
+}
 export interface EngineEvent {
     type: string;
-    payload: unknown;
+    payload?: unknown;
     timestamp: number;
-    source: string;
+    source?: string;
+    engine?: string;
+    error?: EngineError;
 }
 export type EngineEventHandler = (event: EngineEvent) => void | Promise<void>;
 export interface EventBus {
@@ -261,127 +258,6 @@ export interface EngineHealth {
         initialized: boolean;
         running: boolean;
         storage: boolean;
-    };
-}
-export declare enum EngineErrorCode {
-    ENGINE_NOT_INITIALIZED = "ENGINE_NOT_INITIALIZED",
-    ENGINE_ALREADY_RUNNING = "ENGINE_ALREADY_RUNNING",
-    ENGINE_START_FAILED = "ENGINE_START_FAILED",
-    ENGINE_STOP_FAILED = "ENGINE_STOP_FAILED",
-    ENGINE_CONFIG_INVALID = "ENGINE_CONFIG_INVALID",
-    PLUGIN_NOT_FOUND = "PLUGIN_NOT_FOUND",
-    PLUGIN_ALREADY_REGISTERED = "PLUGIN_ALREADY_REGISTERED",
-    PLUGIN_REGISTRATION_FAILED = "PLUGIN_REGISTRATION_FAILED",
-    PLUGIN_EXECUTION_FAILED = "PLUGIN_EXECUTION_FAILED",
-    PLUGIN_INIT_FAILED = "PLUGIN_INIT_FAILED",
-    PLUGIN_SHUTDOWN_FAILED = "PLUGIN_SHUTDOWN_FAILED",
-    PLUGIN_DEPENDENCY_CYCLE = "PLUGIN_DEPENDENCY_CYCLE",
-    PLUGIN_DEPENDENCY_MISSING = "PLUGIN_DEPENDENCY_MISSING",
-    PLUGIN_VERSION_INCOMPATIBLE = "PLUGIN_VERSION_INCOMPATIBLE",
-    LIFECYCLE_HOOK_FAILED = "LIFECYCLE_HOOK_FAILED",
-    CONFIG_VALIDATION_FAILED = "CONFIG_VALIDATION_FAILED",
-    INVALID_STATE_TRANSITION = "INVALID_STATE_TRANSITION",
-    TIMEOUT = "TIMEOUT",
-    ABORTED = "ABORTED",
-    UNKNOWN_ERROR = "UNKNOWN_ERROR"
-}
-export interface EngineError {
-    code: EngineErrorCode;
-    message: string;
-    name: string;
-    metadata?: Record<string, unknown>;
-    cause?: Error;
-    timestamp: number;
-    category: 'engine' | 'plugin' | 'lifecycle' | 'configuration';
-}
-export declare class BaseEngineError extends Error {
-    readonly code: EngineErrorCode;
-    readonly metadata?: Record<string, unknown>;
-    readonly cause?: Error;
-    readonly timestamp: number;
-    readonly category: string;
-    constructor(code: EngineErrorCode, message: string, options?: {
-        metadata?: Record<string, unknown>;
-        cause?: Error;
-        category?: string;
-    });
-    static isEngineError(error: unknown): error is BaseEngineError;
-    toJSON(): Record<string, unknown>;
-}
-export declare class EngineError extends BaseEngineError {
-    readonly category: "engine";
-    constructor(code: EngineErrorCode, message: string, options?: {
-        metadata?: Record<string, unknown>;
-        cause?: Error;
-    });
-}
-export declare class PluginError extends BaseEngineError {
-    readonly pluginId: string;
-    readonly category = "plugin";
-    constructor(pluginId: string, code: EngineErrorCode, message: string, options?: {
-        metadata?: Record<string, unknown>;
-        cause?: Error;
-    });
-    toJSON(): Record<string, unknown>;
-}
-export declare class ConfigurationError extends BaseEngineError {
-    readonly category = "configuration";
-    constructor(code: EngineErrorCode, message: string, options?: {
-        metadata?: Record<string, unknown>;
-        cause?: Error;
-    });
-}
-export declare class LifecycleError extends BaseEngineError {
-    readonly phase: string;
-    readonly category = "lifecycle";
-    constructor(phase: string, code: EngineErrorCode, message: string, options?: {
-        metadata?: Record<string, unknown>;
-        cause?: Error;
-    });
-    toJSON(): Record<string, unknown>;
-}
-export interface PluginRegistry {
-    register<Input, Output, Config>(plugin: PluginDefinition<Input, Output, Config>): void;
-    unregister(pluginId: string): boolean;
-    get<Input, Output, Config>(pluginId: string): PluginDefinition<Input, Output, Config> | undefined;
-    getAll(): PluginDefinition[];
-    getByPhase(phase: string): PluginDefinition[];
-    getEnabled(): PluginDefinition[];
-    isRegistered(pluginId: string): boolean;
-    enable(pluginId: string): boolean;
-    disable(pluginId: string): boolean;
-    getDependencyGraph(): Map<string, string[]>;
-    validateDependencies(): {
-        valid: boolean;
-        cycles: string[][];
-        missing: string[];
-    };
-    clear(): void;
-}
-export interface PluginExecutor {
-    initialize<Config>(plugin: PluginDefinition, context: PluginInitContext<Config>): Promise<void>;
-    execute<Input, Output, Config>(plugin: PluginDefinition<Input, Output, Config>, input: Input, context: PluginExecutionContext<Config>): Promise<PluginResult<Output>>;
-    shutdown(plugin: PluginDefinition, context: PluginShutdownContext): Promise<void>;
-    abort(pluginId: string): void;
-    abortAll(): void;
-}
-export interface ExecutionOptions {
-    timeout?: number;
-    retryAttempts?: number;
-    retryDelay?: number;
-    onProgress?: (progress: number, message: string) => void;
-}
-export interface SDKVersion {
-    version: string;
-    buildDate: string;
-    commit?: string;
-    engineInterfaces: string[];
-}
-export interface VersionInfo {
-    sdk: SDKVersion;
-    engine?: {
-        name: string;
-        version: string;
     };
 }
 //# sourceMappingURL=types.d.ts.map

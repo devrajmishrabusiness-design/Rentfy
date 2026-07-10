@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultLifecycleManager = void 0;
+const types_1 = require("../types");
 const errors_1 = require("../errors");
 const registry_1 = require("../plugin/registry");
 const executor_1 = require("../plugin/executor");
@@ -9,7 +10,7 @@ const logger_1 = require("../context/logger");
 const storage_1 = require("../context/storage");
 const metrics_1 = require("../context/metrics");
 class DefaultLifecycleManager {
-    status = 'idle';
+    status = types_1.EngineStatus.IDLE;
     plugins = [];
     pluginRegistry;
     pluginExecutor;
@@ -29,40 +30,51 @@ class DefaultLifecycleManager {
         this.pluginExecutor = new executor_1.DefaultPluginExecutor(this.logger);
     }
     async initialize(plugins) {
-        if (this.status !== 'idle' && this.status !== 'stopped') {
-            throw new EngineError(EngineErrorCode.ENGINE_ALREADY_RUNNING, 'Engine is already initialized');
+        if (this.status !== types_1.EngineStatus.IDLE && this.status !== types_1.EngineStatus.STOPPED) {
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.ENGINE_ALREADY_RUNNING, 'Engine is already initialized');
         }
-        this.status = 'initializing';
+        this.status = types_1.EngineStatus.INITIALIZING;
         this.emit({ type: 'engine:initializing', engine: 'engine-sdk', timestamp: Date.now() });
         try {
             for (const plugin of plugins) {
                 this.pluginRegistry.register(plugin);
+                this.plugins.push(plugin);
             }
             await this.validateDependencies();
             await this.initializePlugins();
             await this.hooks.onInit?.(this.createContext());
-            this.status = 'running';
+            this.status = types_1.EngineStatus.RUNNING;
             this.emit({ type: 'engine:initialized', engine: 'engine-sdk', timestamp: Date.now() });
         }
         catch (error) {
-            this.status = 'error';
+            this.status = types_1.EngineStatus.ERROR;
             throw error;
         }
     }
     async execute(plugin, input) {
-        if (this.status !== 'running') {
-            throw new EngineError(EngineErrorCode.ENGINE_NOT_RUNNING, 'Engine is not running');
+        if (this.status !== types_1.EngineStatus.RUNNING) {
+            throw new errors_1.EngineError(errors_1.EngineErrorCode.ENGINE_NOT_RUNNING, 'Engine is not running');
         }
         if (this.abortController.signal.aborted) {
-            throw new errors_1.LifecycleError('execution', EngineErrorCode.ABORTED, 'Execution aborted');
+            throw new errors_1.LifecycleError('execution', errors_1.EngineErrorCode.ABORTED, 'Execution aborted');
         }
-        return this.pluginExecutor.execute(plugin, input, this.createExecutionContext(plugin));
+        this.emit({ type: 'engine:run:start', engine: 'engine-sdk', timestamp: Date.now() });
+        const pluginDef = plugin;
+        try {
+            const result = await this.pluginExecutor.execute(pluginDef, input, this.createExecutionContext(pluginDef));
+            this.emit({ type: 'engine:run:complete', engine: 'engine-sdk', timestamp: Date.now() });
+            return result;
+        }
+        catch (error) {
+            this.emit({ type: 'engine:run:complete', engine: 'engine-sdk', timestamp: Date.now() });
+            throw error;
+        }
     }
     async shutdown() {
-        if (this.status === 'stopped' || this.status === 'idle') {
+        if (this.status === types_1.EngineStatus.STOPPED || this.status === types_1.EngineStatus.IDLE) {
             return;
         }
-        this.status = 'stopping';
+        this.status = types_1.EngineStatus.STOPPING;
         this.abortController.abort();
         this.emit({ type: 'engine:shutdown', engine: 'engine-sdk', timestamp: Date.now() });
         try {
@@ -77,26 +89,30 @@ class DefaultLifecycleManager {
                 }
             }
             await this.hooks.onShutdown?.(this.createContext());
-            this.status = 'stopped';
+            this.status = types_1.EngineStatus.STOPPED;
             this.emit({ type: 'engine:shutdown:complete', engine: 'engine-sdk', timestamp: Date.now() });
+            this.emit({ type: 'run-complete', engine: 'engine-sdk', timestamp: Date.now() });
         }
         catch (error) {
-            this.status = 'error';
+            this.status = types_1.EngineStatus.ERROR;
             throw error;
         }
+    }
+    abortAll() {
+        this.abortController.abort();
     }
     getStatus() {
         return this.status;
     }
     getMetrics() {
         return {
-            uptime: 0,
+            totalRuns: 0,
+            successfulRuns: 0,
+            failedRuns: 0,
+            averageExecutionTime: 0,
             pluginCount: this.plugins.length,
             activePlugins: this.pluginRegistry.getEnabled().length,
-            totalExecutions: 0,
-            successfulExecutions: 0,
-            failedExecutions: 0,
-            averageExecutionTime: 0,
+            pluginMetrics: {},
         };
     }
     async validateDependencies() {
@@ -109,22 +125,22 @@ class DefaultLifecycleManager {
             if (validation.missing.length > 0) {
                 errorMessages.push(`Missing dependencies: ${validation.missing.join(', ')}`);
             }
-            throw new EngineError(EngineErrorCode.PLUGIN_DEPENDENCY_CYCLE, errorMessages.join('; '));
+            throw new errors_1.PluginError('system', errors_1.EngineErrorCode.PLUGIN_DEPENDENCY_CYCLE, errorMessages.join('; '));
         }
     }
     async initializePlugins() {
         const plugins = this.pluginRegistry.getEnabled();
         for (const plugin of plugins) {
             if (this.abortController.signal.aborted) {
-                throw new errors_1.LifecycleError('initialization', EngineErrorCode.ABORTED, 'Initialization aborted');
+                throw new errors_1.LifecycleError('initialization', errors_1.EngineErrorCode.ABORTED, 'Initialization aborted');
             }
             try {
                 const context = this.createInitContext(plugin);
                 await this.pluginExecutor.initialize(plugin, context);
             }
             catch (error) {
-                this.status = 'error';
-                throw new errors_1.PluginError(plugin.id, EngineErrorCode.PLUGIN_INIT_FAILED, `Failed to initialize plugin ${plugin.id}: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error instanceof Error ? error : undefined });
+                this.status = types_1.EngineStatus.ERROR;
+                throw new errors_1.PluginError(plugin.id, errors_1.EngineErrorCode.PLUGIN_INIT_FAILED, `Failed to initialize plugin ${plugin.id}: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error instanceof Error ? error : undefined });
             }
         }
     }
@@ -185,8 +201,8 @@ class DefaultLifecycleManager {
         this.eventBus.off(event, handler);
     }
     hooks = {
-        onInit: async () => { },
-        onShutdown: async () => { },
+        onInit: async (_context) => { void _context; },
+        onShutdown: async (_context) => { void _context; },
     };
 }
 exports.DefaultLifecycleManager = DefaultLifecycleManager;

@@ -255,6 +255,139 @@ if (isCompatible('1.0.0')) {
 const info = getVersionInfo('my-engine', '2.0.0');
 ```
 
+## Platform Event Bus (PF-2)
+
+The Platform Event Bus provides a transport-agnostic pub/sub backbone for cross-engine and cross-plugin communication.
+
+### Event Lifecycle
+
+1. **Construct** — `bus.publish(type, payload)` creates a `PlatformEvent` with auto-populated metadata (id, correlationId, timestamp, source, version).
+2. **Dispatch** — The event is handed to the underlying transport (first pass = `MemoryEventBusTransport`).
+3. **Invoke** — Each subscriber is invoked in registration order.
+4. **Isolate** — Handler errors are caught and reported via the platform's `EngineError` model; remaining subscribers are never blocked.
+5. **Complete** — Once handlers return `once` subscriptions for the event type are unregistered.
+
+### Event Metadata
+
+Every published `PlatformEvent` carries:
+
+| Field | Auto-populated | Overridable |
+|-------|---------------|-------------|
+| `id` | UUID-like | via `options.id` |
+| `type` | *(required)* | — |
+| `timestamp` | `Date.now()` | via `options.timestamp` |
+| `source` | `defaultSource` | via `options.source` |
+| `correlationId` | unique per-publish | via `options.correlationId` |
+| `version` | `1` | via `options.version` |
+| `payload` | *(required)* | — |
+| `metadata` | — | via `options.metadata` |
+
+### Public API
+
+```typescript
+interface PlatformEventBus {
+  // Publish a typed event (builds PlatformEvent automatically)
+  publish<TPayload>(type: string, payload: TPayload, options?: EventPublishOptions): PlatformEvent<TPayload>;
+
+  // Publish a pre-built event (for forwarding/replaying)
+  publishEvent<TPayload>(event: PlatformEvent<TPayload>): PlatformEvent<TPayload>;
+
+  // Subscribe to every occurrence of an event type
+  subscribe<TPayload>(type: string, handler: EventHandler<TPayload>, opts?: EventSubscribeOptions): Subscription;
+
+  // Subscribe for a single occurrence
+  once<TPayload>(type: string, handler: EventHandler<TPayload>, opts?: EventSubscribeOptions): Subscription;
+
+  // Unregister individual subscription
+  unsubscribe(subscription: Subscription): boolean;
+
+  // Unregister all subscriptions for a type (or globally if no type)
+  unsubscribeAll(type?: string): number;
+
+  // Remove every subscription and reset transport
+  clear(): void;
+
+  // Inspection
+  listenerCount(type: string): number;
+  hasListeners(type: string): boolean;
+  eventTypes(): readonly string[];
+
+  // Replace error-reporting hook
+  setErrorReporter(reporter: HandlerErrorReporter): void;
+}
+```
+
+### Usage Examples
+
+```typescript
+import {
+  createEventBus,
+  defaultEventBus,
+  createEventBusFromTransport,
+  DefaultPlatformEventBus,
+  MemoryEventBusTransport,
+  DefaultHandlerErrorReporter,
+} from '@rentfy/engine-sdk';
+
+// 1) Create from preset
+const bus = createEventBus('memory', { defaultSource: 'crawler-engine' });
+
+// 2) Subscribe
+const sub = bus.subscribe<{ url: string }>('page.crawled', (event) => {
+  console.log(`Crawled ${event.payload.url}`);
+});
+
+// 3) Publish
+const evt = bus.publish('page.crawled', { url: '/about' });
+// evt.id, evt.correlationId, evt.timestamp all populated
+
+// 4) One‑time listener
+bus.once('engine.ready', (event) => {
+  console.log('Engine ready once');
+});
+
+// 5) Unsubscribe
+bus.unsubscribe(sub);
+
+// 6) Error reporting (platform model)
+const errors: unknown[] = [];
+bus.setErrorReporter((err, ctx) => {
+  console.error(`Handler for "${ctx.event.type}" failed`, err);
+  errors.push(err);
+});
+```
+
+### Future Transport Architecture
+
+The `EventBusTransport` interface is designed so future backends can be plugged in without changing any public API:
+
+```typescript
+interface EventBusTransport<TEvent extends PlatformEvent = PlatformEvent> {
+  readonly kind: string;           // 'memory' | 'redis' | 'kafka' | 'nats' | 'rabbitmq'
+  publish(event: TEvent): void | Promise<void>;
+  on(type: string, handler: EventHandler): Subscription;
+  off(subscription: Subscription): void;
+  clear(): void;
+  listenerCount(type: string): number;
+  trackedTypes?(): readonly string[];
+  configure?(options: unknown): void;
+  dispose?(): void | Promise<void>;
+}
+
+// Factory accepts any transport
+import { createEventBusFromTransport } from '@rentfy/engine-sdk';
+
+// Hypothetical future:
+// const redisBus = createEventBusFromTransport(new RedisEventBusTransport({ url: '...' }));
+```
+
+Future transports planned (but not yet built):
+- `RedisEventBusTransport` — distributed pub/sub
+- `KafkaEventBusTransport` — persistent event streaming
+- `NatsEventBusTransport` — lightweight high-throughput messaging
+- `RabbitMQEventBusTransport` — AMQP 0-9-1 broker
+- `PersistentEventStoreTransport` — event sourcing with replay
+
 ## Default Implementations
 
 The SDK provides default implementations for all context services:

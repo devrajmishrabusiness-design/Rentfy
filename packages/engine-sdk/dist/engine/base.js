@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractEngine = void 0;
+const types_1 = require("../types");
 const errors_1 = require("../errors");
 const registry_1 = require("../plugin/registry");
 const executor_1 = require("../plugin/executor");
@@ -11,7 +12,7 @@ const metrics_1 = require("../context/metrics");
 class AbstractEngine {
     info;
     config;
-    status = 'idle';
+    status = types_1.EngineStatus.IDLE;
     metrics = this.getInitialMetrics();
     hooks;
     eventBus;
@@ -63,20 +64,20 @@ class AbstractEngine {
         if (config) {
             Object.assign(this.config, config);
         }
-        this.status = 'initializing';
+        this.status = types_1.EngineStatus.INITIALIZING;
         this.emit({ type: 'engine:initializing', engine: this.info.name, timestamp: Date.now() });
         try {
             await this.validateConfig(this.config);
-            await this.registerPlugins(this.config.plugins || []);
+            await this.registerPlugins(this.config['plugins'] || []);
             await this.initializePlugins();
             await this.onInitialize();
             this.initialized = true;
-            this.status = 'idle';
+            this.status = types_1.EngineStatus.IDLE;
             this.emit({ type: 'engine:initialized', engine: this.info.name, timestamp: Date.now() });
             this.logger.info(`Engine ${this.info.name} v${this.info.version} initialized`);
         }
         catch (error) {
-            this.status = 'error';
+            this.status = types_1.EngineStatus.ERROR;
             const engineError = this.createError(errors_1.EngineErrorCode.ENGINE_START_FAILED, `Failed to initialize engine: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error instanceof Error ? error : undefined });
             this.emit({ type: 'engine:error', engine: this.info.name, error: engineError, timestamp: Date.now() });
             throw engineError;
@@ -90,7 +91,7 @@ class AbstractEngine {
             throw this.createError(errors_1.EngineErrorCode.ENGINE_ALREADY_RUNNING, 'Engine is already running');
         }
         this.running = true;
-        this.status = 'running';
+        this.status = types_1.EngineStatus.RUNNING;
         this.abortController = new AbortController();
         this.emit({ type: 'engine:started', engine: this.info.name, timestamp: Date.now() });
         this.logger.info(`Engine ${this.info.name} started`);
@@ -101,19 +102,19 @@ class AbstractEngine {
             this.logger.warn('Engine not running');
             return;
         }
-        this.status = 'stopping';
+        this.status = types_1.EngineStatus.STOPPING;
         this.emit({ type: 'engine:stopping', engine: this.info.name, timestamp: Date.now() });
         this.logger.info(`Engine ${this.info.name} stopping`);
         try {
             this.abortController.abort();
             await this.onStop();
             this.running = false;
-            this.status = 'idle';
+            this.status = types_1.EngineStatus.IDLE;
             this.emit({ type: 'engine:stopped', engine: this.info.name, timestamp: Date.now() });
             this.logger.info(`Engine ${this.info.name} stopped`);
         }
         catch (error) {
-            this.status = 'error';
+            this.status = types_1.EngineStatus.ERROR;
             const engineError = this.createError(errors_1.EngineErrorCode.ENGINE_STOP_FAILED, `Failed to stop engine: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error instanceof Error ? error : undefined });
             this.emit({ type: 'engine:error', engine: this.info.name, error: engineError, timestamp: Date.now() });
             throw engineError;
@@ -123,7 +124,7 @@ class AbstractEngine {
         if (this.running) {
             await this.stop();
         }
-        this.status = 'stopping';
+        this.status = types_1.EngineStatus.STOPPING;
         this.emit({ type: 'engine:disposing', engine: this.info.name, timestamp: Date.now() });
         this.logger.info(`Engine ${this.info.name} disposing`);
         try {
@@ -140,7 +141,7 @@ class AbstractEngine {
     }
     async health() {
         return {
-            status: this.status === 'error' ? 'unhealthy' : this.status === 'idle' ? 'healthy' : 'degraded',
+            status: this.status === types_1.EngineStatus.ERROR ? 'unhealthy' : this.status === types_1.EngineStatus.IDLE ? 'healthy' : 'degraded',
             engine: this.info.name,
             version: this.info.version,
             uptime: this.metrics.lastRunTime ? Date.now() - this.metrics.lastRunTime : 0,

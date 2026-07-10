@@ -1,13 +1,4 @@
 import type { PluginMetrics } from '../types';
-export interface EngineMetrics {
-    uptime: number;
-    pluginCount: number;
-    activePlugins: number;
-    totalExecutions: number;
-    successfulExecutions: number;
-    failedExecutions: number;
-    averageExecutionTime: number;
-}
 export declare class DefaultPluginMetrics implements PluginMetrics {
     executions: number;
     successes: number;

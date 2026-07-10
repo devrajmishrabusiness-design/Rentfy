@@ -1,4 +1,6 @@
-import type { PluginDefinition, PluginResult, EngineError, EngineEventHandler, EngineMetrics } from '../types';
+import type { PluginDefinition, PluginResult, EngineEventHandler, EngineMetrics } from '../types';
+import { EngineStatus } from '../types';
+import { EngineError } from '../errors';
 export interface LifecycleManager {
     initialize(plugins: PluginDefinition[]): Promise<void>;
     execute<Input, Output>(plugin: PluginDefinition<Input, Output>, input: Input): Promise<PluginResult<Output>>;
@@ -6,7 +8,6 @@ export interface LifecycleManager {
     getStatus(): EngineStatus;
     getMetrics(): EngineMetrics;
 }
-export type EngineStatus = 'idle' | 'initializing' | 'running' | 'stopping' | 'stopped' | 'error';
 export interface LifecycleOptions {
     onStateChange?: (status: EngineStatus) => void;
     onError?: (error: EngineError) => void;
@@ -26,6 +27,7 @@ export declare class DefaultLifecycleManager implements LifecycleManager {
     initialize(plugins: PluginDefinition[]): Promise<void>;
     execute<Input, Output>(plugin: PluginDefinition<Input, Output>, input: Input): Promise<PluginResult<Output>>;
     shutdown(): Promise<void>;
+    abortAll(): void;
     getStatus(): EngineStatus;
     getMetrics(): EngineMetrics;
     private validateDependencies;

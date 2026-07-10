@@ -20,6 +20,8 @@ var EngineErrorCode;
     EngineErrorCode["LIFECYCLE_HOOK_FAILED"] = "LIFECYCLE_HOOK_FAILED";
     EngineErrorCode["CONFIG_VALIDATION_FAILED"] = "CONFIG_VALIDATION_FAILED";
     EngineErrorCode["INVALID_STATE_TRANSITION"] = "INVALID_STATE_TRANSITION";
+    EngineErrorCode["ENGINE_NOT_RUNNING"] = "ENGINE_NOT_RUNNING";
+    EngineErrorCode["CONTEXT_CREATION_FAILED"] = "CONTEXT_CREATION_FAILED";
     EngineErrorCode["TIMEOUT"] = "TIMEOUT";
     EngineErrorCode["ABORTED"] = "ABORTED";
     EngineErrorCode["UNKNOWN_ERROR"] = "UNKNOWN_ERROR";
@@ -27,6 +29,7 @@ var EngineErrorCode;
 class BaseEngineError extends Error {
     code;
     metadata;
+    details;
     cause;
     timestamp;
     category;
@@ -35,6 +38,7 @@ class BaseEngineError extends Error {
         this.name = 'EngineError';
         this.code = code;
         this.metadata = options?.metadata;
+        this.details = options?.details;
         this.cause = options?.cause;
         this.timestamp = Date.now();
         this.category = options?.category ?? 'engine';
@@ -49,6 +53,7 @@ class BaseEngineError extends Error {
             message: this.message,
             code: this.code,
             metadata: this.metadata,
+            details: this.details,
             cause: this.cause?.message,
             timestamp: this.timestamp,
             category: this.category,

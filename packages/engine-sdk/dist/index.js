@@ -14,14 +14,17 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DefaultLifecycleManager = exports.DefaultPluginMetrics = exports.DefaultPluginStorage = exports.DefaultEngineLogger = exports.DefaultEventBus = exports.DefaultPluginExecutor = exports.DefaultPluginRegistry = exports.AbstractEngine = exports.getVersionInfo = exports.isCompatible = exports.getBuildDate = exports.getVersionString = exports.getVersion = exports.SDK_VERSION = void 0;
+exports.DefaultPluginMetrics = exports.DefaultPluginStorage = exports.DefaultEngineLogger = exports.DefaultEventBus = exports.DefaultPluginExecutor = exports.DefaultPluginRegistry = exports.AbstractEngine = exports.getVersionInfo = exports.isCompatible = exports.getBuildDate = exports.getVersionString = exports.getVersion = exports.SDK_VERSION = exports.DefaultLifecycleManager = void 0;
 __exportStar(require("./types"), exports);
 __exportStar(require("./engine/base"), exports);
 __exportStar(require("./plugin"), exports);
 __exportStar(require("./context"), exports);
-__exportStar(require("./lifecycle"), exports);
+// export * from './lifecycle'; // EngineStatus conflict with types
+var lifecycle_1 = require("./lifecycle");
+Object.defineProperty(exports, "DefaultLifecycleManager", { enumerable: true, get: function () { return lifecycle_1.DefaultLifecycleManager; } });
 __exportStar(require("./errors"), exports);
 __exportStar(require("./version"), exports);
+__exportStar(require("./event-bus"), exports);
 var version_1 = require("./version");
 Object.defineProperty(exports, "SDK_VERSION", { enumerable: true, get: function () { return version_1.SDK_VERSION; } });
 Object.defineProperty(exports, "getVersion", { enumerable: true, get: function () { return version_1.getVersion; } });
@@ -43,6 +46,4 @@ var storage_1 = require("./context/storage");
 Object.defineProperty(exports, "DefaultPluginStorage", { enumerable: true, get: function () { return storage_1.DefaultPluginStorage; } });
 var metrics_1 = require("./context/metrics");
 Object.defineProperty(exports, "DefaultPluginMetrics", { enumerable: true, get: function () { return metrics_1.DefaultPluginMetrics; } });
-var lifecycle_1 = require("./lifecycle");
-Object.defineProperty(exports, "DefaultLifecycleManager", { enumerable: true, get: function () { return lifecycle_1.DefaultLifecycleManager; } });
 //# sourceMappingURL=index.js.map

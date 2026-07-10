@@ -12,17 +12,21 @@ class DefaultPluginMetrics {
     histograms = new Map();
     timings = new Map();
     increment(name, value = 1, _tags) {
+        void _tags;
         const current = this.counters.get(name) || 0;
         this.counters.set(name, current + value);
     }
     decrement(name, value = 1, _tags) {
+        void _tags;
         const current = this.counters.get(name) || 0;
         this.counters.set(name, current - value);
     }
     gauge(name, value, _tags) {
+        void _tags;
         this.gauges.set(name, value);
     }
     histogram(name, value, _tags) {
+        void _tags;
         const values = this.histograms.get(name) || [];
         values.push(value);
         if (values.length > 1000) {
@@ -31,6 +35,7 @@ class DefaultPluginMetrics {
         this.histograms.set(name, values);
     }
     timing(name, value, _tags) {
+        void _tags;
         const values = this.timings.get(name) || [];
         values.push(value);
         if (values.length > 1000) {

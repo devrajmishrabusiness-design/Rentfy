@@ -1,0 +1,1 @@
+{"version":3,"file":"subscription.d.ts","sourceRoot":"","sources":["../../../src/event-bus/interfaces/subscription.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,SAAS,CAAC;AAEjD,MAAM,WAAW,YAAY;IAC3B,QAAQ,CAAC,EAAE,EAAE,MAAM,CAAC;IACpB,QAAQ,CAAC,IAAI,EAAE,iBAAiB,CAAC;IACjC,WAAW,IAAI,IAAI,CAAC;CACrB;AAED,MAAM,MAAM,WAAW,GAAG,MAAM,IAAI,CAAC"}
