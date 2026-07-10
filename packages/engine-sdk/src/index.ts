@@ -7,6 +7,7 @@ export { DefaultLifecycleManager } from './lifecycle';
 export * from './errors';
 export * from './version';
 export * from './event-bus';
+export * from './job-queue';
 
 export { SDK_VERSION, getVersion, getVersionString, getBuildDate, isCompatible, getVersionInfo } from './version';
 
