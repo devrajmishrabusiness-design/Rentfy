@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".claude/**",
     // Test coverage output
     "coverage/**",
+    // Built package output (e.g. engine-sdk dist)
+    "packages/*/dist/**",
   ]),
 ]);
 
