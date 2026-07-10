@@ -10,6 +10,7 @@ export * from './event-bus';
 export * from './job-queue';
 export * from './rule-engine';
 export * from './config';
+export * from './storage';
 
 export { SDK_VERSION, getVersion, getVersionString, getBuildDate, isCompatible, getVersionInfo } from './version';
 
