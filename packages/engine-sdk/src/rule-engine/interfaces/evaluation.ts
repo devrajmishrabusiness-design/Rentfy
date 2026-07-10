@@ -32,7 +32,7 @@ export interface ActionResult {
   readonly executionTime: number;
 }
 
-export interface RuleEngine {
+export interface IRuleEngine {
   evaluate<TPayload = unknown>(eventType: string, payload: TPayload, options?: EvaluationOptions): Promise<RuleEvaluationResult[]>;
 }
 

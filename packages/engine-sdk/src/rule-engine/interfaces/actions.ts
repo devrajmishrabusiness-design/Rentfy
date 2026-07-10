@@ -1,4 +1,3 @@
-import type { RuleEvaluationContext } from './evaluation';
 import type { PlatformEventBus } from '../../event-bus/interfaces/bus';
 import type { JobQueue } from '../../job-queue/interfaces/queue';
 import type { PluginLogger } from '../../types';
