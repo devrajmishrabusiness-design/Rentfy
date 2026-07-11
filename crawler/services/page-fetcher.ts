@@ -8,6 +8,7 @@
  */
 
 import { extractLinks, type ExtractedLink } from "./link-extractor";
+import type { SharedConfig } from "@rentfy/engine-sdk";
 
 /**
  * Result of fetching a single page.
@@ -41,17 +42,24 @@ export interface PageFetcher {
   fetch(url: string, options?: FetchOptions): Promise<FetchedPage>;
 }
 
-const DEFAULT_TIMEOUT_MS = 10_000;
-const DEFAULT_USER_AGENT = "RentfyCrawler/0.1";
+export interface HttpPageFetcherOptions {
+  config?: SharedConfig;
+}
 
 /**
  * Default `PageFetcher` backed by the platform `fetch` (Node 18+ /
  * Edge runtime). Honors a per-request timeout via `AbortController`.
  */
 export class HttpPageFetcher implements PageFetcher {
+  private readonly config?: SharedConfig;
+
+  constructor(options: HttpPageFetcherOptions = {}) {
+    this.config = options.config;
+  }
+
   async fetch(url: string, options: FetchOptions = {}): Promise<FetchedPage> {
-    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    const userAgent = options.userAgent ?? DEFAULT_USER_AGENT;
+    const timeoutMs = options.timeoutMs ?? (this.config?.get("timeoutMs") as number | undefined) ?? 10_000;
+    const userAgent = options.userAgent ?? (this.config?.get("userAgent") as string | undefined) ?? "RentfyCrawler/0.1";
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);

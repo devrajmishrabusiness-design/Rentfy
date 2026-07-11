@@ -12,8 +12,9 @@
  */
 
 import type { PluginCapability, PluginPhase, SeoPlugin } from "../types";
+import { seoConfig } from "../config";
 
-const DEFAULT_PRIORITY = 100;
+const defaultPriority = (): number => seoConfig.get("defaultPriority") as number;
 
 /**
  * The shape a registry takes internally. It exists so multiple storage
@@ -65,7 +66,7 @@ export class SeoRegistry implements SeoRegistryLike {
     this.insertionOrder.push(plugin.id);
     this.priorities.set(
       plugin.id,
-      plugin.priority ?? DEFAULT_PRIORITY
+      plugin.priority ?? defaultPriority()
     );
     // A plugin is enabled unless either (a) the registry has marked
     // it disabled, or (b) the plugin declared `enabledByDefault = false`.

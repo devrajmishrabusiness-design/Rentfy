@@ -10,20 +10,9 @@
 import type { SeoCheckResult, SeoIssue, IssueCategory, SeverityLevel } from "../types";
 import { aggregateScores, topIssues as computeTopIssues } from "../utils/scoring";
 import type { ReportInput, SeoReportOutput, DedupedIssue, ExecutionInfo } from "./types";
+import { seoConfig } from "../config";
 
 const REPORT_VERSION = "1.0.0";
-const PASSED_THRESHOLD = 70;
-
-/**
- * Default report options.
- */
-const DEFAULT_OPTIONS: Required<NonNullable<ReportInput["options"]>> = {
-  includeSuccessIssues: false,
-  topIssuesLimit: 10,
-  recommendationLimit: 5,
-  categoryWeights: {},
-  dedupeStrategy: "best-severity",
-};
 
 /**
  * Severity order for sorting (higher index = more severe).
@@ -400,8 +389,15 @@ const countCheckStatuses = (
  * This is the main pure function that implements RFC-008.
  */
 export const generateReport = (input: ReportInput): SeoReportOutput => {
+  const configDefaults: Required<NonNullable<ReportInput["options"]>> = {
+    includeSuccessIssues: seoConfig.get("report.includeSuccessIssues") as boolean,
+    topIssuesLimit: seoConfig.get("report.topIssuesLimit") as number,
+    recommendationLimit: seoConfig.get("report.recommendationLimit") as number,
+    categoryWeights: {},
+    dedupeStrategy: seoConfig.get("report.dedupeStrategy") as string,
+  } as Required<NonNullable<ReportInput["options"]>>;
   const options: Required<NonNullable<ReportInput["options"]>> = {
-    ...DEFAULT_OPTIONS,
+    ...configDefaults,
     ...input.options,
   };
 
@@ -460,14 +456,15 @@ export const generateReport = (input: ReportInput): SeoReportOutput => {
 
   // Determine pass/fail
   const hasCriticalIssues = buckets.critical.length > 0;
-  const passed = overallScore >= PASSED_THRESHOLD && !hasCriticalIssues;
+  const passedThreshold = seoConfig.get("report.passedThreshold") as number;
+  const passed = overallScore >= passedThreshold && !hasCriticalIssues;
 
   // Build output
   return {
     overallScore,
     scoreGrade,
     passed,
-    passedThreshold: PASSED_THRESHOLD,
+    passedThreshold,
     categoryScores,
     criticalIssues: buckets.critical,
     highIssues: buckets.high,

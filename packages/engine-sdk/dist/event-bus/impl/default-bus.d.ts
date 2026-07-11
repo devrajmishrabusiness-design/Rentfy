@@ -5,6 +5,7 @@ export declare class DefaultPlatformEventBus implements PlatformEventBus {
     private readonly idFactory;
     private readonly correlationIdFactory;
     private reporter;
+    private readonly subscriptions;
     constructor(options?: EventBusOptions & {
         transport?: EventBusTransport;
     });

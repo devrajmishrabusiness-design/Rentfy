@@ -43,13 +43,24 @@ import type { PageFetcher } from "../services";
 
 export const CRAWLER_VERSION = "0.1.0-core";
 
-const DEFAULT_CONFIG: Omit<CrawlConfig, "startUrl"> = {
+import { SharedConfig, MemoryConfigProvider } from "@rentfy/engine-sdk";
+
+const CRAWLER_DEFAULTS: Omit<CrawlConfig, "startUrl"> = {
   maxDepth: 3,
   maxPages: 200,
   sameOriginOnly: true,
   timeoutMs: 10_000,
   userAgent: "RentfyCrawler/0.1",
 };
+
+const crawlerConfig = new SharedConfig({ providers: [new MemoryConfigProvider()] });
+crawlerConfig.register("maxDepth", { type: "number", defaultValue: CRAWLER_DEFAULTS.maxDepth });
+crawlerConfig.register("maxPages", { type: "number", defaultValue: CRAWLER_DEFAULTS.maxPages });
+crawlerConfig.register("sameOriginOnly", { type: "boolean", defaultValue: CRAWLER_DEFAULTS.sameOriginOnly });
+crawlerConfig.register("timeoutMs", { type: "number", defaultValue: CRAWLER_DEFAULTS.timeoutMs });
+crawlerConfig.register("userAgent", { type: "string", defaultValue: CRAWLER_DEFAULTS.userAgent });
+
+export { crawlerConfig };
 
 /**
  * Dependencies the engine needs. `fetcher` is required; `storage` is
@@ -68,11 +79,11 @@ export const resolveConfig = (
   options: CrawlerRunOptions = {}
 ): CrawlConfig => ({
   startUrl: normalizeUrl(startUrl),
-  maxDepth: options.maxDepth ?? DEFAULT_CONFIG.maxDepth,
-  maxPages: options.maxPages ?? DEFAULT_CONFIG.maxPages,
-  sameOriginOnly: options.sameOriginOnly ?? DEFAULT_CONFIG.sameOriginOnly,
-  timeoutMs: options.timeoutMs ?? DEFAULT_CONFIG.timeoutMs,
-  userAgent: options.userAgent ?? DEFAULT_CONFIG.userAgent,
+  maxDepth: options.maxDepth ?? (crawlerConfig.get("maxDepth") as number),
+  maxPages: options.maxPages ?? (crawlerConfig.get("maxPages") as number),
+  sameOriginOnly: options.sameOriginOnly ?? (crawlerConfig.get("sameOriginOnly") as boolean),
+  timeoutMs: options.timeoutMs ?? (crawlerConfig.get("timeoutMs") as number),
+  userAgent: options.userAgent ?? (crawlerConfig.get("userAgent") as string),
 });
 
 /**

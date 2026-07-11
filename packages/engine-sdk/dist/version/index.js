@@ -30,8 +30,12 @@ function getBuildDate() {
     return exports.SDK_VERSION.buildDate;
 }
 function isCompatible(requiredVersion) {
-    const [currentMajor, currentMinor] = exports.SDK_VERSION.version.split('.').map(Number);
-    const [requiredMajor, requiredMinor] = requiredVersion.split('.').map(Number);
+    const currentParts = exports.SDK_VERSION.version.split('.').map(Number);
+    const requiredParts = requiredVersion.split('.').map(Number);
+    const currentMajor = currentParts[0];
+    const currentMinor = currentParts[1];
+    const requiredMajor = requiredParts[0];
+    const requiredMinor = requiredParts[1];
     if (isNaN(currentMajor) || isNaN(currentMinor) || isNaN(requiredMajor) || isNaN(requiredMinor)) {
         return false;
     }

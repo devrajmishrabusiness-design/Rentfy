@@ -11,6 +11,7 @@ class DefaultPlatformEventBus {
     idFactory;
     correlationIdFactory;
     reporter;
+    subscriptions = new Map();
     constructor(options = {}) {
         this.transport = options.transport ?? new memory_event_bus_1.MemoryEventBusTransport();
         this.defaultSource = options.defaultSource ?? 'engine-sdk';
@@ -26,19 +27,54 @@ class DefaultPlatformEventBus {
         return this.enqueue(event);
     }
     subscribe(type, handler, _options = {}) {
-        return this.transport.on(type, wrappedHandlerFactory(type, handler, () => this.reporter));
+        const sub = this.transport.on(type, wrappedHandlerFactory(type, handler, () => this.reporter));
+        const list = this.subscriptions.get(type);
+        if (list) {
+            list.push(sub);
+        }
+        else {
+            this.subscriptions.set(type, [sub]);
+        }
+        return sub;
     }
     once(type, handler, _options = {}) {
         let dispatched = false;
+        let dispatchedSubscriptionIdx = -1;
         const enforcer = (event) => {
             if (dispatched)
                 return;
             dispatched = true;
+            if (dispatchedSubscriptionIdx !== -1) {
+                const arr = this.subscriptions.get(type);
+                if (arr)
+                    arr.splice(dispatchedSubscriptionIdx, 1);
+            }
             return handler(event);
         };
-        return this.transport.on(type, wrappedHandlerFactory(type, enforcer, () => this.reporter));
+        const sub = this.transport.on(type, wrappedHandlerFactory(type, enforcer, () => this.reporter));
+        const list = this.subscriptions.get(type);
+        if (list) {
+            dispatchedSubscriptionIdx = list.length;
+            list.push(sub);
+        }
+        else {
+            this.subscriptions.set(type, [sub]);
+            dispatchedSubscriptionIdx = 0;
+        }
+        return sub;
     }
     unsubscribe(subscription) {
+        const type = subscription.type;
+        const list = this.subscriptions.get(type);
+        if (list) {
+            const idx = list.findIndex((s) => s.id === subscription.id);
+            if (idx !== -1) {
+                list.splice(idx, 1);
+                if (list.length === 0) {
+                    this.subscriptions.delete(type);
+                }
+            }
+        }
         try {
             this.transport.off(subscription);
             return true;
@@ -50,30 +86,29 @@ class DefaultPlatformEventBus {
     unsubscribeAll(type) {
         let count = 0;
         if (type) {
-            const before = this.listenerCount(type);
-            const iter = () => {
-                for (let i = 0; i < before; i++) {
-                    const placeholder = this.transport.on(type, () => { });
-                    this.transport.off(placeholder);
+            const list = this.subscriptions.get(type);
+            if (list) {
+                const copy = [...list];
+                for (const sub of copy) {
+                    this.unsubscribe(sub);
+                    count++;
                 }
-            };
-            iter();
-            count = before;
+            }
         }
         else {
-            const types = this.eventTypes();
-            for (const t of types) {
-                const before = this.listenerCount(t);
-                for (let i = 0; i < before; i++) {
-                    const placeholder = this.transport.on(t, () => { });
-                    this.transport.off(placeholder);
+            const typeEntries = Array.from(this.subscriptions.entries());
+            for (const [, list] of typeEntries) {
+                const copy = [...list];
+                for (const sub of copy) {
+                    this.unsubscribe(sub);
+                    count++;
                 }
-                count += before;
             }
         }
         return count;
     }
     clear() {
+        this.subscriptions.clear();
         this.transport.clear();
     }
     listenerCount(type) {
@@ -104,14 +139,12 @@ class DefaultPlatformEventBus {
         const pubResult = this.transport.publish(event);
         if (pubResult && typeof pubResult.then === 'function') {
             pubResult.catch((unknown) => {
-                const err = error_reporter_1.DefaultHandlerErrorReporter.fromUnknown(event.type, unknown, {
+                const ctx = {
                     event: event,
                     handler: () => undefined,
-                });
-                this.reporter(err, {
-                    event: event,
-                    handler: () => undefined,
-                });
+                };
+                const err = error_reporter_1.DefaultHandlerErrorReporter.fromUnknown(event.type, unknown, ctx);
+                this.reporter(err, ctx);
             });
         }
         return event;

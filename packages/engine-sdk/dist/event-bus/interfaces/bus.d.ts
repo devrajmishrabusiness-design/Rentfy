@@ -1,8 +1,6 @@
 import type { EngineError } from '../../errors';
-export { type PlatformEvent, type EventHandler, type PlatformEventType } from './event';
 import type { PlatformEvent, EventHandler, PlatformEventType } from './event';
-export { type Subscription, type Unsubscribe } from './subscription';
-import type { Subscription } from './subscription';
+import type { Subscription, Unsubscribe } from './subscription';
 export interface HandlerErrorContext {
     readonly event: PlatformEvent;
     readonly handler: EventHandler;
@@ -50,5 +48,5 @@ export interface EventBusOptions {
     readonly idFactory?: () => string;
     readonly correlationIdFactory?: () => string;
 }
-export type { Subscription, Unsubscribe };
+export type { PlatformEvent, EventHandler, PlatformEventType, Subscription, Unsubscribe };
 //# sourceMappingURL=bus.d.ts.map

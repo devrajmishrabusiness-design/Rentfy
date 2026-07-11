@@ -12,8 +12,7 @@ import type {
   EngineRunOptions,
   PluginState,
 } from "../types";
-
-const DEFAULT_PRIORITY = 100;
+import { seoConfig } from "../config";
 
 /**
  * Build the immutable config passed to plugins. Computed once per
@@ -29,6 +28,7 @@ export const buildConfig = (
 ): EngineConfig => {
   const enabled = new Set<string>();
   const priorities = new Map<string, number>();
+  const defaultPriority = seoConfig.get("defaultPriority") as number;
 
   for (const plugin of registered) {
     const overrideEnabled = options.pluginOverrides?.[plugin.id];
@@ -40,7 +40,7 @@ export const buildConfig = (
     const overridePri = options.priorityOverrides?.[plugin.id];
     priorities.set(
       plugin.id,
-      overridePri ?? plugin.priority ?? DEFAULT_PRIORITY
+      overridePri ?? plugin.priority ?? defaultPriority
     );
   }
 

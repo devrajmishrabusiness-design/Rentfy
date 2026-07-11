@@ -41,8 +41,13 @@ export function getBuildDate(): string {
 }
 
 export function isCompatible(requiredVersion: string): boolean {
-  const [currentMajor, currentMinor] = SDK_VERSION.version.split('.').map(Number);
-  const [requiredMajor, requiredMinor] = requiredVersion.split('.').map(Number);
+  const currentParts = SDK_VERSION.version.split('.').map(Number);
+  const requiredParts = requiredVersion.split('.').map(Number);
+
+  const currentMajor = currentParts[0] as number;
+  const currentMinor = currentParts[1] as number;
+  const requiredMajor = requiredParts[0] as number;
+  const requiredMinor = requiredParts[1] as number;
 
   if (isNaN(currentMajor) || isNaN(currentMinor) || isNaN(requiredMajor) || isNaN(requiredMinor)) {
     return false;

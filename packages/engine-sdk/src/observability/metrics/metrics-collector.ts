@@ -19,8 +19,8 @@ function computePercentiles(sorted: number[], p: number): number {
   const idx = (p / 100) * (sorted.length - 1);
   const lower = Math.floor(idx);
   const upper = Math.ceil(idx);
-  if (lower === upper) return sorted[lower];
-  return sorted[lower] * (upper - idx) + sorted[upper] * (idx - lower);
+  if (lower === upper) return sorted[lower] as number;
+  return (sorted[lower] as number) * (upper - idx) + (sorted[upper] as number) * (idx - lower);
 }
 
 export class DefaultMetricsCollector implements MetricsCollector {
@@ -120,8 +120,8 @@ export class DefaultMetricsCollector implements MetricsCollector {
           name,
           count: values.length,
           sum,
-          min: values.length ? sorted[0] : 0,
-          max: values.length ? sorted[sorted.length - 1] : 0,
+          min: values.length ? (sorted[0] as number) : 0,
+          max: values.length ? (sorted[sorted.length - 1] as number) : 0,
           avg: values.length ? sum / values.length : 0,
           p50: computePercentiles(sorted, 50),
           p90: computePercentiles(sorted, 90),
