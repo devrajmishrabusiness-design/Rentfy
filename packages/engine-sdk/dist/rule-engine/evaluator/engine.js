@@ -59,6 +59,7 @@ class RuleEngine {
                     ruleId: rule.id,
                     success: false,
                     skipped: true,
+                    reason: 'conditions_not_met',
                     actionResults: [],
                     executionTime: Date.now() - evalStart,
                 };
@@ -136,11 +137,12 @@ class RuleEngine {
     }
 }
 exports.RuleEngine = RuleEngine;
-function createSkippedResult(rule, _reason) {
+function createSkippedResult(rule, reason) {
     return {
         ruleId: rule.id,
         success: false,
         skipped: true,
+        reason,
         actionResults: [],
         executionTime: 0,
     };

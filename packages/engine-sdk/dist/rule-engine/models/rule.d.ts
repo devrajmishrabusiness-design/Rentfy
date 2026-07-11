@@ -4,7 +4,7 @@ export declare function createRuleMetadata(options?: {
     tags?: readonly string[];
     category?: string;
 }): RuleMetadata;
-export declare function createRule<TPayload = unknown>(id: string, config: Omit<RuleDefinition<TPayload>, 'id' | 'metadata'> & {
+export declare function createRule(id: string, config: Omit<RuleDefinition, 'id' | 'metadata'> & {
     metadata?: Partial<RuleMetadata>;
-}): RuleDefinition<TPayload>;
+}): RuleDefinition;
 //# sourceMappingURL=rule.d.ts.map

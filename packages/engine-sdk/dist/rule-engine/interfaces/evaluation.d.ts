@@ -1,7 +1,7 @@
 import type { EngineError } from '../../errors';
 import type { RuleDefinition } from './rules';
 export interface RuleEvaluationContext<TPayload = unknown> {
-    readonly rule: RuleDefinition<TPayload>;
+    readonly rule: RuleDefinition;
     readonly event: {
         readonly type: string;
         readonly payload: TPayload;
@@ -15,6 +15,7 @@ export interface RuleEvaluationResult<TResult = unknown> {
     readonly ruleId: string;
     readonly success: boolean;
     readonly skipped: boolean;
+    readonly reason?: string;
     readonly actionResults: readonly ActionResult[];
     readonly error?: EngineError;
     readonly executionTime: number;

@@ -27,7 +27,7 @@ class EnvConfigProvider {
         }
         return result;
     }
-    async has(key, namespace) {
+    async has(key, _namespace) {
         const envKey = `${this.prefix}${key.toUpperCase()}`;
         return process.env[envKey] !== undefined;
     }

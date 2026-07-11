@@ -6,10 +6,6 @@ export declare class DefaultPluginMetrics implements PluginMetrics {
     averageTime: number;
     lastExecutionTime?: number;
     private collector;
-    private counters;
-    private gauges;
-    private histograms;
-    private timings;
     increment(name: string, value?: number, _tags?: Record<string, string>): void;
     decrement(name: string, value?: number, _tags?: Record<string, string>): void;
     gauge(name: string, value: number, _tags?: Record<string, string>): void;

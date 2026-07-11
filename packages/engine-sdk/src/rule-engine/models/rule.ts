@@ -16,10 +16,10 @@ export function createRuleMetadata(options: {
   };
 }
 
-export function createRule<TPayload = unknown>(
+export function createRule(
   id: string,
-  config: Omit<RuleDefinition<TPayload>, 'id' | 'metadata'> & { metadata?: Partial<RuleMetadata> },
-): RuleDefinition<TPayload> {
+  config: Omit<RuleDefinition, 'id' | 'metadata'> & { metadata?: Partial<RuleMetadata> },
+): RuleDefinition {
   return {
     id,
     name: config.name,

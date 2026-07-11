@@ -88,6 +88,7 @@ export class RuleEngine implements IRuleEngine {
           ruleId: rule.id,
           success: false,
           skipped: true,
+          reason: 'conditions_not_met',
           actionResults: [],
           executionTime: Date.now() - evalStart,
         };
@@ -173,11 +174,12 @@ export class RuleEngine implements IRuleEngine {
   }
 }
 
-function createSkippedResult(rule: RuleDefinition, _reason: string): RuleEvaluationResult {
+function createSkippedResult(rule: RuleDefinition, reason: string): RuleEvaluationResult {
   return {
     ruleId: rule.id,
     success: false,
     skipped: true,
+    reason,
     actionResults: [],
     executionTime: 0,
   };

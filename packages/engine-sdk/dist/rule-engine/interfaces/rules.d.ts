@@ -13,7 +13,7 @@ export interface RuleMetadata {
     readonly category?: string;
     readonly meta?: Readonly<Record<string, unknown>>;
 }
-export interface RuleDefinition<_TPayload = unknown, _TResult = unknown> {
+export interface RuleDefinition {
     readonly id: string;
     readonly name: string;
     readonly description?: string;

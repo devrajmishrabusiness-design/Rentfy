@@ -31,7 +31,7 @@ export class EnvConfigProvider implements ConfigProvider {
     return result;
   }
 
-  async has(key: string, namespace?: string): Promise<boolean> {
+  async has(key: string, _namespace?: string): Promise<boolean> {
     const envKey = `${this.prefix}${key.toUpperCase()}`;
     return process.env[envKey] !== undefined;
   }
