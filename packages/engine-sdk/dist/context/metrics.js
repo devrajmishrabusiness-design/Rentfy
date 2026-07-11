@@ -1,12 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultPluginMetrics = void 0;
+const observability_1 = require("../observability");
 class DefaultPluginMetrics {
     executions = 0;
     successes = 0;
     failures = 0;
     averageTime = 0;
     lastExecutionTime;
+    collector = new observability_1.DefaultMetricsCollector();
     counters = new Map();
     gauges = new Map();
     histograms = new Map();
@@ -15,15 +17,18 @@ class DefaultPluginMetrics {
         void _tags;
         const current = this.counters.get(name) || 0;
         this.counters.set(name, current + value);
+        this.collector.counter(name, value);
     }
     decrement(name, value = 1, _tags) {
         void _tags;
         const current = this.counters.get(name) || 0;
         this.counters.set(name, current - value);
+        this.collector.counter(name, -value);
     }
     gauge(name, value, _tags) {
         void _tags;
         this.gauges.set(name, value);
+        this.collector.gauge(name, value);
     }
     histogram(name, value, _tags) {
         void _tags;
@@ -33,6 +38,7 @@ class DefaultPluginMetrics {
             values.shift();
         }
         this.histograms.set(name, values);
+        this.collector.histogram(name, value);
     }
     timing(name, value, _tags) {
         void _tags;
@@ -42,6 +48,7 @@ class DefaultPluginMetrics {
             values.shift();
         }
         this.timings.set(name, values);
+        this.collector.timer(name, value);
     }
     getCounter(name) {
         return this.counters.get(name) || 0;
@@ -82,6 +89,7 @@ class DefaultPluginMetrics {
         this.gauges.clear();
         this.histograms.clear();
         this.timings.clear();
+        this.collector.reset();
     }
 }
 exports.DefaultPluginMetrics = DefaultPluginMetrics;

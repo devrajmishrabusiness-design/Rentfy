@@ -1,59 +1,46 @@
 import type { PluginLogger } from '../types';
+import {
+  DefaultStructuredLogger,
+  ConsoleLogTransport,
+  type StructuredLogger,
+} from '../observability';
 
 export interface EngineLogger extends PluginLogger {
   child(meta: Record<string, unknown>): PluginLogger;
 }
 
 export class DefaultEngineLogger implements EngineLogger {
-  private prefix: string;
-  private context: Record<string, unknown>;
+  private readonly prefix: string;
+  private readonly context: Record<string, unknown>;
+  private readonly logger: StructuredLogger;
 
   constructor(prefix: string, context: Record<string, unknown> = {}) {
     this.prefix = prefix;
     this.context = context;
+    this.logger = new DefaultStructuredLogger({
+      source: prefix,
+      bindings: context,
+      transports: [new ConsoleLogTransport()],
+    });
   }
 
   debug(message: string, meta?: Record<string, unknown>): void {
-    this.log('debug', message, meta);
+    this.logger.debug(message, meta);
   }
 
   info(message: string, meta?: Record<string, unknown>): void {
-    this.log('info', message, meta);
+    this.logger.info(message, meta);
   }
 
   warn(message: string, meta?: Record<string, unknown>): void {
-    this.log('warn', message, meta);
+    this.logger.warn(message, meta);
   }
 
   error(message: string, meta?: Record<string, unknown>): void {
-    this.log('error', message, meta);
+    this.logger.error(message, meta);
   }
 
   child(meta: Record<string, unknown>): PluginLogger {
     return new DefaultEngineLogger(this.prefix, { ...this.context, ...meta });
-  }
-
-  private log(level: string, message: string, meta?: Record<string, unknown>): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      prefix: this.prefix,
-      message,
-      context: { ...this.context, ...meta },
-    };
-
-    switch (level) {
-      case 'debug':
-      case 'info':
-        console.log(JSON.stringify(logEntry));
-        break;
-      case 'warn':
-        console.warn(JSON.stringify(logEntry));
-        break;
-      case 'error':
-        console.error(JSON.stringify(logEntry));
-        break;
-    }
   }
 }

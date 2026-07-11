@@ -8,6 +8,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getReportByPropertyId } from "@/lib/seo/report-service";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/seo/reports",
+  transports: [new ConsoleLogTransport()],
+});
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +49,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to retrieve SEO report:", error);
+    logger.error("Failed to retrieve SEO report", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to retrieve SEO report." },
       { status: 500 }

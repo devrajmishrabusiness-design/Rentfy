@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/properties/similar",
+  transports: [new ConsoleLogTransport()],
+});
 
 export const revalidate = 60;
 
@@ -73,7 +79,7 @@ export async function GET(request: NextRequest) {
   const { data: properties, error } = await query;
 
   if (error) {
-    console.error("Similar properties error:", error);
+    logger.error("Similar properties error", { error: String(error) });
     return NextResponse.json({ error: "Failed to fetch similar properties" }, { status: 500 });
   }
 

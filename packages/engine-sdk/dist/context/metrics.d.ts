@@ -5,6 +5,7 @@ export declare class DefaultPluginMetrics implements PluginMetrics {
     failures: number;
     averageTime: number;
     lastExecutionTime?: number;
+    private collector;
     private counters;
     private gauges;
     private histograms;

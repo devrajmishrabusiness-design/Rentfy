@@ -1,4 +1,5 @@
 import type { PluginMetrics } from '../types';
+import { DefaultMetricsCollector, type MetricsCollector } from '../observability';
 
 export class DefaultPluginMetrics implements PluginMetrics {
   executions = 0;
@@ -7,6 +8,7 @@ export class DefaultPluginMetrics implements PluginMetrics {
   averageTime = 0;
   lastExecutionTime?: number;
 
+  private collector: MetricsCollector = new DefaultMetricsCollector();
   private counters = new Map<string, number>();
   private gauges = new Map<string, number>();
   private histograms = new Map<string, number[]>();
@@ -16,17 +18,20 @@ export class DefaultPluginMetrics implements PluginMetrics {
     void _tags;
     const current = this.counters.get(name) || 0;
     this.counters.set(name, current + value);
+    this.collector.counter(name, value);
   }
 
   decrement(name: string, value: number = 1, _tags?: Record<string, string>): void {
     void _tags;
     const current = this.counters.get(name) || 0;
     this.counters.set(name, current - value);
+    this.collector.counter(name, -value);
   }
 
   gauge(name: string, value: number, _tags?: Record<string, string>): void {
     void _tags;
     this.gauges.set(name, value);
+    this.collector.gauge(name, value);
   }
 
   histogram(name: string, value: number, _tags?: Record<string, string>): void {
@@ -37,6 +42,7 @@ export class DefaultPluginMetrics implements PluginMetrics {
       values.shift();
     }
     this.histograms.set(name, values);
+    this.collector.histogram(name, value);
   }
 
   timing(name: string, value: number, _tags?: Record<string, string>): void {
@@ -47,6 +53,7 @@ export class DefaultPluginMetrics implements PluginMetrics {
       values.shift();
     }
     this.timings.set(name, values);
+    this.collector.timer(name, value);
   }
 
   getCounter(name: string): number {
@@ -92,5 +99,6 @@ export class DefaultPluginMetrics implements PluginMetrics {
     this.gauges.clear();
     this.histograms.clear();
     this.timings.clear();
+    this.collector.reset();
   }
 }

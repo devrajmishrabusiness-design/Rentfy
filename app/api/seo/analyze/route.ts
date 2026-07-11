@@ -17,6 +17,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzePropertySeo } from "@/lib/seo/adapter";
 import { upsertReport } from "@/lib/seo/report-service";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/seo/analyze",
+  transports: [new ConsoleLogTransport()],
+});
 
 const ANALYZER_VERSION = "0.1.0-core";
 
@@ -70,7 +76,7 @@ export async function POST(request: NextRequest) {
       });
       persisted = true;
     } catch (error) {
-      console.error("Failed to persist SEO report:", error);
+      logger.error("Failed to persist SEO report", { error: String(error) });
     }
   }
 

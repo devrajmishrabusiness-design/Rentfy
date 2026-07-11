@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/visits",
+  transports: [new ConsoleLogTransport()],
+});
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -29,7 +35,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error("Visit creation error:", error);
+    logger.error("Visit creation error", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to schedule visit" },
       { status: 500 }
@@ -67,7 +73,7 @@ export async function GET(request: NextRequest) {
   const { data: visits, error } = await query;
 
   if (error) {
-    console.error("Visits fetch error:", error);
+    logger.error("Visits fetch error", { error: String(error) });
     return NextResponse.json({ error: "Failed to fetch visits" }, { status: 500 });
   }
 
@@ -94,7 +100,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error("Visit update error:", error);
+    logger.error("Visit update error", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to update visit" },
       { status: 500 }

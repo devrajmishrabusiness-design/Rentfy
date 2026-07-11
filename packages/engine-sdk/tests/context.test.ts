@@ -12,11 +12,12 @@ describe('DefaultEngineLogger', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'debug').mockImplementation(() => {});
   });
 
   it('should log debug messages', () => {
     logger.debug('debug message', { key: 'value' });
-    expect(console.log).toHaveBeenCalled();
+    expect(console.debug).toHaveBeenCalled();
   });
 
   it('should log info messages', () => {
