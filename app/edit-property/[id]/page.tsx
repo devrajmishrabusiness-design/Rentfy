@@ -1,6 +1,7 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import EditPropertyForm from "@/app/EditPropertyForm";
 import Footer from "@/app/Footer";
+import { redirect } from "next/navigation";
 
 export default async function EditPropertyPage({
   params,
@@ -8,6 +9,11 @@ export default async function EditPropertyPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: property } = await supabase
     .from("properties")
@@ -16,14 +22,17 @@ export default async function EditPropertyPage({
     .single();
 
   if (!property) {
-    return (
-      <main className="min-h-screen bg-[var(--brand-background)]">
-        <div className="container-app py-32 text-center">
-          <p className="text-2xl font-bold">Property not found</p>
-        </div>
-        <Footer />
-      </main>
-    );
+    redirect("/dashboard");
+  }
+
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("id, verified")
+    .eq("auth_user_id", user!.id)
+    .single();
+
+  if (!agency || !agency.verified || agency.id !== property.agency_id) {
+    redirect("/dashboard");
   }
 
   return (

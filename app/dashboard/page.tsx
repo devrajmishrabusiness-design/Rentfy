@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import type { Agency, Lead, Property } from "../types";
 import Footer from "../Footer";
@@ -31,33 +32,8 @@ export default async function Dashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // --- Graceful sign-in guard ---
   if (!user) {
-    return (
-      <main className="min-h-screen bg-[var(--brand-background)]">
-        <section className="container-app py-24 text-center">
-          <div className="mx-auto max-w-md card p-10">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-orange-50 text-[var(--brand-primary)]">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-            </span>
-            <h1 className="mt-5 text-2xl font-extrabold">
-              Please sign in first
-            </h1>
-            <p className="mt-2 text-[var(--brand-muted)]">
-              Sign in to your RenterEasy agency account to access the
-              dashboard.
-            </p>
-            <Link href="/login" className="btn-primary mt-6">
-              Go to login
-            </Link>
-          </div>
-        </section>
-        <Footer />
-      </main>
-    );
+    redirect("/login");
   }
 
   const { data: agency } = await supabase

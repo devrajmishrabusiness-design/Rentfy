@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import EditAgencyProfile from "@/app/EditAgencyProfile";
 import Footer from "@/app/Footer";
@@ -10,19 +11,7 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <main className="min-h-screen bg-[var(--brand-background)]">
-        <section className="container-app py-24 text-center">
-          <div className="mx-auto max-w-md card p-10">
-            <h1 className="text-2xl font-extrabold">Please login first</h1>
-            <p className="mt-2 text-[var(--brand-muted)]">
-              Sign in to edit your agency profile.
-            </p>
-          </div>
-        </section>
-        <Footer />
-      </main>
-    );
+    redirect("/login");
   }
 
   const { data: agency } = await supabase

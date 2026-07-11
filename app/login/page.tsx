@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "../Footer";
 import ErrorMessage from "../ErrorMessage";
+
+function safeRedirect(redirect: string | null): string {
+  if (!redirect || typeof redirect !== "string") return "/dashboard";
+  if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect;
+  return "/dashboard";
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,14 +19,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = safeRedirect(searchParams.get("redirect"));
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        router.push("/dashboard");
+        router.push(redirectTo);
       }
     });
-  }, [router]);
+  }, [router, redirectTo]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +47,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(redirectTo);
   };
 
   return (

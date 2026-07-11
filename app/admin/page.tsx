@@ -22,9 +22,6 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  // Authorize: only signed-in users whose agency row has is_admin = true
-  // may continue. The service-role client is used here so we can read the
-  // agency row even if the agency's own RLS policies would mask it.
   const { data: agencyRow } = await supabaseAdmin
     .from("agencies")
     .select("is_admin")
