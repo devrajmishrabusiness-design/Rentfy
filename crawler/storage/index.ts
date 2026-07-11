@@ -8,6 +8,7 @@
  * required to start.
  */
 import type { CrawlResult } from "../types";
+import { Storage } from "@rentfy/engine-sdk";
 
 export interface CrawlStorage {
   /** Persist a completed crawl. May throw; the engine will surface the error. */
@@ -15,12 +16,21 @@ export interface CrawlStorage {
 }
 
 /**
- * In-memory stub used in tests and dev when no durable layer is wired
- * up yet. Satisfies `CrawlStorage` but does nothing.
+ * In-memory store backed by the Platform Foundation Shared Storage module.
+ * Satisfies `CrawlStorage`.
  */
 export class MemoryCrawlStorage implements CrawlStorage {
+  private readonly storage: Storage;
+
+  constructor(storage?: Storage) {
+    this.storage = storage ?? new Storage({ collections: ["crawl_results"] });
+  }
+
   async save(result: CrawlResult): Promise<void> {
-    void result;
-    // No-op
+    const key = `crawl-${result.stats.startedAt}-${result.startUrl.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    await this.storage.save("crawl_results", {
+      key,
+      value: result as unknown,
+    });
   }
 }

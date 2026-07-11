@@ -1,4 +1,5 @@
 import type { PluginStorage } from '../types';
+import { MemoryStorageProvider, type StorageProvider } from '../storage';
 
 export interface EngineStorage extends PluginStorage {
   get<T>(key: string): Promise<T | null>;
@@ -10,30 +11,37 @@ export interface EngineStorage extends PluginStorage {
 }
 
 export class DefaultPluginStorage implements EngineStorage {
-  private store = new Map<string, unknown>();
+  private provider: StorageProvider;
+
+  constructor(provider?: StorageProvider) {
+    this.provider = provider ?? new MemoryStorageProvider();
+  }
+
+  getProvider(): StorageProvider {
+    return this.provider;
+  }
 
   async get<T>(key: string): Promise<T | null> {
-    const value = this.store.get(key);
-    return value as T ?? null;
+    return this.provider.get<T>(key);
   }
 
   async set<T>(key: string, value: T): Promise<void> {
-    this.store.set(key, value);
+    return this.provider.set(key, value);
   }
 
   async delete(key: string): Promise<void> {
-    this.store.delete(key);
+    return this.provider.delete(key);
   }
 
   async clear(): Promise<void> {
-    this.store.clear();
+    return this.provider.clear();
   }
 
   async has(key: string): Promise<boolean> {
-    return this.store.has(key);
+    return this.provider.has(key);
   }
 
   async keys(): Promise<string[]> {
-    return Array.from(this.store.keys());
+    return this.provider.keys();
   }
 }
