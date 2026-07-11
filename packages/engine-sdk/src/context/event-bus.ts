@@ -1,63 +1,74 @@
 import type { EngineEvent, EngineEventHandler, EventBus } from '../types';
+import { DefaultPlatformEventBus, MemoryEventBusTransport } from '../event-bus';
+import type { PlatformEvent, Subscription } from '../event-bus';
 
 export class DefaultEventBus implements EventBus {
-  private handlers = new Map<string, Set<EngineEventHandler>>();
-  private onceHandlers = new Map<string, Set<EngineEventHandler>>();
+  private readonly bus = new DefaultPlatformEventBus({
+    transport: new MemoryEventBusTransport(),
+  });
+
+  private readonly handlerSubs = new Map<EngineEventHandler, Subscription[]>();
 
   on(event: string, handler: EngineEventHandler): void {
-    if (!this.handlers.has(event)) {
-      this.handlers.set(event, new Set());
-    }
-    this.handlers.get(event)!.add(handler);
+    const wrapped = (platformEvent: PlatformEvent<EngineEvent>) => {
+      const engineEvent = platformEvent.payload as EngineEvent;
+      handler(engineEvent);
+    };
+    const sub = this.bus.subscribe(event, wrapped);
+    this.trackSub(handler, sub);
   }
 
   off(event: string, handler: EngineEventHandler): void {
-    this.handlers.get(event)?.delete(handler);
-    this.onceHandlers.get(event)?.delete(handler);
+    const subs = this.handlerSubs.get(handler);
+    if (subs) {
+      const remaining: Subscription[] = [];
+      for (const sub of subs) {
+        if (sub.type === event) {
+          sub.unsubscribe();
+        } else {
+          remaining.push(sub);
+        }
+      }
+      if (remaining.length === 0) {
+        this.handlerSubs.delete(handler);
+      } else {
+        this.handlerSubs.set(handler, remaining);
+      }
+    }
   }
 
   emit(event: EngineEvent): void {
-    const handlers = this.handlers.get(event.type);
-    if (handlers) {
-      for (const handler of handlers) {
-        try {
-          handler(event);
-        } catch (error) {
-          console.error(`Error in event handler for ${event.type}:`, error);
-        }
-      }
-    }
-
-    const onceHandlers = this.onceHandlers.get(event.type);
-    if (onceHandlers) {
-      for (const handler of onceHandlers) {
-        try {
-          handler(event);
-        } catch (error) {
-          console.error(`Error in once event handler for ${event.type}:`, error);
-        }
-      }
-      this.onceHandlers.delete(event.type);
-    }
+    this.bus.publish(event.type, event, { source: event.source });
   }
 
   once(event: string, handler: EngineEventHandler): void {
-    if (!this.onceHandlers.has(event)) {
-      this.onceHandlers.set(event, new Set());
-    }
-    this.onceHandlers.get(event)!.add(handler);
+    const wrapped = (platformEvent: PlatformEvent<EngineEvent>) => {
+      const engineEvent = platformEvent.payload as EngineEvent;
+      handler(engineEvent);
+    };
+    const sub = this.bus.once(event, wrapped);
+    this.trackSub(handler, sub);
   }
 
   clear(): void {
-    this.handlers.clear();
-    this.onceHandlers.clear();
+    this.handlerSubs.clear();
+    this.bus.clear();
   }
 
   getHandlerCount(event: string): number {
-    return this.handlers.get(event)?.size ?? 0;
+    return this.bus.listenerCount(event);
   }
 
   hasHandlers(event: string): boolean {
-    return (this.handlers.get(event)?.size ?? 0) > 0;
+    return this.bus.hasListeners(event);
+  }
+
+  private trackSub(handler: EngineEventHandler, sub: Subscription): void {
+    const subs = this.handlerSubs.get(handler);
+    if (subs) {
+      subs.push(sub);
+    } else {
+      this.handlerSubs.set(handler, [sub]);
+    }
   }
 }
