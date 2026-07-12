@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 const logger = new DefaultStructuredLogger({
   source: "api/properties/similar",
@@ -10,6 +11,9 @@ const logger = new DefaultStructuredLogger({
 export const revalidate = 60;
 
 export async function GET(request: NextRequest) {
+  const rl = await rateLimit(request, RateLimitPresets.light);
+  if (rl.blocked) return rl.response;
+
   const supabase = await createClient();
   const searchParams = request.nextUrl.searchParams;
 

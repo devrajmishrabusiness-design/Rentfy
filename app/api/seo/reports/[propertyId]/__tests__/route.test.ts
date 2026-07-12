@@ -10,13 +10,32 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/supabase-server", () => ({
+  createClient: vi.fn(),
+}));
+
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn(),
+  RateLimitPresets: {
+    strict: { tokens: 5, intervalMs: 60_000 },
+    moderate: { tokens: 20, intervalMs: 60_000 },
+    standard: { tokens: 60, intervalMs: 60_000 },
+    light: { tokens: 120, intervalMs: 60_000 },
+  },
+}));
+
 // Mock the report service
 vi.mock("@/lib/seo/report-service", () => ({
   getReportByPropertyId: vi.fn(),
 }));
 
 import { GET } from "../route";
+import { createClient } from "@/lib/supabase-server";
+import { rateLimit } from "@/lib/rate-limit";
 import { getReportByPropertyId } from "@/lib/seo/report-service";
+
+const mockCreateClient = createClient as unknown as ReturnType<typeof vi.fn>;
+const mockRateLimit = rateLimit as unknown as ReturnType<typeof vi.fn>;
 
 const mockGetReport = getReportByPropertyId as ReturnType<typeof vi.fn>;
 
@@ -69,11 +88,33 @@ function createMockRequest(propertyId?: string): Request {
   return new Request(url, { method: "GET" });
 }
 
+function setupAuth() {
+  mockRateLimit.mockResolvedValue({ blocked: false, remaining: 10, resetAt: Date.now() + 60_000 });
+  const mockSupabaseClient = {
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "user-1", email: "test@agency.com" } },
+      }),
+    },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: "agency-1", verified: true },
+          }),
+        }),
+      }),
+    }),
+  };
+  mockCreateClient.mockResolvedValue(mockSupabaseClient);
+}
+
 type RouteContext = { params: Promise<{ propertyId: string }> };
 
 describe("GET /api/seo/reports/:propertyId", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupAuth();
   });
 
   it("returns 200 with stored report", async () => {

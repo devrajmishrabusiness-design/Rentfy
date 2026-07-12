@@ -14,6 +14,20 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/supabase-server", () => ({
+  createClient: vi.fn(),
+}));
+
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn(),
+  RateLimitPresets: {
+    strict: { tokens: 5, intervalMs: 60_000 },
+    moderate: { tokens: 20, intervalMs: 60_000 },
+    standard: { tokens: 60, intervalMs: 60_000 },
+    light: { tokens: 120, intervalMs: 60_000 },
+  },
+}));
+
 // Mock the adapter and report service
 vi.mock("@/lib/seo/adapter", async () => {
   const actual = await vi.importActual<typeof import("@/lib/seo/adapter")>(
@@ -30,9 +44,13 @@ vi.mock("@/lib/seo/report-service", () => ({
 }));
 
 import { POST } from "../route";
+import { createClient } from "@/lib/supabase-server";
+import { rateLimit } from "@/lib/rate-limit";
 import { analyzePropertySeo } from "@/lib/seo/adapter";
 import { upsertReport } from "@/lib/seo/report-service";
 
+const mockCreateClient = createClient as unknown as ReturnType<typeof vi.fn>;
+const mockRateLimit = rateLimit as unknown as ReturnType<typeof vi.fn>;
 const mockAnalyze = analyzePropertySeo as unknown as ReturnType<typeof vi.fn>;
 const mockUpsert = upsertReport as unknown as ReturnType<typeof vi.fn>;
 
@@ -58,9 +76,31 @@ const validPropertyWithId = {
   propertyId: "prop-123",
 };
 
+function setupAuth() {
+  mockRateLimit.mockResolvedValue({ blocked: false, remaining: 10, resetAt: Date.now() + 60_000 });
+  const mockSupabaseClient = {
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "user-1", email: "test@agency.com" } },
+      }),
+    },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: "agency-1", verified: true },
+          }),
+        }),
+      }),
+    }),
+  };
+  mockCreateClient.mockResolvedValue(mockSupabaseClient);
+}
+
 describe("POST /api/seo/analyze — success", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupAuth();
   });
 
   it("returns 200 with a structured report", async () => {
@@ -130,6 +170,11 @@ describe("POST /api/seo/analyze — success", () => {
 });
 
 describe("POST /api/seo/analyze — validation failures", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupAuth();
+  });
+
   it("returns 400 for malformed JSON", async () => {
     const req = new Request("http://localhost/api/seo/analyze", {
       method: "POST",
@@ -162,6 +207,11 @@ describe("POST /api/seo/analyze — validation failures", () => {
 });
 
 describe("POST /api/seo/analyze — engine failures", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupAuth();
+  });
+
   it("returns 500 when the adapter reports an engine failure", async () => {
     mockAnalyze.mockResolvedValueOnce({
       ok: false,

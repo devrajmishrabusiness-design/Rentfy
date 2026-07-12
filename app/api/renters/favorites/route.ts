@@ -19,12 +19,16 @@
  * attempting any of this, so 401 here means something genuinely wrong.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 type PostBody = { property_id?: string };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.standard);
+  if (limit.blocked) return limit.response;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -60,7 +64,10 @@ export async function GET() {
   return NextResponse.json({ favorites: data });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.standard);
+  if (limit.blocked) return limit.response;
+
   let body: PostBody = {};
   try {
     body = (await request.json()) as PostBody;
@@ -114,7 +121,10 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.standard);
+  if (limit.blocked) return limit.response;
+
   const url = new URL(request.url);
   const propertyId =
     url.searchParams.get("property_id") ??

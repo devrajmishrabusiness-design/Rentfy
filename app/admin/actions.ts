@@ -87,6 +87,36 @@ export async function deletePropertyAdmin(
   return { ok: true };
 }
 
+export async function approveProperty(propertyId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const { error } = await supabaseAdmin
+    .from("properties")
+    .update({ status: "approved" })
+    .eq("id", propertyId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+export async function rejectProperty(propertyId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const { error } = await supabaseAdmin
+    .from("properties")
+    .update({ status: "rejected" })
+    .eq("id", propertyId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
 export async function deleteAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;

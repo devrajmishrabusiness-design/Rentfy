@@ -14,13 +14,17 @@
  *   - user_id comes from the JWT (auth.uid()), not the body.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 type Body = { full_name?: string | null; phone_number?: string };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.light);
+  if (limit.blocked) return limit.response;
+
   let body: Body = {};
   try {
     body = (await request.json()) as Body;

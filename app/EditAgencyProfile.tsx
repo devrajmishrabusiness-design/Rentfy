@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { updateAgencyProfile } from "@/app/actions";
 import type { Agency } from "./types";
 
 export default function EditAgencyProfile({
@@ -11,6 +11,7 @@ export default function EditAgencyProfile({
   agency: Agency;
 }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const [form, setForm] = useState({
     agency_name: agency.agency_name || "",
@@ -18,35 +19,25 @@ export default function EditAgencyProfile({
     phone: agency.phone || "",
     city: agency.city || "",
   });
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setError(null);
     setSaved(false);
 
-    const { error } = await supabase
-      .from("agencies")
-      .update({
-        agency_name: form.agency_name,
-        owner_name: form.owner_name,
-        phone: form.phone,
-        city: form.city,
-      })
-      .eq("id", agency.id);
+    startTransition(async () => {
+      const result = await updateAgencyProfile(agency.id!, form);
 
-    setSaving(false);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    setSaved(true);
-    router.refresh();
+      setSaved(true);
+      router.refresh();
+    });
   };
 
   return (
@@ -122,10 +113,10 @@ export default function EditAgencyProfile({
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={isPending}
         className="btn-primary w-full disabled:cursor-wait"
       >
-        {saving ? "Saving..." : "Save changes"}
+        {isPending ? "Saving..." : "Save changes"}
       </button>
     </form>
   );

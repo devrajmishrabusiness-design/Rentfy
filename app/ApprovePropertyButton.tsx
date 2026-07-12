@@ -1,7 +1,8 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { approveProperty } from "@/app/admin/actions";
 
 export default function ApprovePropertyButton({
   propertyId,
@@ -9,25 +10,25 @@ export default function ApprovePropertyButton({
   propertyId: string;
 }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const approveProperty = async () => {
-    const { error } = await supabase
-      .from("properties")
-      .update({ status: "approved" })
-      .eq("id", propertyId);
-
-    if (!error) {
-      router.refresh();
-    }
+  const handleApprove = () => {
+    startTransition(async () => {
+      const result = await approveProperty(propertyId);
+      if (result.ok) {
+        router.refresh();
+      }
+    });
   };
 
   return (
     <button
       type="button"
-      onClick={approveProperty}
-      className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-200"
+      onClick={handleApprove}
+      disabled={isPending}
+      className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-200 disabled:opacity-50"
     >
-      Approve
+      {isPending ? "Approving..." : "Approve"}
     </button>
   );
 }

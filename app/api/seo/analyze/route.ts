@@ -4,20 +4,24 @@
  * Receives a Rentfy property payload, validates it, delegates to the
  * SEO integration adapter, and returns a structured JSON report.
  *
- * If a valid propertyId is provided, the report is persisted to the database.
+ * Requires authentication. If a valid propertyId is provided, the
+ * report is persisted to the database.
  *
  * Status code policy:
  *   - 200: successful analysis
  *   - 201: successful analysis with report persisted
  *   - 400: malformed body or missing required fields
+ *   - 401: not authenticated
  *   - 405: non-POST request
  *   - 500: unexpected engine failure
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase-server";
 import { analyzePropertySeo } from "@/lib/seo/adapter";
 import { upsertReport } from "@/lib/seo/report-service";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 const logger = new DefaultStructuredLogger({
   source: "api/seo/analyze",
@@ -27,6 +31,35 @@ const logger = new DefaultStructuredLogger({
 const ANALYZER_VERSION = "0.1.0-core";
 
 export async function POST(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.strict);
+  if (limit.blocked) return limit.response;
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "Not authenticated." },
+      { status: 401 }
+    );
+  }
+
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("id, verified")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!agency || !agency.verified) {
+    return NextResponse.json(
+      { error: "Only verified agencies can run SEO analysis." },
+      { status: 403 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();

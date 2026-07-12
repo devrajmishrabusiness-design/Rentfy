@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 const logger = new DefaultStructuredLogger({
   source: "api/visits",
@@ -8,6 +9,9 @@ const logger = new DefaultStructuredLogger({
 });
 
 export async function POST(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.moderate);
+  if (limit.blocked) return limit.response;
+
   const supabase = await createClient();
 
   const body = await request.json();
@@ -46,7 +50,19 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.moderate);
+  if (limit.blocked) return limit.response;
+
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const propertyId = searchParams.get("property_id");
   const renterId = searchParams.get("renter_id");
@@ -81,7 +97,19 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const limit = await rateLimit(request, RateLimitPresets.moderate);
+  if (limit.blocked) return limit.response;
+
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
   const body = await request.json();
   const { visit_id, status } = body;
 
