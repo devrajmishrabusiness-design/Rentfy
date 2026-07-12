@@ -47,6 +47,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!user.email_confirmed_at) {
+    return NextResponse.json(
+      { error: "Email not verified. Please confirm your email first." },
+      { status: 403 }
+    );
+  }
+
   const { data: agency } = await supabase
     .from("agencies")
     .select("id, verified")

@@ -93,7 +93,7 @@ function setupAuth() {
   const mockSupabaseClient = {
     auth: {
       getUser: vi.fn().mockResolvedValue({
-        data: { user: { id: "user-1", email: "test@agency.com" } },
+        data: { user: { id: "user-1", email: "test@agency.com", email_confirmed_at: new Date().toISOString() } },
       }),
     },
     from: vi.fn().mockReturnValue({

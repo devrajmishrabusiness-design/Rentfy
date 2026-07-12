@@ -87,6 +87,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (user && !user.email_confirmed_at && isProtected(pathname)) {
+    const verifyUrl = new URL("/verify-email", request.url);
+    if (pathname !== "/verify-email") {
+      verifyUrl.searchParams.set("redirect", pathname);
+    }
+    return NextResponse.redirect(verifyUrl);
+  }
+
   return response;
 }
 

@@ -83,6 +83,7 @@ export default function RenterAuthDialog() {
         email: cleanEmail,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/verify-email`,
           data: {
             role: "renter",
             full_name: cleanName,
@@ -131,6 +132,12 @@ export default function RenterAuthDialog() {
     if (signInError || !data.user) {
       setLoading(false);
       setError(signInError?.message ?? "Could not sign in.");
+      return;
+    }
+
+    if (!data.user.email_confirmed_at) {
+      setLoading(false);
+      setNotice("Your email is not verified yet. Please check your inbox for the confirmation link.");
       return;
     }
 

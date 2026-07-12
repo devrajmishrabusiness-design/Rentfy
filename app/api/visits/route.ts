@@ -63,6 +63,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
+  if (!user.email_confirmed_at) {
+    return NextResponse.json(
+      { error: "Email not verified. Please confirm your email first." },
+      { status: 403 }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const propertyId = searchParams.get("property_id");
   const renterId = searchParams.get("renter_id");
@@ -108,6 +115,13 @@ export async function PATCH(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
+  if (!user.email_confirmed_at) {
+    return NextResponse.json(
+      { error: "Email not verified. Please confirm your email first." },
+      { status: 403 }
+    );
   }
 
   const body = await request.json();

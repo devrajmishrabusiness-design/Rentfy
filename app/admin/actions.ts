@@ -25,6 +25,10 @@ async function requireAdmin(): Promise<RequireAdminResult> {
 
   if (!user) return { ok: false, error: "Not signed in." };
 
+  if (!user.email_confirmed_at) {
+    return { ok: false, error: "Email not verified. Please confirm your email first." };
+  }
+
   // Read the caller's agency row through the service-role client so that
   // an admin can still be located even if their own RLS policy would mask it.
   const { data: agencyRow } = await supabaseAdmin

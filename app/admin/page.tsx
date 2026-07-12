@@ -22,6 +22,10 @@ export default async function AdminPage() {
     redirect("/");
   }
 
+  if (!user.email_confirmed_at) {
+    redirect("/verify-email?redirect=/admin");
+  }
+
   const { data: agencyRow } = await supabaseAdmin
     .from("agencies")
     .select("is_admin")

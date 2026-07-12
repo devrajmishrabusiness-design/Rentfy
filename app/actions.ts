@@ -12,8 +12,41 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Create an agency row at signup using the service-role client.
+ *
+ * Called from the signup page regardless of whether Supabase email
+ * confirmation is enabled. The service-role client bypasses RLS,
+ * ensuring the row is persisted even when the user has no session
+ * (email confirmation pending).
+ */
+export async function createAgencyAtSignup(params: {
+  auth_user_id: string;
+  agency_name: string;
+  owner_name: string;
+  email: string;
+  phone: string;
+  city: string;
+}): Promise<ActionResult> {
+  const { error } = await supabaseAdmin.from("agencies").insert([
+    {
+      auth_user_id: params.auth_user_id,
+      agency_name: params.agency_name,
+      owner_name: params.owner_name,
+      email: params.email,
+      phone: params.phone,
+      city: params.city,
+      verified: false,
+    },
+  ]);
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
 
 async function getVerifiedAgency(): Promise<
   { ok: true; agencyId: string } | { ok: false; error: string }
@@ -24,6 +57,10 @@ async function getVerifiedAgency(): Promise<
   } = await supabase.auth.getUser();
 
   if (!user) return { ok: false, error: "Not signed in." };
+
+  if (!user.email_confirmed_at) {
+    return { ok: false, error: "Email not verified. Please confirm your email first." };
+  }
 
   const { data: agency } = await supabase
     .from("agencies")

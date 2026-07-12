@@ -13,11 +13,14 @@ function safeRedirect(redirect: string | null): string {
   return "/dashboard";
 }
 
+type LoginState = "form" | "unverified";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginState, setLoginState] = useState<LoginState>("form");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = safeRedirect(searchParams.get("redirect"));
@@ -25,6 +28,11 @@ export default function LoginPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
+        const user = data.session.user;
+        if (!user.email_confirmed_at) {
+          router.push("/verify-email");
+          return;
+        }
         router.push(redirectTo);
       }
     });
@@ -35,7 +43,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -47,8 +55,84 @@ export default function LoginPage() {
       return;
     }
 
+    if (data.user && !data.user.email_confirmed_at) {
+      setLoginState("unverified");
+      return;
+    }
+
     router.push(redirectTo);
   };
+
+  const resendVerification = async () => {
+    setError(null);
+    setLoading(true);
+const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    });
+    if (resendError) {
+      setError(resendError.message);
+    }
+  };
+
+  if (loginState === "unverified") {
+    return (
+      <main className="min-h-screen bg-[var(--brand-background)]">
+        <section className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md">
+            <div className="card p-8">
+              <div className="mb-6 text-center">
+                <span className="badge-warning mx-auto">Email not verified</span>
+                <h1 className="mt-3 text-2xl font-extrabold text-[var(--brand-text)]">
+                  Verify your email first
+                </h1>
+                <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                  Your account was created but your email has not been confirmed.
+                  Check your inbox for the verification link.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-6">
+                <p className="text-sm leading-6 text-[var(--brand-text)]">
+                  We sent a confirmation link to <strong>{email}</strong> when
+                  you signed up. Click that link first, then sign in again.
+                </p>
+              </div>
+
+              <ErrorMessage message={error} className="mt-4" />
+
+              <button
+                type="button"
+                onClick={resendVerification}
+                disabled={loading}
+                className="btn-secondary mt-4 w-full disabled:cursor-wait"
+              >
+                {loading ? "Sending..." : "Resend verification email"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push("/verify-email")}
+                className="btn-primary mt-3 w-full"
+              >
+                I&apos;ve confirmed my email
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setLoginState("form"); setError(null); }}
+                className="mt-4 block w-full text-center text-sm font-bold text-[var(--brand-primary)] hover:underline"
+              >
+                Try a different account
+              </button>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[var(--brand-background)]">
