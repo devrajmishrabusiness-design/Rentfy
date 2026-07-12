@@ -132,7 +132,7 @@ export default function AddProperty() {
             .upload(fileName, file);
 
           if (uploadError) {
-            setError(uploadError.message);
+            setError("Image upload failed. Please try again.");
             setSubmitting(false);
             return;
           }
@@ -173,7 +173,7 @@ export default function AddProperty() {
         .single();
 
       if (error) {
-        setError(error.message);
+        setError("Failed to publish property. Please try again.");
         setSubmitting(false);
         return;
       }
@@ -188,10 +188,8 @@ export default function AddProperty() {
       }
 
       window.location.href = "/dashboard";
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Something went wrong.";
-      setError(msg);
+    } catch {
+      setError("Something went wrong. Please try again.");
       setSubmitting(false);
     }
   };

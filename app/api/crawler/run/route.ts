@@ -20,6 +20,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { runCrawl } from "@/lib/crawler/adapter";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/crawler/run",
+  transports: [new ConsoleLogTransport()],
+});
 
 export async function POST(request: NextRequest) {
   const limit = await rateLimit(request, RateLimitPresets.strict);
@@ -74,8 +80,11 @@ export async function POST(request: NextRequest) {
     const status = result.error?.message?.includes("required")
       ? 400
       : 500;
+    logger.warn("Crawl failed", {
+      error: result.error?.message ?? "unknown",
+    });
     return NextResponse.json(
-      { error: result.error?.message ?? "Crawl failed." },
+      { error: "Crawl failed. Please check the URL and try again." },
       { status }
     );
   }

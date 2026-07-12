@@ -67,6 +67,26 @@ export async function GET(
     );
   }
 
+  const { data: property, error: propertyError } = await supabase
+    .from("properties")
+    .select("agency_id")
+    .eq("id", propertyId)
+    .maybeSingle<{ agency_id: string }>();
+
+  if (propertyError || !property) {
+    return NextResponse.json(
+      { error: "Property not found." },
+      { status: 404 }
+    );
+  }
+
+  if (property.agency_id !== agency.id) {
+    return NextResponse.json(
+      { error: "You do not own this property." },
+      { status: 403 }
+    );
+  }
+
   try {
     const report = await getReportByPropertyId(propertyId);
 

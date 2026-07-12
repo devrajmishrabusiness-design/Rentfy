@@ -90,21 +90,35 @@ function createMockRequest(propertyId?: string): Request {
 
 function setupAuth() {
   mockRateLimit.mockResolvedValue({ blocked: false, remaining: 10, resetAt: Date.now() + 60_000 });
+  const baseFrom = (table: string) => {
+    if (table === "agencies") {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: { id: "agency-1", verified: true },
+            }),
+          }),
+        }),
+      };
+    }
+    return {
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { agency_id: "agency-1" },
+          }),
+        }),
+      }),
+    };
+  };
   const mockSupabaseClient = {
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: { id: "user-1", email: "test@agency.com", email_confirmed_at: new Date().toISOString() } },
       }),
     },
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: "agency-1", verified: true },
-          }),
-        }),
-      }),
-    }),
+    from: vi.fn((table: string) => baseFrom(table)),
   };
   mockCreateClient.mockResolvedValue(mockSupabaseClient);
 }

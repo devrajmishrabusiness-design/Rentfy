@@ -83,10 +83,11 @@ export async function POST(request: NextRequest) {
     const status = result.error?.message?.includes("required")
       ? 400
       : 500;
+    logger.warn("SEO analysis failed", {
+      error: result.error?.message ?? "unknown",
+    });
     return NextResponse.json(
-      {
-        error: result.error?.message ?? "SEO analysis failed.",
-      },
+      { error: "SEO analysis failed. Please check the property data and try again." },
       { status }
     );
   }

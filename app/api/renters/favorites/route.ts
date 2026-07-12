@@ -22,6 +22,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/renters/favorites",
+  transports: [new ConsoleLogTransport()],
+});
 
 type PostBody = { property_id?: string };
 
@@ -58,7 +64,11 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    return NextResponse.json(
+      { error: "Failed to process favorites request." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ favorites: data });
@@ -115,7 +125,11 @@ export async function POST(request: NextRequest) {
     if (error.code === "23505") {
       return NextResponse.json({ ok: true });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    return NextResponse.json(
+      { error: "Failed to process favorites request." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true });
@@ -166,7 +180,11 @@ export async function DELETE(request: NextRequest) {
     .eq("property_id", propertyId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    return NextResponse.json(
+      { error: "Failed to process favorites request." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true });

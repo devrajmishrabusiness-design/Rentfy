@@ -220,7 +220,9 @@ describe("POST /api/seo/analyze — engine failures", () => {
     const res = await POST(makeRequest(validProperty) as never);
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.error).toMatch(/engine blew up/);
+    expect(body.error).toBe(
+      "SEO analysis failed. Please check the property data and try again."
+    );
   });
 });
 

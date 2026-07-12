@@ -18,6 +18,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+
+const logger = new DefaultStructuredLogger({
+  source: "api/renters/profile",
+  transports: [new ConsoleLogTransport()],
+});
 
 type Body = { full_name?: string | null; phone_number?: string };
 
@@ -98,7 +104,11 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logger.error("Profile upsert error", { error: String(error) });
+    return NextResponse.json(
+      { error: "Failed to save profile." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ profile: data });
