@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { Property } from "./types";
 import SectionHeader from "./SectionHeader";
 import HeroSearch from "./HeroSearch";
+import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
 const whyItems = [
   {
@@ -232,8 +233,26 @@ const trustItems = [
 
 export const revalidate = 60;
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const supabase = await createClient();
+  const resolvedParams = await searchParams;
+  const pagination = extractPagination(new URLSearchParams(
+    Object.entries(resolvedParams).flatMap(([k, v]) =>
+      Array.isArray(v) ? v.map((sv) => [k, sv] as [string, string]) : [[k, v ?? ""] as [string, string]]
+    )
+  ));
+
+  const { count: totalCount } = await supabase
+    .from("properties")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "approved");
+
+  const [from, to] = toRange(pagination);
+
   const { data: properties } = await supabase
     .from("properties")
     .select(
@@ -246,9 +265,13 @@ export default async function Home() {
     )
     .eq("agencies.verified", true)
     .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .range(from, to)
     .returns<Property[]>();
 
-  const activeListings = properties?.length || 0;
+  const paginated = respondPaginated(properties ?? [], totalCount ?? 0, pagination);
+
+  const activeListings = totalCount ?? 0;
   const featuredProperty = properties?.[0];
 
   return (
@@ -472,7 +495,31 @@ export default async function Home() {
             />
           </div>
 
-          <PropertyList properties={properties || []} />
+          <PropertyList properties={paginated.items} />
+
+          {paginated.totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-4">
+              {paginated.hasPrev && (
+                <Link
+                  href={`/?page=${paginated.page - 1}#listings`}
+                  className="btn-secondary"
+                >
+                  Previous
+                </Link>
+              )}
+              <span className="text-sm font-medium text-[var(--brand-muted)]">
+                Page {paginated.page} of {paginated.totalPages}
+              </span>
+              {paginated.hasNext && (
+                <Link
+                  href={`/?page=${paginated.page + 1}#listings`}
+                  className="btn-secondary"
+                >
+                  Next
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
