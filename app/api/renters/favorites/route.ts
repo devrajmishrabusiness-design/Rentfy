@@ -23,6 +23,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
 const logger = new DefaultStructuredLogger({
   source: "api/renters/favorites",
@@ -57,11 +58,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { data, error } = await supabase
+  const searchParams = request.nextUrl.searchParams;
+  const pagination = extractPagination(searchParams, 20);
+  const [from, to] = toRange(pagination);
+
+  const { count: totalCount, data, error } = await supabase
     .from("renter_favorites")
-    .select("property_id, created_at")
+    .select("property_id, created_at", { count: "exact" })
     .eq("renter_id", profile.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     logger.error("Favorites operation error", { error: String(error), code: error.code });
@@ -71,7 +77,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ favorites: data });
+  const result = respondPaginated(data ?? [], totalCount ?? 0, pagination);
+  return NextResponse.json({
+    favorites: result.items,
+    page: result.page,
+    pageSize: result.pageSize,
+    totalCount: result.totalCount,
+    totalPages: result.totalPages,
+    hasNext: result.hasNext,
+    hasPrev: result.hasPrev,
+  });
 }
 
 export async function POST(request: NextRequest) {

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
 const logger = new DefaultStructuredLogger({
   source: "api/visits",
@@ -74,6 +75,9 @@ export async function GET(request: NextRequest) {
   const propertyId = searchParams.get("property_id");
   const renterId = searchParams.get("renter_id");
 
+  const pagination = extractPagination(searchParams, 20);
+  const [from, to] = toRange(pagination);
+
   let query = supabase
     .from("property_visits")
     .select(
@@ -81,7 +85,8 @@ export async function GET(request: NextRequest) {
       *,
       properties(title, location, city),
       renter_profiles(full_name, phone_number)
-    `
+    `,
+      { count: "exact" }
     )
     .order("created_at", { ascending: false });
 
@@ -93,14 +98,24 @@ export async function GET(request: NextRequest) {
     query = query.eq("renter_id", renterId);
   }
 
-  const { data: visits, error } = await query;
+  const { count: totalCount, data: visits, error } = await query
+    .range(from, to);
 
   if (error) {
     logger.error("Visits fetch error", { error: String(error) });
     return NextResponse.json({ error: "Failed to fetch visits" }, { status: 500 });
   }
 
-  return NextResponse.json({ visits: visits || [] });
+  const result = respondPaginated(visits ?? [], totalCount ?? 0, pagination);
+  return NextResponse.json({
+    visits: result.items,
+    page: result.page,
+    pageSize: result.pageSize,
+    totalCount: result.totalCount,
+    totalPages: result.totalPages,
+    hasNext: result.hasNext,
+    hasPrev: result.hasPrev,
+  });
 }
 
 export async function PATCH(request: NextRequest) {
