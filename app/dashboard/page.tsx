@@ -38,9 +38,9 @@ export default async function Dashboard({
 
   const { data: agency } = await supabase
     .from("agencies")
-    .select("*")
+    .select("id, verified, agency_name, owner_name, city")
     .eq("auth_user_id", userResult.user.id)
-    .single<Agency>();
+    .single<Pick<Agency, "id" | "verified" | "agency_name" | "owner_name" | "city">>();
 
   if (!agency) {
     return (
@@ -164,14 +164,9 @@ export default async function Dashboard({
     )
   ));
 
-  const { count: totalPropertiesCount } = await supabase
+  const { data: allProperties, count: totalPropertiesCount } = await supabase
     .from("properties")
-    .select("id", { count: "exact", head: true })
-    .eq("agency_id", agency.id);
-
-  const { data: allProperties } = await supabase
-    .from("properties")
-    .select("id, status, rent, title")
+    .select("id, status, rent, title", { count: "exact" })
     .eq("agency_id", agency.id)
     .returns<Property[]>();
 
@@ -179,7 +174,7 @@ export default async function Dashboard({
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("*")
+    .select("id, title, image_url, rent, area_sqft, location, city, property_type, bedrooms, bathrooms, furnishing, parking, available_from, status, agency_id, created_at")
     .eq("agency_id", agency.id)
     .order("created_at", { ascending: false })
     .range(from, to)
@@ -190,7 +185,7 @@ export default async function Dashboard({
   const { data: seoReports } = propertyIds.length > 0
                   ? await supabase
                       .from("seo_reports")
-                      .select("*")
+                      .select("property_id, overall_score, overall_grade")
                       .in("property_id", propertyIds)
                   : { data: null };
 
@@ -209,7 +204,7 @@ export default async function Dashboard({
   const { data: leads } = await supabase
     .from("leads")
     .select(`
-      *,
+      id, source, status, created_at, property_id,
       properties(title)
     `)
     .eq("agency_id", agency.id)
