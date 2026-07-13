@@ -1,3 +1,4 @@
+import { cache } from "react";
 import ImageGallery from "@/app/ImageGallery";
 import { supabase } from "@/lib/supabase";
 import ContactAgencyButton from "@/app/ContactAgencyButton";
@@ -8,6 +9,20 @@ import SimilarListings from "@/app/SimilarListings";
 import ScheduleVisitButton from "@/app/renter/ScheduleVisitButton";
 import type { Metadata } from "next";
 
+/** Columns needed by both generateMetadata and the PropertyPage render. */
+const PROPERTY_COLUMNS =
+  "id, title, description, rent, city, location, property_type, bedrooms, bathrooms, furnishing, parking, available_from, image_url, agency_id";
+
+/** Cache the property fetch so generateMetadata and PropertyPage share one DB call. */
+const getProperty = cache(async (id: string) => {
+  return supabase
+    .from("properties")
+    .select(PROPERTY_COLUMNS)
+    .eq("id", id)
+    .eq("status", "approved")
+    .single();
+});
+
 export async function generateMetadata({
   params,
 }: {
@@ -15,12 +30,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
 
-  const { data: property } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("id", id)
-    .eq("status", "approved")
-    .single();
+  const { data: property } = await getProperty(id);
 
   if (!property) {
     return {
@@ -67,12 +77,7 @@ export default async function PropertyPage({
 }) {
   const { id } = await params;
 
-  const { data: property } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("id", id)
-    .eq("status", "approved")
-    .single();
+  const { data: property } = await getProperty(id);
 
   if (!property) {
     return (
@@ -90,13 +95,13 @@ export default async function PropertyPage({
 
   const { data: agency } = await supabase
     .from("agencies")
-    .select("*")
+    .select("id, agency_name, verified, owner_name, city, phone")
     .eq("id", property.agency_id)
     .single();
 
   const { data: images } = await supabase
     .from("property_images")
-    .select("*")
+    .select("image_url")
     .eq("property_id", property.id);
 
   const imageUrls = images?.map((img) => img.image_url) || [];
