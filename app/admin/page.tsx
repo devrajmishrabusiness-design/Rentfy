@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { redirect } from "next/navigation";
 import Footer from "@/app/Footer";
@@ -11,25 +10,21 @@ import RejectPropertyButton from "@/app/RejectPropertyButton";
 import StatusBadge from "@/app/StatusBadge";
 import StatCard from "@/app/StatCard";
 import type { Agency, Lead, Property } from "../types";
+import { requireUser } from "@/lib/auth";
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const userResult = await requireUser();
+  if (!userResult.ok) {
+    if (userResult.status === 403) {
+      redirect("/verify-email?redirect=/admin");
+    }
     redirect("/");
-  }
-
-  if (!user.email_confirmed_at) {
-    redirect("/verify-email?redirect=/admin");
   }
 
   const { data: agencyRow } = await supabaseAdmin
     .from("agencies")
     .select("is_admin")
-    .eq("auth_user_id", user.id)
+    .eq("auth_user_id", userResult.user.id)
     .maybeSingle();
 
   if (!agencyRow?.is_admin) {

@@ -1,23 +1,16 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase-server";
 import EditAgencyProfile from "@/app/EditAgencyProfile";
 import Footer from "@/app/Footer";
+import { requireUser } from "@/lib/auth";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
+  const userResult = await requireUser();
+  if (!userResult.ok) redirect("/login");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: agency } = await supabase
+  const { data: agency } = await userResult.supabase
     .from("agencies")
     .select("*")
-    .eq("auth_user_id", user.id)
+    .eq("auth_user_id", userResult.user.id)
     .single();
 
   if (!agency) {

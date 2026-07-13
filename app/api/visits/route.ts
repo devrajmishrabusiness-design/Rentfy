@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
+import { requireUser } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
   source: "api/visits",
@@ -54,22 +55,8 @@ export async function GET(request: NextRequest) {
   const limit = await rateLimit(request, RateLimitPresets.moderate);
   if (limit.blocked) return limit.response;
 
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-  }
-
-  if (!user.email_confirmed_at) {
-    return NextResponse.json(
-      { error: "Email not verified. Please confirm your email first." },
-      { status: 403 }
-    );
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const searchParams = request.nextUrl.searchParams;
   const propertyId = searchParams.get("property_id");
@@ -78,7 +65,7 @@ export async function GET(request: NextRequest) {
   const pagination = extractPagination(searchParams, 20);
   const [from, to] = toRange(pagination);
 
-  let query = supabase
+  let query = auth.supabase
     .from("property_visits")
     .select(
       `
@@ -122,22 +109,8 @@ export async function PATCH(request: NextRequest) {
   const limit = await rateLimit(request, RateLimitPresets.moderate);
   if (limit.blocked) return limit.response;
 
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-  }
-
-  if (!user.email_confirmed_at) {
-    return NextResponse.json(
-      { error: "Email not verified. Please confirm your email first." },
-      { status: 403 }
-    );
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const body = await request.json();
   const { visit_id, status } = body;
@@ -149,7 +122,7 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await auth.supabase
     .from("property_visits")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", visit_id)

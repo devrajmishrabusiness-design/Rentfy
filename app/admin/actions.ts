@@ -11,37 +11,26 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { requireUser, type ActionResult } from "@/lib/auth";
 
-type ActionResult = { ok: true } | { ok: false; error: string };
 type RequireAdminResult = { ok: true; userId: string } | { ok: false; error: string };
 
 async function requireAdmin(): Promise<RequireAdminResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userResult = await requireUser();
+  if (!userResult.ok) return { ok: false, error: userResult.error };
 
-  if (!user) return { ok: false, error: "Not signed in." };
-
-  if (!user.email_confirmed_at) {
-    return { ok: false, error: "Email not verified. Please confirm your email first." };
-  }
-
-  // Read the caller's agency row through the service-role client so that
-  // an admin can still be located even if their own RLS policy would mask it.
   const { data: agencyRow } = await supabaseAdmin
     .from("agencies")
     .select("is_admin")
-    .eq("auth_user_id", user.id)
+    .eq("auth_user_id", userResult.user.id)
     .maybeSingle();
 
   if (!agencyRow?.is_admin) {
     return { ok: false, error: "You don't have admin access." };
   }
 
-  return { ok: true, userId: user.id };
+  return { ok: true, userId: userResult.user.id };
 }
 
 export async function verifyAgency(agencyId: string): Promise<ActionResult> {

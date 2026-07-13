@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase-server";
 import type { Agency, Lead, Property } from "../types";
 import Footer from "../Footer";
 import LogoutButton from "../LogoutButton";
@@ -10,6 +9,7 @@ import PropertyCard from "../PropertyCard";
 import StatusBadge from "../StatusBadge";
 import StatCard from "../StatCard";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
+import { requireUser } from "@/lib/auth";
 
 const monthLabels = [
   "Jan",
@@ -31,20 +31,15 @@ export default async function Dashboard({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const supabase = await createClient();
+  const userResult = await requireUser();
+  if (!userResult.ok) redirect("/login");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  const supabase = userResult.supabase;
 
   const { data: agency } = await supabase
     .from("agencies")
     .select("*")
-    .eq("auth_user_id", user.id)
+    .eq("auth_user_id", userResult.user.id)
     .single<Agency>();
 
   if (!agency) {

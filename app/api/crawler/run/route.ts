@@ -17,10 +17,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
 import { runCrawl } from "@/lib/crawler/adapter";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
+import { requireVerifiedAgency } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
   source: "api/crawler/run",
@@ -31,38 +31,8 @@ export async function POST(request: NextRequest) {
   const limit = await rateLimit(request, RateLimitPresets.strict);
   if (limit.blocked) return limit.response;
 
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json(
-      { error: "Not authenticated." },
-      { status: 401 }
-    );
-  }
-
-  if (!user.email_confirmed_at) {
-    return NextResponse.json(
-      { error: "Email not verified. Please confirm your email first." },
-      { status: 403 }
-    );
-  }
-
-  const { data: agency } = await supabase
-    .from("agencies")
-    .select("id, verified")
-    .eq("auth_user_id", user.id)
-    .single();
-
-  if (!agency || !agency.verified) {
-    return NextResponse.json(
-      { error: "Only verified agencies can run crawls." },
-      { status: 403 }
-    );
-  }
+  const auth = await requireVerifiedAgency();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   let body: unknown;
   try {

@@ -11,10 +11,12 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
+import {
+  requireVerifiedAgency,
+  requirePropertyOwnership,
+  type ActionResult,
+} from "@/lib/auth";
 
 /**
  * Create an agency row at signup using the service-role client.
@@ -48,49 +50,14 @@ export async function createAgencyAtSignup(params: {
   return { ok: true };
 }
 
-async function getVerifiedAgency(): Promise<
-  { ok: true; agencyId: string } | { ok: false; error: string }
-> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { ok: false, error: "Not signed in." };
-
-  if (!user.email_confirmed_at) {
-    return { ok: false, error: "Email not verified. Please confirm your email first." };
-  }
-
-  const { data: agency } = await supabase
-    .from("agencies")
-    .select("id, verified")
-    .eq("auth_user_id", user.id)
-    .single();
-
-  if (!agency) return { ok: false, error: "Agency not found." };
-  if (!agency.verified) return { ok: false, error: "Agency not verified yet." };
-
-  return { ok: true, agencyId: agency.id };
-}
-
 export async function deleteOwnProperty(propertyId: string): Promise<ActionResult> {
-  const auth = await getVerifiedAgency();
+  const auth = await requireVerifiedAgency();
   if (!auth.ok) return auth;
 
-  const supabase = await createClient();
+  const ownership = await requirePropertyOwnership(propertyId, auth.agencyId, auth.supabase);
+  if (!ownership.ok) return ownership;
 
-  const { data: property } = await supabase
-    .from("properties")
-    .select("agency_id")
-    .eq("id", propertyId)
-    .single();
-
-  if (!property || property.agency_id !== auth.agencyId) {
-    return { ok: false, error: "You do not own this property." };
-  }
-
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("properties")
     .delete()
     .eq("id", propertyId);
@@ -105,12 +72,10 @@ export async function updateLeadStatus(
   leadId: string,
   status: string
 ): Promise<ActionResult> {
-  const auth = await getVerifiedAgency();
+  const auth = await requireVerifiedAgency();
   if (!auth.ok) return auth;
 
-  const supabase = await createClient();
-
-  const { data: lead } = await supabase
+  const { data: lead } = await auth.supabase
     .from("leads")
     .select("agency_id")
     .eq("id", leadId)
@@ -120,7 +85,7 @@ export async function updateLeadStatus(
     return { ok: false, error: "You do not own this lead." };
   }
 
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("leads")
     .update({ status })
     .eq("id", leadId);
@@ -140,16 +105,14 @@ export async function updateAgencyProfile(
     city?: string;
   }
 ): Promise<ActionResult> {
-  const auth = await getVerifiedAgency();
+  const auth = await requireVerifiedAgency();
   if (!auth.ok) return auth;
 
   if (auth.agencyId !== agencyId) {
     return { ok: false, error: "You do not own this agency profile." };
   }
 
-  const supabase = await createClient();
-
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("agencies")
     .update(updates)
     .eq("id", agencyId);

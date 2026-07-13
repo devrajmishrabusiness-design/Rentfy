@@ -1,7 +1,7 @@
-import { createClient } from "@/lib/supabase-server";
 import EditPropertyForm from "@/app/EditPropertyForm";
 import Footer from "@/app/Footer";
 import { redirect } from "next/navigation";
+import { requireVerifiedAgency } from "@/lib/auth";
 
 export default async function EditPropertyPage({
   params,
@@ -9,29 +9,17 @@ export default async function EditPropertyPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const auth = await requireVerifiedAgency();
+  if (!auth.ok) redirect("/dashboard");
 
-  const { data: property } = await supabase
+  const { data: property } = await auth.supabase
     .from("properties")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (!property) {
-    redirect("/dashboard");
-  }
-
-  const { data: agency } = await supabase
-    .from("agencies")
-    .select("id, verified")
-    .eq("auth_user_id", user!.id)
-    .single();
-
-  if (!agency || !agency.verified || agency.id !== property.agency_id) {
+  if (!property || property.agency_id !== auth.agencyId) {
     redirect("/dashboard");
   }
 

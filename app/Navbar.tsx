@@ -1,19 +1,39 @@
 import Link from "next/link";
 import Logo from "./Logo";
-import { createClient } from "@/lib/supabase-server";
 import MobileMenu from "./MobileMenu";
 import RenterNavButton from "./renter/RenterNavButton";
 import ProfileDropdown from "./ProfileDropdown";
+import { requireUser } from "@/lib/auth";
 
 export default async function Navbar() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userResult = await requireUser();
+  if (!userResult.ok) {
+    return (
+      <nav className="border-b border-[var(--brand-border)] bg-white">
+        <div className="container-app flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2" aria-label="RenterEasy home">
+            <Logo className="h-8 w-auto" />
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-sm font-semibold text-[var(--brand-primary)] hover:underline">
+              Login
+            </Link>
+            <Link href="/signup" className="btn-primary">
+              Sign up
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  const user = userResult.user;
+  const supabase = userResult.supabase;
 
   let isVerifiedAgency = false;
   let isAgency = false;
   let isRenter = false;
+
   if (user) {
     const [{ data: agencyRow }, { data: renterRow }] = await Promise.all([
       supabase.from("agencies").select("id, verified, agency_name").eq("auth_user_id", user.id).maybeSingle(),
@@ -93,7 +113,7 @@ export default async function Navbar() {
           ) : (
             <RenterNavButton />
           )}
-          
+
           {!user && (
             <Link
               href="/login"

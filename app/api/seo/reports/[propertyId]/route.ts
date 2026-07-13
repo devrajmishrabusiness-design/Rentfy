@@ -8,10 +8,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
 import { getReportByPropertyId } from "@/lib/seo/report-service";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { requireVerifiedAgency, requirePropertyOwnership } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
   source: "api/seo/reports",
@@ -25,38 +25,8 @@ export async function GET(
   const limit = await rateLimit(request, RateLimitPresets.standard);
   if (limit.blocked) return limit.response;
 
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json(
-      { error: "Not authenticated." },
-      { status: 401 }
-    );
-  }
-
-  if (!user.email_confirmed_at) {
-    return NextResponse.json(
-      { error: "Email not verified. Please confirm your email first." },
-      { status: 403 }
-    );
-  }
-
-  const { data: agency } = await supabase
-    .from("agencies")
-    .select("id, verified")
-    .eq("auth_user_id", user.id)
-    .single();
-
-  if (!agency || !agency.verified) {
-    return NextResponse.json(
-      { error: "Only verified agencies can view SEO reports." },
-      { status: 403 }
-    );
-  }
+  const auth = await requireVerifiedAgency();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { propertyId } = await params;
 
@@ -67,24 +37,9 @@ export async function GET(
     );
   }
 
-  const { data: property, error: propertyError } = await supabase
-    .from("properties")
-    .select("agency_id")
-    .eq("id", propertyId)
-    .maybeSingle<{ agency_id: string }>();
-
-  if (propertyError || !property) {
-    return NextResponse.json(
-      { error: "Property not found." },
-      { status: 404 }
-    );
-  }
-
-  if (property.agency_id !== agency.id) {
-    return NextResponse.json(
-      { error: "You do not own this property." },
-      { status: 403 }
-    );
+  const ownership = await requirePropertyOwnership(propertyId, auth.agencyId, auth.supabase);
+  if (!ownership.ok) {
+    return NextResponse.json({ error: ownership.error }, { status: ownership.status });
   }
 
   try {
