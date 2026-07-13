@@ -9,6 +9,7 @@ import LeadStatusSelect from "../LeadStatusSelect";
 import PropertyCard from "../PropertyCard";
 import StatusBadge from "../StatusBadge";
 import StatCard from "../StatCard";
+import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
 const monthLabels = [
   "Jan",
@@ -25,7 +26,11 @@ const monthLabels = [
   "Dec",
 ];
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const supabase = await createClient();
 
   const {
@@ -157,31 +162,55 @@ export default async function Dashboard() {
   }
 
   // --- Verified agency: full dashboard ---
+  const resolvedParams = await searchParams;
+  const pagination = extractPagination(new URLSearchParams(
+    Object.entries(resolvedParams).flatMap(([k, v]) =>
+      Array.isArray(v) ? v.map((sv) => [k, sv] as [string, string]) : [[k, v ?? ""] as [string, string]]
+    )
+  ));
+
+  const { count: totalPropertiesCount } = await supabase
+    .from("properties")
+    .select("id", { count: "exact", head: true })
+    .eq("agency_id", agency.id);
+
+  const { data: allProperties } = await supabase
+    .from("properties")
+    .select("id, status, rent, title")
+    .eq("agency_id", agency.id)
+    .returns<Property[]>();
+
+  const [from, to] = toRange(pagination);
+
   const { data: properties } = await supabase
     .from("properties")
     .select("*")
     .eq("agency_id", agency.id)
+    .order("created_at", { ascending: false })
+    .range(from, to)
     .returns<Property[]>();
 
-  // Fetch SEO reports for all properties
+  // Fetch SEO reports for paginated properties only
   const propertyIds = properties?.map((p) => p.id) ?? [];
   const { data: seoReports } = propertyIds.length > 0
                   ? await supabase
                       .from("seo_reports")
                       .select("*")
                       .in("property_id", propertyIds)
-                  : { data: null as Property[] | null };
+                  : { data: null };
 
   // Create a map of propertyId -> seoReport for easy lookup
   const seoReportMap = new Map(
     (seoReports ?? []).map((r) => [r.property_id, r])
   );
 
-  // Enrich properties with their SEO reports
-  const propertiesWithSeo = properties?.map((property) => ({
+  // Enrich paginated properties with their SEO reports
+  const propertiesWithSeo = (properties ?? []).map((property) => ({
     ...property,
     seo_report: seoReportMap.get(property.id) ?? null,
   }));
+
+  const paginatedProperties = respondPaginated(properties ?? [], totalPropertiesCount ?? 0, pagination);
   const { data: leads } = await supabase
     .from("leads")
     .select(`
@@ -214,20 +243,20 @@ export default async function Dashboard() {
 
   const recentLeads = leads?.slice(0, 5) || [];
 
-  const totalProperties = properties?.length || 0;
+  const totalProperties = totalPropertiesCount ?? 0;
   const approvedCount =
-    properties?.filter((p) => p.status === "approved").length || 0;
+    allProperties?.filter((p) => p.status === "approved").length || 0;
   const pendingCount =
-    properties?.filter((p) => p.status === "pending").length || 0;
+    allProperties?.filter((p) => p.status === "pending").length || 0;
 
   const totalRentValue =
-    properties?.reduce(
+    allProperties?.reduce(
       (sum, property) => sum + Number(property.rent || 0),
       0
     ) || 0;
 
   const propertyLeadCounts =
-    properties
+    allProperties
       ?.map((property) => ({
         ...property,
         leadCount:
@@ -381,7 +410,7 @@ export default async function Dashboard() {
             <span className="badge-info">{totalProperties} total</span>
           </div>
 
-          {propertiesWithSeo && propertiesWithSeo.length > 0 ? (
+          {paginatedProperties.items.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {propertiesWithSeo.map((property) => (
                 <PropertyCard
@@ -432,6 +461,29 @@ export default async function Dashboard() {
               <Link href="/add-property" className="btn-primary mt-6">
                 + Add property
               </Link>
+            </div>
+)}
+          {paginatedProperties.totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              {paginatedProperties.hasPrev && (
+                <Link
+                  href={`/dashboard?page=${paginatedProperties.page - 1}`}
+                  className="btn-secondary"
+                >
+                  Previous
+                </Link>
+              )}
+              <span className="text-sm font-medium text-[var(--brand-muted)]">
+                Page {paginatedProperties.page} of {paginatedProperties.totalPages}
+              </span>
+              {paginatedProperties.hasNext && (
+                <Link
+                  href={`/dashboard?page=${paginatedProperties.page + 1}`}
+                  className="btn-secondary"
+                >
+                  Next
+                </Link>
+              )}
             </div>
           )}
         </div>
