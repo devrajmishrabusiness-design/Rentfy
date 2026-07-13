@@ -1,9 +1,10 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import Footer from "@/app/Footer";
 import PropertyList from "@/app/PropertyList";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Property } from "../../types";
+import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
 export const metadata: Metadata = {
   title: "Flats & Apartments for Rent in Noida | RenterEasy",
@@ -22,13 +23,37 @@ const popularSectors = [
   "Sector 137",
 ];
 
-export default async function NoidaRentPage() {
+export default async function NoidaRentPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const supabase = await createClient();
+  const resolvedParams = await searchParams;
+  const pagination = extractPagination(new URLSearchParams(
+    Object.entries(resolvedParams).flatMap(([k, v]) =>
+      Array.isArray(v) ? v.map((sv) => [k, sv] as [string, string]) : [[k, v ?? ""] as [string, string]]
+    )
+  ));
+
+  const { count: totalCount } = await supabase
+    .from("properties")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "approved")
+    .ilike("city", "noida");
+
+  const [from, to] = toRange(pagination);
+
   const { data: properties } = await supabase
     .from("properties")
     .select("*")
     .eq("status", "approved")
     .ilike("city", "noida")
+    .order("created_at", { ascending: false })
+    .range(from, to)
     .returns<Property[]>();
+
+  const paginated = respondPaginated(properties ?? [], totalCount ?? 0, pagination);
 
   return (
     <main className="min-h-screen bg-[var(--brand-background)]">
@@ -65,7 +90,31 @@ export default async function NoidaRentPage() {
           </div>
         </div>
 
-        <PropertyList properties={properties || []} />
+        <PropertyList properties={paginated.items} />
+
+        {paginated.totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-4">
+            {paginated.hasPrev && (
+              <Link
+                href={`/rent/noida?page=${paginated.page - 1}`}
+                className="btn-secondary"
+              >
+                Previous
+              </Link>
+            )}
+            <span className="text-sm font-medium text-[var(--brand-muted)]">
+              Page {paginated.page} of {paginated.totalPages}
+            </span>
+            {paginated.hasNext && (
+              <Link
+                href={`/rent/noida?page=${paginated.page + 1}`}
+                className="btn-secondary"
+              >
+                Next
+              </Link>
+            )}
+          </div>
+        )}
       </section>
 
       <Footer />
