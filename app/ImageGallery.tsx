@@ -41,8 +41,8 @@ export default function ImageGallery({
           alt={title}
           width={1600}
           height={900}
-          unoptimized
           priority
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           onClick={() => setFullscreen(true)}
           className="h-[420px] w-full cursor-pointer object-cover transition-transform duration-500 hover:scale-[1.01] sm:h-[480px]"
         />
@@ -97,7 +97,8 @@ export default function ImageGallery({
                 alt={`Photo ${images.indexOf(image) + 1} of ${images.length}`}
                 width={240}
                 height={160}
-                unoptimized
+                loading="lazy"
+                sizes="(max-width: 640px) 25vw, 12vw"
                 className="h-20 w-full object-cover sm:h-24"
               />
             </button>
@@ -137,14 +138,15 @@ export default function ImageGallery({
             ‹
           </button>
 
-          <Image
-            src={selectedImage}
-            alt={title}
-            width={1600}
-            height={1000}
-            unoptimized
-            className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
-          />
+          <div className="relative h-[90vh] w-[90vw]">
+            <Image
+              src={selectedImage}
+              alt={title}
+              fill
+              sizes="90vw"
+              className="rounded-2xl object-contain"
+            />
+          </div>
 
           <button
             type="button"

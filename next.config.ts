@@ -4,11 +4,17 @@ const isProd = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/webp", "image/avif"],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "vznobifmkcqxnzvtjbnh.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
       },
     ],
   },

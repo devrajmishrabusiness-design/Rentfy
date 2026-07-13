@@ -64,7 +64,8 @@ export default function PropertyCard({
             alt={property.title || "Rental property"}
             width={640}
             height={416}
-            unoptimized
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           />
         ) : (

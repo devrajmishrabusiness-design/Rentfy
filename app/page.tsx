@@ -326,7 +326,8 @@ export default async function Home() {
                   alt={featuredProperty.title || "Featured rental property"}
                   width={720}
                   height={420}
-                  unoptimized
+                  priority
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="h-72 w-full rounded-xl object-cover"
                 />
               ) : (

@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
 
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://${SUPABASE_HOST}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://${SUPABASE_HOST}${isDev() ? " 'unsafe-eval'" : ""}`,
     `style-src 'self' 'unsafe-inline' https://${SUPABASE_HOST}`,
     `img-src 'self' blob: data: https://${SUPABASE_HOST}`,
     `font-src 'self'`,
