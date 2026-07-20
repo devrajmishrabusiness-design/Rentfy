@@ -7,6 +7,7 @@ import type { Property } from "./types";
 import SectionHeader from "./SectionHeader";
 import HeroSearch from "./HeroSearch";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
+import { listingPropertyColumns } from "@/lib/listing-query";
 
 const whyItems = [
   {
@@ -248,7 +249,8 @@ export default async function Home({
 
   const { count: totalCount } = await supabase
     .from("properties")
-    .select("id", { count: "exact", head: true })
+    .select("id, agencies!inner (verified)", { count: "exact", head: true })
+    .eq("agencies.verified", true)
     .eq("status", "approved");
 
   const [from, to] = toRange(pagination);
@@ -257,7 +259,7 @@ export default async function Home({
     .from("properties")
     .select(
       `
-      *,
+      ${listingPropertyColumns},
       agencies!inner (
        verified
       )

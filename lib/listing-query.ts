@@ -1,0 +1,13 @@
+export const listingPropertyColumns = `id,
+title,
+image_url,
+rent,
+location,
+city,
+property_type,
+bedrooms,
+bathrooms,
+furnishing,
+parking,
+available_from,
+created_at`;

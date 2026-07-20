@@ -174,7 +174,7 @@ export default async function Dashboard({
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("id, title, image_url, rent, area_sqft, location, city, property_type, bedrooms, bathrooms, furnishing, parking, available_from, status, agency_id, created_at")
+    .select("id, title, image_url, rent, location, city, property_type, bedrooms, bathrooms, furnishing, parking, available_from, status, agency_id, created_at")
     .eq("agency_id", agency.id)
     .order("created_at", { ascending: false })
     .range(from, to)
