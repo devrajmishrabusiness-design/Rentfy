@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
+import { useRouter } from "next/navigation";
+import { createLead } from "@/app/actions";
 import ErrorMessage from "./ErrorMessage";
 
 type LeadCaptureModalProps = {
@@ -33,7 +34,6 @@ const PHONE_REGEX = /^[0-9+\-\s()]{7,20}$/;
 
 function RenterLeadCapture({
   propertyId,
-  agencyId,
   source,
   onSuccess,
   renterId,
@@ -41,6 +41,7 @@ function RenterLeadCapture({
 }: LeadCaptureModalProps) {
   const started = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (started.current || !renterId || !renterProfile?.full_name) return;
@@ -48,24 +49,20 @@ function RenterLeadCapture({
     const fullName = renterProfile.full_name;
 
     void (async () => {
-      const { error: insertError } = await supabase.from("leads").insert({
-        property_id: propertyId,
-        agency_id: agencyId,
+      const result = await createLead({
+        propertyId,
         name: fullName,
         phone: renterProfile.phone_number,
-        status: "New",
         source,
-        renter_id: renterId,
-        created_at: new Date().toISOString(),
       });
-
-      if (insertError) {
-        setError(insertError.message);
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
       onSuccess({ name: fullName, phone: renterProfile.phone_number });
+      router.refresh();
     })();
-  }, [agencyId, onSuccess, propertyId, renterId, renterProfile, source]);
+  }, [propertyId, source, onSuccess, renterId, renterProfile, router]);
 
   return (
     <div className="px-6 py-8 text-center">
@@ -79,14 +76,14 @@ function RenterLeadCapture({
 
 function LeadCaptureForm({
   propertyId,
-  agencyId,
   source,
   onSuccess,
   propertyTitle,
   agencyName,
   renterId,
 }: LeadCaptureModalProps) {
-  const [name, setName] = useState("");
+  const router = useRouter();
+  const [name, setName] = useState(renterId ? "" : "");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -114,24 +111,21 @@ function LeadCaptureForm({
     const cleanPhone = phone.trim();
 
     try {
-      const { error } = await supabase.from("leads").insert({
-        property_id: propertyId,
-        agency_id: agencyId,
+      const result = await createLead({
+        propertyId,
         name: cleanName,
         phone: cleanPhone,
-        status: "New",
         source,
-        created_at: new Date().toISOString(),
-        ...(renterId ? { renter_id: renterId } : {}),
       });
 
-      if (error) {
-        setServerError(error.message);
+      if (!result.ok) {
+        setServerError(result.error);
         setSubmitting(false);
         return;
       }
 
       onSuccess({ name: cleanName, phone: cleanPhone });
+      router.refresh();
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Something went wrong.";

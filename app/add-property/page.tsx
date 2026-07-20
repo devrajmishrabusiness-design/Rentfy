@@ -7,6 +7,7 @@ import Footer from "../Footer";
 import PropertyFormFields from "../PropertyFormFields";
 import ErrorMessage from "../ErrorMessage";
 import SeoAnalysisPanel from "../SeoAnalysisPanel";
+import { createProperty } from "@/app/actions";
 
 /**
  * Compute whether the form has enough data for the SEO analyzer to
@@ -110,19 +111,8 @@ export default function AddProperty() {
 
       if (!agency.verified) {
         setError(
-          "Your agency is not verified yet. Please wait for RenterEasy approval."
+          "Your agency is not verified yet. Please wait for Rentfy approval."
         );
-        setSubmitting(false);
-        return;
-      }
-
-      if (Number(form.rent) < 0) {
-        setError("Rent cannot be negative");
-        setSubmitting(false);
-        return;
-      }
-      if (Number(form.bedrooms) < 0 || Number(form.bathrooms) < 0) {
-        setError("Bedrooms and bathrooms cannot be negative");
         setSubmitting(false);
         return;
       }
@@ -168,44 +158,47 @@ export default function AddProperty() {
         imageUrl = uploadedImages[0];
       }
 
-      const { data: property, error } = await supabase
-        .from("properties")
-        .insert([
-          {
-            title: form.title,
-            description: form.description,
-            rent: Number(form.rent),
-            city: form.city,
-            location: form.location,
-            property_type: form.property_type,
-            bedrooms: Number(form.bedrooms),
-            bathrooms: Number(form.bathrooms),
-            furnishing: form.furnishing,
-            parking: form.parking,
-            available_from: form.available_from,
-            contact_number: form.contact_number,
-            image_url: imageUrl,
-            cover_image_url: imageUrl,
-            agency_id: agency.id,
-            status: "pending",
-          },
-        ])
-        .select()
-        .single();
+      // Server action: validates every field, derives agency_id from
+      // the JWT (not the client), and writes through auth.supabase.
+      const result = await createProperty({
+        title: form.title,
+        description: form.description,
+        rent: form.rent,
+        city: form.city,
+        location: form.location,
+        property_type: form.property_type,
+        bedrooms: form.bedrooms,
+        bathrooms: form.bathrooms,
+        furnishing: form.furnishing,
+        parking: form.parking,
+        available_from: form.available_from,
+        contact_number: form.contact_number,
+        image_url: imageUrl,
+        cover_image_url: imageUrl,
+      });
 
-      if (error) {
-        setError("Failed to publish property. Please try again.");
+      if (!result.ok) {
+        if (result.fieldErrors) {
+          const first =
+            Object.values(result.fieldErrors)[0] ??
+            "Some fields are invalid.";
+          setError(first);
+        } else {
+          setError(result.error);
+        }
         setSubmitting(false);
         return;
       }
 
-      for (const image of uploadedImages) {
-        await supabase.from("property_images").insert([
-          {
-            property_id: property.id,
-            image_url: image,
-          },
-        ]);
+      const propertyId = result.propertyId;
+
+      if (uploadedImages.length > 1) {
+        for (const url of uploadedImages.slice(1)) {
+          await supabase.from("property_images").insert({
+            property_id: propertyId,
+            image_url: url,
+          });
+        }
       }
 
       window.location.href = "/dashboard";

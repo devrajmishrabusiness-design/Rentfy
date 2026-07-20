@@ -134,6 +134,37 @@ export async function GET(request: NextRequest) {
   const pagination = extractPagination(searchParams, 20);
   const [from, to] = toRange(pagination);
 
+  // Resolve the caller's renter_id server-side; the query param renter_id
+  // is only honored if it matches the caller's own profile. This prevents
+  // one renter from enumerating another renter's visits.
+  const { data: callerProfile } = await auth.supabase
+    .from("renter_profiles")
+    .select("id")
+    .eq("user_id", auth.user.id)
+    .maybeSingle<{ id: string }>();
+  const callerRenterId = callerProfile?.id ?? null;
+
+  // If a renter_id is provided and it isn't the caller's, refuse.
+  if (renterId && renterId !== callerRenterId) {
+    return NextResponse.json(
+      { error: "Forbidden." },
+      { status: 403 }
+    );
+  }
+
+  // Determine the effective renter_id filter. If the caller has a renter
+  // profile, scope to their own visits unless they explicitly pass their
+  // own id. If they don't have a renter profile, return an empty list.
+  const effectiveRenterId = callerRenterId;
+
+  if (!effectiveRenterId) {
+    // Not a renter. Agencies see visits on their own properties, not
+    // visits for other agencies. Without a verified agency, refuse.
+    return NextResponse.json(
+      { visits: [], page: 1, pageSize: pagination.pageSize, totalCount: 0, totalPages: 0, hasNext: false, hasPrev: false }
+    );
+  }
+
   let query = auth.supabase
     .from("property_visits")
     .select(
@@ -146,12 +177,10 @@ export async function GET(request: NextRequest) {
     )
     .order("created_at", { ascending: false });
 
+  query = query.eq("renter_id", effectiveRenterId);
+
   if (propertyId) {
     query = query.eq("property_id", propertyId);
-  }
-
-  if (renterId) {
-    query = query.eq("renter_id", renterId);
   }
 
   const { count: totalCount, data: visits, error } = await query
@@ -174,6 +203,8 @@ export async function GET(request: NextRequest) {
   });
 }
 
+const ALLOWED_VISIT_STATUSES = new Set(["pending", "confirmed", "completed", "cancelled", "no_show"]);
+
 export async function PATCH(request: NextRequest) {
   const limit = await rateLimit(request, RateLimitPresets.moderate);
   if (limit.blocked) return limit.response;
@@ -184,10 +215,59 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const { visit_id, status } = body;
 
-  if (!visit_id || !status) {
+  if (typeof visit_id !== "string" || visit_id.length === 0) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "visit_id is required." },
       { status: 400 }
+    );
+  }
+  if (typeof status !== "string" || !ALLOWED_VISIT_STATUSES.has(status)) {
+    return NextResponse.json(
+      { error: `status must be one of: ${Array.from(ALLOWED_VISIT_STATUSES).join(", ")}.` },
+      { status: 400 }
+    );
+  }
+
+  // Ownership: the visit must belong to the calling renter, or the
+  // calling user must own the property's agency.
+  const { data: visit } = await auth.supabase
+    .from("property_visits")
+    .select("renter_id, property_id, properties(agency_id)")
+    .eq("id", visit_id)
+    .maybeSingle<{
+      renter_id: string;
+      property_id: string;
+      properties: { agency_id: string } | null;
+    }>();
+
+  if (!visit) {
+    return NextResponse.json(
+      { error: "Visit not found." },
+      { status: 404 }
+    );
+  }
+
+  const { data: callerRenter } = await auth.supabase
+    .from("renter_profiles")
+    .select("id")
+    .eq("user_id", auth.user.id)
+    .maybeSingle<{ id: string }>();
+
+  const callerIsVisitOwner = !!callerRenter && callerRenter.id === visit.renter_id;
+  const callerOwnsAgency =
+    !!visit.properties && visit.properties.agency_id != null &&
+    (await auth.supabase
+      .from("agencies")
+      .select("id")
+      .eq("id", visit.properties.agency_id)
+      .eq("auth_user_id", auth.user.id)
+      .maybeSingle<{ id: string }>()
+      .then((r) => r.data != null));
+
+  if (!callerIsVisitOwner && !callerOwnsAgency) {
+    return NextResponse.json(
+      { error: "You do not own this visit." },
+      { status: 403 }
     );
   }
 

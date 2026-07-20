@@ -62,12 +62,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (authUser.user.user_metadata?.role !== "renter") {
-    return NextResponse.json(
-      { error: "This is not a renter account." },
-      { status: 403 }
-    );
-  }
+  // Fallback route: creates/updates a renter_profile row for any
+  // verified user. The dual-capability architecture allows a single auth
+  // user to hold both a renter_profile and an agency row, so we no
+  // longer gate on user_metadata.role.
 
   const metadataPhone = authUser.user.user_metadata?.phone_number;
   const phone =

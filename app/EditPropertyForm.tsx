@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import type { Property } from "./types";
 import PropertyFormFields from "./PropertyFormFields";
 import ErrorMessage from "./ErrorMessage";
+import { updateOwnPropertyData } from "@/app/actions";
 
 export default function EditPropertyForm({
   property,
@@ -36,28 +36,32 @@ export default function EditPropertyForm({
     setSaving(true);
     setError(null);
 
-    const { error } = await supabase
-      .from("properties")
-      .update({
-        title: form.title,
-        description: form.description,
-        rent: Number(form.rent),
-        city: form.city,
-        location: form.location,
-        property_type: form.property_type,
-        bedrooms: Number(form.bedrooms),
-        bathrooms: Number(form.bathrooms),
-        furnishing: form.furnishing,
-        parking: form.parking,
-        available_from: form.available_from,
-        contact_number: form.contact_number,
-      })
-      .eq("id", property.id);
+    const result = await updateOwnPropertyData(property.id, {
+      title: form.title,
+      description: form.description,
+      rent: form.rent,
+      city: form.city,
+      location: form.location,
+      property_type: form.property_type,
+      bedrooms: form.bedrooms,
+      bathrooms: form.bathrooms,
+      furnishing: form.furnishing,
+      parking: form.parking,
+      available_from: form.available_from,
+      contact_number: form.contact_number,
+      image_url: property.image_url || "",
+      cover_image_url: property.cover_image_url || "",
+    });
 
     setSaving(false);
 
-    if (error) {
-      setError(error.message);
+    if (!result.ok) {
+      if (result.fieldErrors) {
+        const first = Object.values(result.fieldErrors)[0] ?? result.error;
+        setError(first);
+      } else {
+        setError(result.error);
+      }
       return;
     }
 

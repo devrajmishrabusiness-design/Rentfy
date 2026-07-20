@@ -36,14 +36,15 @@ export type Property = {
 
 export type Lead = {
   id: string;
-  name?: string | null;
-  phone?: string | null;
+  lead_name?: string | null;
+  lead_phone?: string | null;
   property_id?: string | null;
   agency_id?: string | null;
   source?: string | null;
   status?: string | null;
   created_at?: string | null;
   renter_id?: string | null;
+  notes?: string | null;
   properties?: {
     title?: string | null;
   } | null;
