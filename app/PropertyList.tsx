@@ -111,10 +111,10 @@ export default function PropertyList({
     if (furnishing !== "all") count++;
     if (parking !== "all") count++;
     if (sector !== "all") count++;
-    if (initializedRentMin > dataMin) count++;
-    if (initializedRentMax < dataMax) count++;
+    if (rentMin !== 0 && initializedRentMin > dataMin) count++;
+    if (rentMax !== 0 && initializedRentMax < dataMax) count++;
     return count;
-  }, [propertyType, bedrooms, furnishing, parking, sector, initializedRentMin, initializedRentMax, dataMin, dataMax]);
+  }, [propertyType, bedrooms, furnishing, parking, sector, rentMin, rentMax, initializedRentMin, initializedRentMax, dataMin, dataMax]);
 
   const resetFilters = () => {
     setSearch("");
