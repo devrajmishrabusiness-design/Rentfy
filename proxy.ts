@@ -12,6 +12,7 @@ const protectedPaths = [
   "/edit-property",
   "/admin",
   "/seo-report",
+  "/onboarding",
 ];
 
 function isProtected(pathname: string): boolean {
@@ -27,7 +28,7 @@ function isDev(): boolean {
   return process.env.NODE_ENV === "development";
 }
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   const csp = [

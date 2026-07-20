@@ -148,18 +148,23 @@ export default function RenterAuthDialog() {
       .maybeSingle<{ id: string }>();
 
     if (!existingProfile) {
+      // Capability-based: a verified authenticated user with no renter
+      // profile can create one regardless of user_metadata. Role is
+      // derived from profile existence, not from metadata flags.
       const metadata = data.user.user_metadata;
-      if (metadata?.role !== "renter") {
-        await supabase.auth.signOut();
-        setLoading(false);
-        setError("This is not a renter account. Agencies should use the agency login page.");
-        return;
-      }
+      const fullName =
+        typeof metadata?.full_name === "string" && metadata.full_name.trim().length > 0
+          ? metadata.full_name.trim()
+          : null;
+      const phone =
+        typeof metadata?.phone_number === "string" && metadata.phone_number.trim().length > 0
+          ? metadata.phone_number.trim()
+          : "";
 
       const { error: profileError } = await supabase.from("renter_profiles").insert({
         user_id: data.user.id,
-        full_name: metadata.full_name,
-        phone_number: metadata.phone_number,
+        full_name: fullName,
+        phone_number: phone,
       });
       if (profileError) {
         setLoading(false);

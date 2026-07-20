@@ -9,7 +9,9 @@ export default function Footer() {
       <div className="container-app py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
-            <Logo />
+            <Link href="/" className="inline-flex" aria-label="RenterEasy home">
+              <Logo />
+            </Link>
             <p className="mt-4 max-w-md text-sm leading-7 text-[var(--brand-muted)]">
               RenterEasy is a premium rental marketplace connecting tenants
               with verified agencies in Noida and NCR. Discover homes you can

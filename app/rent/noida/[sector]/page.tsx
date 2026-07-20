@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { Property } from "../../../types";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
+import { listingPropertyColumns } from "@/lib/listing-query";
 
 export async function generateMetadata({
   params,
@@ -46,7 +47,7 @@ export default async function SectorPage({
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("*")
+    .select(listingPropertyColumns)
     .eq("status", "approved")
     .eq("city", "noida")
     .ilike("location", formattedSector)

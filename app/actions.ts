@@ -1,52 +1,94 @@
 "use server";
 
-/**
- * Agency Server Actions.
- *
- * Every action here:
- *  1. Confirms the caller is signed in.
- *  2. Confirms the caller owns the resource being mutated.
- *  3. Writes through the SSR Supabase client (RLS-enforced).
- *  4. Revalidates the page so the UI reflects the new state.
- */
-
 import { revalidatePath } from "next/cache";
-import { supabaseAdmin } from "@/lib/supabase-admin";
 import {
+  requireUser,
   requireVerifiedAgency,
   requirePropertyOwnership,
   type ActionResult,
 } from "@/lib/auth";
 
 /**
- * Create an agency row at signup using the service-role client.
+ * Complete agency onboarding for the currently authenticated user.
  *
- * Called from the signup page regardless of whether Supabase email
- * confirmation is enabled. The service-role client bypasses RLS,
- * ensuring the row is persisted even when the user has no session
- * (email confirmation pending).
+ * Called from /onboarding/agency AFTER the user has verified their email
+ * and has a real session. The authenticated user's id (auth.uid()) is
+ * the only source of identity; the client cannot influence which agency
+ * row is created.
+ *
+ * Writes go through `auth.supabase` (the user's JWT client), so RLS
+ * is the security boundary. Migration 0009 grants the INSERT policy
+ * `WITH CHECK (auth.uid() = auth_user_id)`.
+ *
+ * Refuses if the user already has an agency profile — onboarding is a
+ * one-shot flow. Refuses if the email is not yet confirmed.
  */
-export async function createAgencyAtSignup(params: {
-  auth_user_id: string;
+export async function completeAgencyOnboarding(params: {
   agency_name: string;
   owner_name: string;
-  email: string;
   phone: string;
   city: string;
 }): Promise<ActionResult> {
-  const { error } = await supabaseAdmin.from("agencies").insert([
-    {
-      auth_user_id: params.auth_user_id,
-      agency_name: params.agency_name,
-      owner_name: params.owner_name,
-      email: params.email,
-      phone: params.phone,
-      city: params.city,
-      verified: false,
-    },
-  ]);
+  const auth = await requireUser();
+  if (!auth.ok) return auth;
 
-  if (error) return { ok: false, error: error.message };
+  if (!auth.user.email_confirmed_at) {
+    return {
+      ok: false,
+      error: "Please verify your email before completing onboarding.",
+    };
+  }
+
+  const agencyName = params.agency_name?.trim() ?? "";
+  const ownerName = params.owner_name?.trim() ?? "";
+  const phone = params.phone?.trim() ?? "";
+  const city = params.city?.trim() ?? "";
+
+  if (agencyName.length < 2 || agencyName.length > 120) {
+    return { ok: false, error: "Agency name must be 2–120 characters." };
+  }
+  if (ownerName.length < 2 || ownerName.length > 120) {
+    return { ok: false, error: "Owner name must be 2–120 characters." };
+  }
+  if (!/^[0-9+\-\s()]{7,20}$/.test(phone)) {
+    return { ok: false, error: "Please enter a valid contact number." };
+  }
+  if (city.length < 2 || city.length > 80) {
+    return { ok: false, error: "City must be 2–80 characters." };
+  }
+
+  // Idempotency: if the user already has an agency row, treat as success.
+  const { data: existing } = await auth.supabase
+    .from("agencies")
+    .select("id")
+    .eq("auth_user_id", auth.user.id)
+    .maybeSingle<{ id: string }>();
+
+  if (existing) {
+    return { ok: true };
+  }
+
+  const email = auth.user.email ?? "";
+
+  const { error } = await auth.supabase.from("agencies").insert({
+    auth_user_id: auth.user.id,
+    agency_name: agencyName,
+    owner_name: ownerName,
+    email,
+    phone,
+    city,
+    verified: false,
+  });
+
+  if (error) {
+    // 23505 = unique_violation. A racing second tab could trigger this.
+    if (error.code === "23505") {
+      return { ok: true };
+    }
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 

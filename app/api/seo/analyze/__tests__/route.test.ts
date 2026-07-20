@@ -90,6 +90,9 @@ function setupAuth() {
           single: vi.fn().mockResolvedValue({
             data: { id: "agency-1", verified: true },
           }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { agency_id: "agency-1" },
+          }),
         }),
       }),
     }),

@@ -21,7 +21,7 @@ import { analyzePropertySeo } from "@/lib/seo/adapter";
 import { upsertReport } from "@/lib/seo/report-service";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
-import { requireVerifiedAgency } from "@/lib/auth";
+import { requireVerifiedAgency, requirePropertyOwnership } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
   source: "api/seo/analyze",
@@ -45,6 +45,32 @@ export async function POST(request: NextRequest) {
       { error: "Request body must be valid JSON." },
       { status: 400 }
     );
+  }
+
+  const propertyId = typeof body === "object" && body !== null
+    ? (body as Record<string, unknown>).propertyId
+    : undefined;
+
+  // If a propertyId is supplied and we are about to persist, verify the
+  // calling agency owns that property before writing the report. This
+  // prevents one verified agency from clobbering another agency's report
+  // by guessing the propertyId.
+  if (
+    propertyId &&
+    typeof propertyId === "string" &&
+    propertyId.length > 0
+  ) {
+    const ownership = await requirePropertyOwnership(
+      propertyId,
+      auth.agencyId,
+      auth.supabase
+    );
+    if (!ownership.ok) {
+      return NextResponse.json(
+        { error: ownership.error },
+        { status: ownership.status }
+      );
+    }
   }
 
   const result = await analyzePropertySeo(body);
@@ -71,10 +97,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   }
-
-  const propertyId = typeof body === "object" && body !== null
-    ? (body as Record<string, unknown>).propertyId
-    : undefined;
 
   let persisted = false;
 

@@ -7,10 +7,24 @@ import Link from "next/link";
 import Footer from "../Footer";
 import ErrorMessage from "../ErrorMessage";
 
-function safeRedirect(redirect: string | null): string {
-  if (!redirect || typeof redirect !== "string") return "/dashboard";
+function safeRedirect(redirect: string | null): string | null {
+  if (!redirect || typeof redirect !== "string") return null;
   if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect;
-  return "/dashboard";
+  return null;
+}
+
+async function resolvePostLoginDestination(
+  explicitRedirect: string | null
+): Promise<string> {
+  if (explicitRedirect) return explicitRedirect;
+
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("id")
+    .eq("auth_user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
+    .maybeSingle<{ id: string }>();
+
+  return agency ? "/dashboard" : "/onboarding/agency";
 }
 
 type LoginState = "form" | "unverified";
@@ -23,20 +37,22 @@ export default function LoginPage() {
   const [loginState, setLoginState] = useState<LoginState>("form");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = safeRedirect(searchParams.get("redirect"));
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
         const user = data.session.user;
         if (!user.email_confirmed_at) {
           router.push("/verify-email");
           return;
         }
-        router.push(redirectTo);
+        const dest = await resolvePostLoginDestination(
+          safeRedirect(searchParams.get("redirect"))
+        );
+        router.push(dest);
       }
     });
-  }, [router, redirectTo]);
+  }, [router, searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +76,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(redirectTo);
+    const dest = await resolvePostLoginDestination(
+      safeRedirect(searchParams.get("redirect"))
+    );
+    router.push(dest);
   };
 
   const resendVerification = async () => {

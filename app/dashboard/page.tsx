@@ -40,33 +40,11 @@ export default async function Dashboard({
     .from("agencies")
     .select("id, verified, agency_name, owner_name, city")
     .eq("auth_user_id", userResult.user.id)
-    .single<Pick<Agency, "id" | "verified" | "agency_name" | "owner_name" | "city">>();
+    .maybeSingle<Pick<Agency, "id" | "verified" | "agency_name" | "owner_name" | "city">>();
 
   if (!agency) {
-    return (
-      <main className="min-h-screen bg-[var(--brand-background)]">
-        <section className="container-app py-24 text-center">
-          <div className="mx-auto max-w-md card p-10">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-orange-50 text-[var(--brand-primary)]">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01" />
-              </svg>
-            </span>
-            <h1 className="mt-5 text-2xl font-extrabold">
-              Finish setting up your agency
-            </h1>
-            <p className="mt-2 text-[var(--brand-muted)]">
-              We couldn&apos;t find your agency profile. Please complete your
-              signup to access the dashboard.
-            </p>
-            <Link href="/signup" className="btn-primary mt-6">
-              Complete signup
-            </Link>
-          </div>
-        </section>
-        <Footer />
-      </main>
-    );
+    // No agency profile yet — onboarding flow handles this.
+    redirect("/onboarding/agency");
   }
 
   // --- Pending verification: show beautiful waiting screen ---

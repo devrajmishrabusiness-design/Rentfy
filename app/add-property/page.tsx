@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import Footer from "../Footer";
 import PropertyFormFields from "../PropertyFormFields";
@@ -40,6 +41,7 @@ interface PropertyFormState {
 }
 
 export default function AddProperty() {
+  const router = useRouter();
   const [form, setForm] = useState<PropertyFormState>({
     title: "",
     description: "",
@@ -58,6 +60,25 @@ export default function AddProperty() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // If the user is authenticated but has no agency row, route them to
+  // onboarding. The proxy already ensures they are signed in and
+  // verified; this is a UX guard, not a security check.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (cancelled || !userData.user) return;
+      const { data: agency } = await supabase
+        .from("agencies")
+        .select("id")
+        .eq("auth_user_id", userData.user.id)
+        .maybeSingle<{ id: string }>();
+      if (cancelled) return;
+      if (!agency) router.replace("/onboarding/agency");
+    })();
+    return () => { cancelled = true; };
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

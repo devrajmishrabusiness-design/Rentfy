@@ -73,15 +73,9 @@ export default async function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3">
           <MobileMenu navItems={navItems} />
 
-          {isRenter ? (
-            <ProfileDropdown
-              userName={""}
-              userInitial={""}
-              isRenter={true}
-              isAgency={false}
-              isVerifiedAgency={false}
-            />
-          ) : isAgency ? (
+          {/* Agency features — show whenever the user has an agencies row,
+              regardless of whether they also have a renter profile. */}
+          {isAgency && (
             <>
               {isVerifiedAgency ? (
                 <Link
@@ -102,14 +96,19 @@ export default async function Navbar() {
                   Dashboard
                 </Link>
               )}
-              <ProfileDropdown
-                userName={""}
-                userInitial={""}
-                isRenter={false}
-                isAgency={true}
-                isVerifiedAgency={isVerifiedAgency}
-              />
             </>
+          )}
+
+          {/* Profile dropdown — capability-based: shows renter and/or
+              agency links depending on which profile rows exist. */}
+          {isRenter || isAgency ? (
+            <ProfileDropdown
+              userName={""}
+              userInitial={""}
+              isRenter={isRenter}
+              isAgency={isAgency}
+              isVerifiedAgency={isVerifiedAgency}
+            />
           ) : (
             <RenterNavButton />
           )}

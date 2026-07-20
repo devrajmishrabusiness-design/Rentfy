@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { Property } from "../../types";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
+import { listingPropertyColumns } from "@/lib/listing-query";
 
 export const metadata: Metadata = {
   title: "Flats & Apartments for Rent in Noida | RenterEasy",
@@ -46,7 +47,7 @@ export default async function NoidaRentPage({
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("*")
+    .select(listingPropertyColumns)
     .eq("status", "approved")
     .ilike("city", "noida")
     .order("created_at", { ascending: false })

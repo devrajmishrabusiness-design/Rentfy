@@ -12,6 +12,7 @@ export default defineConfig({
       'lib/crawler/**/*.test.ts',
       'app/api/crawler/**/*.test.ts',
       'crawler/**/*.test.ts',
+      'app/__tests__/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',

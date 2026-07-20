@@ -6,10 +6,41 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "../Footer";
 
+/**
+ * Resolve the destination after email confirmation.
+ *
+ *   1. If a `?redirect=` query param is present, honor it.
+ *   2. Otherwise, send the user to onboarding if they have no agency row,
+ *      or to the dashboard if they do.
+ */
+async function resolvePostVerificationDestination(
+  explicitRedirect: string | null
+): Promise<string> {
+  if (explicitRedirect) return explicitRedirect;
+
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+  if (!userId) return "/login";
+
+  const { data: agency } = await supabase
+    .from("agencies")
+    .select("id")
+    .eq("auth_user_id", userId)
+    .maybeSingle<{ id: string }>();
+
+  return agency ? "/dashboard" : "/onboarding/agency";
+}
+
+function safeRedirect(redirect: string | null): string | null {
+  if (!redirect || typeof redirect !== "string") return null;
+  if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect;
+  return null;
+}
+
 export default function VerifyEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect");
+  const explicitRedirect = safeRedirect(searchParams.get("redirect"));
 
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,23 +48,25 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (cancelled) return;
       if (data.user?.email_confirmed_at) {
-        router.push(redirect || "/dashboard");
-      } else {
-        setLoading(false);
+        const dest = await resolvePostVerificationDestination(explicitRedirect);
+        router.push(dest);
+        return;
       }
+      setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [router, redirect]);
+  }, [router, explicitRedirect]);
 
   const checkConfirmed = async () => {
     setLoading(true);
     setError(null);
     const { data } = await supabase.auth.getUser();
     if (data.user?.email_confirmed_at) {
-      router.push(redirect || "/dashboard");
+      const dest = await resolvePostVerificationDestination(explicitRedirect);
+      router.push(dest);
       return;
     }
     setLoading(false);

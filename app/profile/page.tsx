@@ -11,22 +11,10 @@ export default async function ProfilePage() {
     .from("agencies")
     .select("*")
     .eq("auth_user_id", userResult.user.id)
-    .single();
+    .maybeSingle();
 
   if (!agency) {
-    return (
-      <main className="min-h-screen bg-[var(--brand-background)]">
-        <section className="container-app py-24 text-center">
-          <div className="mx-auto max-w-md card p-10">
-            <h1 className="text-2xl font-extrabold">Agency not found</h1>
-            <p className="mt-2 text-[var(--brand-muted)]">
-              We couldn&apos;t find your agency profile.
-            </p>
-          </div>
-        </section>
-        <Footer />
-      </main>
-    );
+    redirect("/onboarding/agency");
   }
 
   return (

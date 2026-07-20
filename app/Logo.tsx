@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function Logo({
   className = "",
   showTagline = true,
@@ -8,8 +6,7 @@ export default function Logo({
   showTagline?: boolean;
 }) {
   return (
-    <Link
-      href="/"
+    <div
       className={`group flex items-center gap-3 ${className}`}
       aria-label="RenterEasy home"
     >
@@ -26,6 +23,6 @@ export default function Logo({
           </span>
         )}
       </span>
-    </Link>
+    </div>
   );
 }
