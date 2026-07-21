@@ -11,6 +11,17 @@
  *   import { rateLimit } from "@/lib/rate-limit";
  *   const result = await rateLimit(request);
  *   if (result.blocked) return NextResponse.json(..., { status: 429 });
+ *
+ * Usage in a server action (no NextRequest available):
+ *   import { rateLimitByKey, RateLimitPresets } from "@/lib/rate-limit";
+ *   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
+ *   const r = await rateLimitByKey(`action:${name}:${userId ?? ip}`, RateLimitPresets.moderate);
+ *   if (r.blocked) return { ok: false, error: "Too many requests. Please try again later." };
+ *
+ * Note: client-side Supabase Auth (signInWithPassword / signUp / verify) is
+ * called directly from the browser to Supabase's hosted Auth API and CANNOT
+ * be throttled from our server. To limit auth attempts, enable Supabase's
+ * built-in rate limiting in the Supabase dashboard.
  */
 
 import { NextRequest } from "next/server";
@@ -141,6 +152,20 @@ async function getRequestKey(request: NextRequest): Promise<string> {
 }
 
 /**
+ * Apply rate limiting against a pre-built string key.
+ *
+ * Use this from server actions and other contexts where a `NextRequest`
+ * is not available. The caller is responsible for producing a stable
+ * key (e.g. `action:<name>:<userId>` or `action:<name>:<ip>`).
+ */
+export async function rateLimitByKey(
+  key: string,
+  config: RateLimitConfig = RateLimitPresets.standard
+): Promise<RateLimitResult> {
+  return store.consume(key, config);
+}
+
+/**
  * Apply rate limiting to a Next.js API request.
  *
  * Returns `{ blocked: false }` if under limit, or `{ blocked: true, retryAfter }`
@@ -154,7 +179,7 @@ export async function rateLimit(
   | { blocked: true; retryAfter: number; response: Response }
 > {
   const key = await getRequestKey(request);
-  const result = await store.consume(key, config);
+  const result = await rateLimitByKey(key, config);
 
   if (result.blocked) {
     const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);

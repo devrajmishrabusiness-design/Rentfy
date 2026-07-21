@@ -7,6 +7,39 @@ import {
   requirePropertyOwnership,
   type ActionResult,
 } from "@/lib/auth";
+import { rateLimitByKey, RateLimitPresets } from "@/lib/rate-limit";
+
+/**
+ * Per-action rate limit check.
+ *
+ * Called AFTER `requireUser` / `requireVerifiedAgency` so we have a
+ * stable per-user key. Returns either `null` (under limit) or the
+ * caller's own failure object (over limit), built via the
+ * `buildFailure` callback. This keeps each action's return-type union
+ * intact — including richer unions like `CreatePropertyResult` that
+ * carry `propertyId` on success or `fieldErrors` on failure — without
+ * losing type safety.
+ *
+ * Server actions do not receive a `NextRequest`, so we key by
+ * `action:<name>:<userId>`. IP-based keying is unnecessary once the
+ * caller is authenticated.
+ */
+async function checkRateLimit<TFailure>(
+  actionName: string,
+  userId: string,
+  buildFailure: (error: string) => TFailure,
+  preset: keyof typeof RateLimitPresets = "moderate"
+): Promise<TFailure | null> {
+  const config = RateLimitPresets[preset];
+  const result = await rateLimitByKey(
+    `action:${actionName}:${userId}`,
+    config
+  );
+  if (result.blocked) {
+    return buildFailure("Too many requests. Please try again in a minute.");
+  }
+  return null;
+}
 
 /**
  * Complete agency onboarding for the currently authenticated user.
@@ -31,6 +64,9 @@ export async function completeAgencyOnboarding(params: {
 }): Promise<ActionResult> {
   const auth = await requireUser();
   if (!auth.ok) return auth;
+
+  const rl = await checkRateLimit("completeAgencyOnboarding", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   if (!auth.user.email_confirmed_at) {
     return {
@@ -95,6 +131,9 @@ export async function completeAgencyOnboarding(params: {
 export async function deleteOwnProperty(propertyId: string): Promise<ActionResult> {
   const auth = await requireVerifiedAgency();
   if (!auth.ok) return auth;
+
+  const rl = await checkRateLimit("deleteOwnProperty", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   const ownership = await requirePropertyOwnership(propertyId, auth.agencyId, auth.supabase);
   if (!ownership.ok) return ownership;
@@ -342,6 +381,9 @@ export async function createProperty(
     return { ok: false, error: auth.error };
   }
 
+  const rl = await checkRateLimit("createProperty", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
+
   const parsed = parsePropertyInput(input);
   if (!parsed.ok) {
     return {
@@ -400,6 +442,9 @@ export async function updateOwnPropertyData(
 ): Promise<UpdatePropertyResult> {
   const auth = await requireVerifiedAgency();
   if (!auth.ok) return { ok: false, error: auth.error };
+
+  const rl = await checkRateLimit("updateOwnPropertyData", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   if (typeof propertyId !== "string" || propertyId.length === 0) {
     return { ok: false, error: "Property id is required." };
@@ -470,6 +515,9 @@ export async function updateLeadStatus(
 ): Promise<UpdateLeadResult> {
   const auth = await requireVerifiedAgency();
   if (!auth.ok) return { ok: false, error: auth.error };
+
+  const rl = await checkRateLimit("updateLeadStatus", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   if (typeof leadId !== "string" || leadId.length === 0) {
     return { ok: false, error: "Lead id is required." };
@@ -545,6 +593,9 @@ export async function createLead(input: {
     return { ok: false, error: auth.error };
   }
 
+  const rl = await checkRateLimit("createLead", auth.user.id, (error) => ({ ok: false, error } as const), "moderate");
+  if (rl) return rl;
+
   // Resolve the property's agency server-side.
   const { data: property, error: propError } = await auth.supabase
     .from("properties")
@@ -602,6 +653,9 @@ export async function updateAgencyProfile(
 ): Promise<ActionResult> {
   const auth = await requireVerifiedAgency();
   if (!auth.ok) return auth;
+
+  const rl = await checkRateLimit("updateAgencyProfile", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   if (auth.agencyId !== agencyId) {
     return { ok: false, error: "You do not own this agency profile." };
@@ -669,6 +723,9 @@ export async function updateRenterProfile(input: {
 }): Promise<UpdateRenterProfileResult> {
   const auth = await requireUser();
   if (!auth.ok) return { ok: false, error: auth.error };
+
+  const rl = await checkRateLimit("updateRenterProfile", auth.user.id, (error) => ({ ok: false, error } as const));
+  if (rl) return rl;
 
   const updates: Record<string, string | null> = {};
 

@@ -13,6 +13,7 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireUser, type ActionResult } from "@/lib/auth";
+import { rateLimitByKey, RateLimitPresets } from "@/lib/rate-limit";
 
 type RequireAdminResult = { ok: true; userId: string } | { ok: false; error: string };
 
@@ -33,9 +34,33 @@ async function requireAdmin(): Promise<RequireAdminResult> {
   return { ok: true, userId: userResult.user.id };
 }
 
+/**
+ * Per-action rate limit for admin actions. Standard preset is sufficient
+ * here because admin users are already verified privileged operators.
+ */
+async function checkAdminRateLimit(
+  actionName: string,
+  userId: string
+): Promise<ActionResult | null> {
+  const result = await rateLimitByKey(
+    `admin:${actionName}:${userId}`,
+    RateLimitPresets.standard
+  );
+  if (result.blocked) {
+    return {
+      ok: false,
+      error: "Too many requests. Please try again in a minute.",
+    };
+  }
+  return null;
+}
+
 export async function verifyAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
+
+  const rl = await checkAdminRateLimit("verifyAgency", auth.userId);
+  if (rl) return rl;
 
   const { error } = await supabaseAdmin
     .from("agencies")
@@ -51,6 +76,9 @@ export async function verifyAgency(agencyId: string): Promise<ActionResult> {
 export async function unverifyAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
+
+  const rl = await checkAdminRateLimit("unverifyAgency", auth.userId);
+  if (rl) return rl;
 
   const { error } = await supabaseAdmin
     .from("agencies")
@@ -69,6 +97,9 @@ export async function deletePropertyAdmin(
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
 
+  const rl = await checkAdminRateLimit("deletePropertyAdmin", auth.userId);
+  if (rl) return rl;
+
   const { error } = await supabaseAdmin
     .from("properties")
     .delete()
@@ -83,6 +114,9 @@ export async function deletePropertyAdmin(
 export async function approveProperty(propertyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
+
+  const rl = await checkAdminRateLimit("approveProperty", auth.userId);
+  if (rl) return rl;
 
   const { error } = await supabaseAdmin
     .from("properties")
@@ -99,6 +133,9 @@ export async function rejectProperty(propertyId: string): Promise<ActionResult> 
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
 
+  const rl = await checkAdminRateLimit("rejectProperty", auth.userId);
+  if (rl) return rl;
+
   const { error } = await supabaseAdmin
     .from("properties")
     .update({ status: "rejected" })
@@ -113,6 +150,9 @@ export async function rejectProperty(propertyId: string): Promise<ActionResult> 
 export async function deleteAgency(agencyId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
+
+  const rl = await checkAdminRateLimit("deleteAgency", auth.userId);
+  if (rl) return rl;
 
   const { error } = await supabaseAdmin
     .from("agencies")

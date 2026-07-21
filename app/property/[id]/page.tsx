@@ -1,6 +1,6 @@
 import { cache } from "react";
 import ImageGallery from "@/app/ImageGallery";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import ContactAgencyButton from "@/app/ContactAgencyButton";
 import Footer from "@/app/Footer";
 import StatusBadge from "@/app/StatusBadge";
@@ -15,6 +15,7 @@ const PROPERTY_COLUMNS =
 
 /** Cache the property fetch so generateMetadata and PropertyPage share one DB call. */
 const getProperty = cache(async (id: string) => {
+  const supabase = await createClient();
   return supabase
     .from("properties")
     .select(PROPERTY_COLUMNS)
@@ -92,6 +93,8 @@ export default async function PropertyPage({
       </main>
     );
   }
+
+  const supabase = await createClient();
 
   const { data: agency } = await supabase
     .from("agencies")

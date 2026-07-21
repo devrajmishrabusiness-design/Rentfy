@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /add-property
+Disallow: /edit-property
+Disallow: /onboarding/
+Disallow: /renter
+Disallow: /seo-report/
+
+Sitemap: https://rentereasy.in/sitemap.xml
