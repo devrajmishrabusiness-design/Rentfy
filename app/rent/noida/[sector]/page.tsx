@@ -1,9 +1,20 @@
 import { createClient } from "@/lib/supabase-server";
+import Footer from "@/app/Footer";
+import PropertyList from "@/app/PropertyList";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Property } from "../../../types";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 import { listingPropertyColumns } from "@/lib/listing-query";
+
+const popularSectors = [
+  "Sector 18",
+  "Sector 50",
+  "Sector 62",
+  "Sector 70",
+  "Sector 78",
+  "Sector 137",
+];
 
 export async function generateMetadata({
   params,
@@ -11,10 +22,11 @@ export async function generateMetadata({
   params: Promise<{ sector: string }>;
 }): Promise<Metadata> {
   const { sector } = await params;
+  const formattedSector = sector.replace(/-/g, " ");
 
   return {
-    title: `Flats for Rent in ${sector} Noida | Rentfy`,
-    description: `Browse rental properties in ${sector}, Noida listed by verified agencies on Rentfy.`,
+    title: `Flats for Rent in ${formattedSector}, Noida | RenterEasy`,
+    description: `Browse verified rental properties in ${formattedSector}, Noida listed by verified agencies on RenterEasy.`,
   };
 }
 
@@ -40,7 +52,7 @@ export default async function SectorPage({
     .from("properties")
     .select("id", { count: "exact", head: true })
     .eq("status", "approved")
-    .eq("city", "noida")
+    .ilike("city", "noida")
     .ilike("location", formattedSector);
 
   const [from, to] = toRange(pagination);
@@ -49,7 +61,7 @@ export default async function SectorPage({
     .from("properties")
     .select(listingPropertyColumns)
     .eq("status", "approved")
-    .eq("city", "noida")
+    .ilike("city", "noida")
     .ilike("location", formattedSector)
     .order("created_at", { ascending: false })
     .range(from, to)
@@ -58,74 +70,68 @@ export default async function SectorPage({
   const paginated = respondPaginated(properties ?? [], totalCount ?? 0, pagination);
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold mb-4">
-        Flats for Rent in {formattedSector}, Noida
-      </h1>
+    <main className="min-h-screen bg-[var(--brand-background)]">
+      <section className="border-b border-[var(--brand-border)] bg-gradient-to-br from-slate-50 to-indigo-50 py-14">
+        <div className="container-app">
+          <span className="badge-info mb-3">Noida rentals</span>
+          <h1 className="text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
+            Flats &amp; Apartments for Rent in {formattedSector}, Noida
+          </h1>
+          <p className="mt-2 max-w-2xl text-[var(--brand-muted)]">
+            Browse verified rental properties in {formattedSector}.
+          </p>
+        </div>
+      </section>
 
-      <p className="text-gray-600 mb-8">
-        Browse verified rental properties in {formattedSector}.
-      </p>
-
-      <div className="grid md:grid-cols-3 gap-6">
-        {paginated.items.map((property: Property) => (
-          <div
-            key={property.id}
-            className="bg-white rounded-xl shadow p-4"
-          >
-            <h2 className="text-xl font-semibold">
-              {property.title}
-            </h2>
-
-            <p className="text-green-600 font-bold mt-2">
-              ₹{property.rent}/month
-            </p>
-
-            <p>
-              {property.location}, {property.city}
-            </p>
-
-            <Link
-              href={`/property/${property.id}`}
-              className="block mt-4 bg-blue-600 text-white py-2 rounded text-center"
-            >
-              View Property
-            </Link>
-          </div>
-        ))}
-      </div>
-
-      {paginated.items.length === 0 && (
-        <div className="mt-10 text-center">
-          <h2 className="text-2xl font-semibold">
-            No properties found in {formattedSector}
+      <section className="container-app py-12">
+        <div className="mb-10">
+          <h2 className="text-2xl font-extrabold text-[var(--brand-text)]">
+            Popular areas in Noida
           </h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {popularSectors.map((s) => {
+              const slug = s.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <Link
+                  key={s}
+                  href={`/rent/noida/${slug}`}
+                  className="rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition-all hover:-translate-y-0.5 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+                >
+                  {s}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      )}
 
-      {paginated.totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-4">
-          {paginated.hasPrev && (
-            <Link
-              href={`/rent/noida/${sector}?page=${paginated.page - 1}`}
-              className="btn-secondary"
-            >
-              Previous
-            </Link>
-          )}
-          <span className="text-sm font-medium text-gray-500">
-            Page {paginated.page} of {paginated.totalPages}
-          </span>
-          {paginated.hasNext && (
-            <Link
-              href={`/rent/noida/${sector}?page=${paginated.page + 1}`}
-              className="btn-secondary"
-            >
-              Next
-            </Link>
-          )}
-        </div>
-      )}
+        <PropertyList properties={paginated.items} />
+
+        {paginated.totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-4">
+            {paginated.hasPrev && (
+              <Link
+                href={`/rent/noida/${sector}?page=${paginated.page - 1}`}
+                className="btn-secondary"
+              >
+                Previous
+              </Link>
+            )}
+            <span className="text-sm font-medium text-[var(--brand-muted)]">
+              Page {paginated.page} of {paginated.totalPages}
+            </span>
+            {paginated.hasNext && (
+              <Link
+                href={`/rent/noida/${sector}?page=${paginated.page + 1}`}
+                className="btn-secondary"
+              >
+                Next
+              </Link>
+            )}
+          </div>
+        )}
+      </section>
+
+      <Footer />
     </main>
   );
 }

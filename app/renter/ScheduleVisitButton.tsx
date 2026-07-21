@@ -82,7 +82,7 @@ function ScheduleVisitModal({
   const [error, setError] = useState<string | null>(null);
   const [visitDate, setVisitDate] = useState("");
   const [visitTime, setVisitTime] = useState("");
-  const [visitType, setVisitType] = useState<"physical" | "video">("physical");
+  const [visitType, setVisitType] = useState<"site_visit" | "video_tour">("site_visit");
   const [notes, setNotes] = useState("");
 
   // Compute static dates during render - avoids useEffect setState warning
@@ -188,23 +188,22 @@ function ScheduleVisitModal({
                 className="select"
               >
                 <option value="">Select a time slot</option>
-                <option value="Morning (9 AM - 12 PM)">Morning (9 AM - 12 PM)</option>
-                <option value="Afternoon (12 PM - 3 PM)">Afternoon (12 PM - 3 PM)</option>
-                <option value="Late Afternoon (3 PM - 6 PM)">Late Afternoon (3 PM - 6 PM)</option>
-                <option value="Evening (6 PM - 8 PM)">Evening (6 PM - 8 PM)</option>
+                <option value="morning">Morning (9 AM - 12 PM)</option>
+                <option value="afternoon">Afternoon (12 PM - 3 PM)</option>
+                <option value="evening">Evening (6 PM - 8 PM)</option>
               </select>
             </div>
 
             <div>
               <label className="label">Visit Type</label>
               <div className="flex gap-3">
-                <label className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${visitType === "physical" ? "border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]" : "border-[var(--brand-border)] text-[var(--brand-muted)]"}`}>
+                <label className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${visitType === "site_visit" ? "border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]" : "border-[var(--brand-border)] text-[var(--brand-muted)]"}`}>
                   <input
                     type="radio"
                     name="visitType"
-                    value="physical"
-                    checked={visitType === "physical"}
-                    onChange={() => setVisitType("physical")}
+                    value="site_visit"
+                    checked={visitType === "site_visit"}
+                    onChange={() => setVisitType("site_visit")}
                     className="sr-only"
                   />
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -213,13 +212,13 @@ function ScheduleVisitModal({
                   </svg>
                   Physical
                 </label>
-                <label className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${visitType === "video" ? "border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]" : "border-[var(--brand-border)] text-[var(--brand-muted)]"}`}>
+                <label className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${visitType === "video_tour" ? "border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]" : "border-[var(--brand-border)] text-[var(--brand-muted)]"}`}>
                   <input
                     type="radio"
                     name="visitType"
-                    value="video"
-                    checked={visitType === "video"}
-                    onChange={() => setVisitType("video")}
+                    value="video_tour"
+                    checked={visitType === "video_tour"}
+                    onChange={() => setVisitType("video_tour")}
                     className="sr-only"
                   />
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

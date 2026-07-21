@@ -35,6 +35,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginState, setLoginState] = useState<LoginState>("form");
+  const [sessionExpired] = useState(() => {
+    if (typeof window !== "undefined" && sessionStorage.getItem("rentfy.sessionExpired") === "1") {
+      sessionStorage.removeItem("rentfy.sessionExpired");
+      return true;
+    }
+    return false;
+  });
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -166,6 +173,11 @@ const { error: resendError } = await supabase.auth.resend({
               <p className="mt-2 text-sm text-[var(--brand-muted)]">
                 Manage your listings, profile and rental leads.
               </p>
+              {sessionExpired && (
+                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                  Your session expired. Please sign in again to continue.
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">

@@ -71,7 +71,36 @@ export default async function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <MobileMenu navItems={navItems} />
+          <MobileMenu
+            navItems={navItems}
+            showProfileButton={isRenter || isAgency}
+            profileButton={
+              (isRenter || isAgency) ? (
+                <div className="flex flex-col gap-1">
+                  {isRenter && (
+                    <>
+                      <Link href="/renter" className="rounded-xl px-4 py-3 text-base font-semibold text-[var(--brand-text)] hover:bg-stone-50 hover:text-[var(--brand-primary)]">
+                        Renter Profile
+                      </Link>
+                      <Link href="/renter" className="rounded-xl px-4 py-3 text-base font-semibold text-[var(--brand-text)] hover:bg-stone-50 hover:text-[var(--brand-primary)]">
+                        Shortlisted
+                      </Link>
+                    </>
+                  )}
+                  {isAgency && (
+                    <>
+                      <Link href="/dashboard" className="rounded-xl px-4 py-3 text-base font-semibold text-[var(--brand-text)] hover:bg-stone-50 hover:text-[var(--brand-primary)]">
+                        Dashboard
+                      </Link>
+                      <Link href="/profile" className="rounded-xl px-4 py-3 text-base font-semibold text-[var(--brand-text)] hover:bg-stone-50 hover:text-[var(--brand-primary)]">
+                        Agency Profile
+                      </Link>
+                    </>
+                  )}
+                </div>
+              ) : null
+            }
+          />
 
           {/* Agency features — show whenever the user has an agencies row,
               regardless of whether they also have a renter profile. */}

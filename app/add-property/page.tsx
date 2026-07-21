@@ -62,14 +62,18 @@ export default function AddProperty() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If the user is authenticated but has no agency row, route them to
-  // onboarding. The proxy already ensures they are signed in and
-  // verified; this is a UX guard, not a security check.
+  // UX guard: if the session expired or the user is not signed in,
+  // redirect to login. If the user is signed in but has no agency row,
+  // route them to onboarding.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
-      if (cancelled || !userData.user) return;
+      if (cancelled) return;
+      if (!userData.user) {
+        router.replace("/login");
+        return;
+      }
       const { data: agency } = await supabase
         .from("agencies")
         .select("id")
@@ -92,8 +96,8 @@ export default function AddProperty() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        setError("Please login first");
-        setSubmitting(false);
+        sessionStorage.setItem("rentfy.sessionExpired", "1");
+        router.push("/login");
         return;
       }
 
@@ -201,7 +205,8 @@ export default function AddProperty() {
         }
       }
 
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
+      router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
       setSubmitting(false);

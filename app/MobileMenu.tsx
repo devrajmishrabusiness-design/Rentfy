@@ -72,7 +72,10 @@ export default function MobileMenu({
           </div>
           
           {showProfileButton && profileButton && (
-            <div className="mt-4 pt-4 border-t border-[var(--brand-border)]">
+            <div
+              className="mt-4 pt-4 border-t border-[var(--brand-border)]"
+              onClick={() => setIsOpen(false)}
+            >
               {profileButton}
             </div>
           )}

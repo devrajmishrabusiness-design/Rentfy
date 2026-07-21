@@ -106,6 +106,21 @@ export default function RenterAuthDialog() {
         return;
       }
 
+      // Guard: if Supabase auto-confirmed the session (e.g. dev mode with
+      // CONFIRM_EMAIL disabled) but the email is not actually verified,
+      // block profile creation until the user verifies through the
+      // sign-in path, which checks email_confirmed_at before proceeding.
+      if (!data.user.email_confirmed_at) {
+        setLoading(false);
+        setNotice("Check your email to confirm your account, then return here to sign in.");
+        setMode("signin");
+        setPassword("");
+        // Remove the auto-created session so the user cannot bypass
+        // verification by refreshing the page.
+        await supabase.auth.signOut();
+        return;
+      }
+
       const { error: profileError } = await supabase.from("renter_profiles").insert({
         user_id: data.user.id,
         full_name: cleanName,

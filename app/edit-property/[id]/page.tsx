@@ -11,7 +11,7 @@ export default async function EditPropertyPage({
   const { id } = await params;
 
   const auth = await requireVerifiedAgency();
-  if (!auth.ok) redirect("/dashboard");
+  if (!auth.ok) redirect(`/login?redirect=/edit-property/${id}`);
 
   const { data: property } = await auth.supabase
     .from("properties")
@@ -20,7 +20,7 @@ export default async function EditPropertyPage({
     .single();
 
   if (!property || property.agency_id !== auth.agencyId) {
-    redirect("/dashboard");
+    redirect(`/login?redirect=/edit-property/${id}`);
   }
 
   return (
