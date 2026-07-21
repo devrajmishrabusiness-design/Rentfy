@@ -3,8 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Next.js 16 proxy (formerly `middleware`).
  *
- * Runs on `/api/:path*` only. API endpoints serve JSON, so a strict
- * `default-src 'none'` CSP is correct here. Page-level CSP is set in
+ * Matches `/api/:path*`. Responsibilities:
+ *   - Inject a cryptographically random `X-Request-Id` on every API
+ *     request so that logs, errors, and upstream traces carry the
+ *     same correlation ID.
+ *   - Echo the `X-Request-Id` back on the response for client-side
+ *     debugging.
+ *   - Set security headers appropriate for JSON-only API responses.
+ *
+ * Page-level security headers (CSP, etc.) are set in
  * `next.config.ts` `headers()`.
  *
  * For Next.js 16:
@@ -12,9 +19,16 @@ import { NextResponse, type NextRequest } from "next/server";
  *   - The default export name is `proxy` (NOT `middleware`).
  *   - Runtime is `nodejs` and cannot be changed to `edge` in proxy.
  */
-export default async function proxy(request: NextRequest) {
+export default async function proxy(_request: NextRequest) {
+  // Generate a unique request ID for log correlation.
+  const requestId = crypto.randomUUID();
+
   const response = NextResponse.next();
 
+  // Echo the request ID back to the client.
+  response.headers.set("X-Request-Id", requestId);
+
+  // Security headers for API (JSON-only) responses.
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");

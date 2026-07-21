@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 
 const logger = new DefaultStructuredLogger({
@@ -49,6 +50,16 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
   }
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId,
+    method: request.method,
+    path: "/api/renters/profile",
+    userId: user.id,
+    agencyId: null,
+    renterId: null,
+  });
 
   const admin = getSupabaseAdmin();
   const { data: authUser, error: authError } = await admin.auth.admin.getUserById(
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    logger.error("Profile upsert error", { error: String(error) });
+    rlog.error("Profile upsert error", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to save profile." },
       { status: 500 }

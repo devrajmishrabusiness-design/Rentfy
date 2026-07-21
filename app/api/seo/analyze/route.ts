@@ -21,6 +21,7 @@ import { analyzePropertySeo } from "@/lib/seo/adapter";
 import { upsertReport } from "@/lib/seo/report-service";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { requireVerifiedAgency, requirePropertyOwnership } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
@@ -73,13 +74,23 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId,
+    method: request.method,
+    path: "/api/seo/analyze",
+    userId: auth.user.id,
+    agencyId: auth.agencyId,
+    renterId: null,
+  });
+
   const result = await analyzePropertySeo(body);
 
   if (!result.ok) {
     const status = result.error?.message?.includes("required")
       ? 400
       : 500;
-    logger.warn("SEO analysis failed", {
+    rlog.warn("SEO analysis failed", {
       error: result.error?.message ?? "unknown",
     });
     return NextResponse.json(
@@ -109,7 +120,7 @@ export async function POST(request: NextRequest) {
       });
       persisted = true;
     } catch (error) {
-      logger.error("Failed to persist SEO report", { error: String(error) });
+      rlog.error("Failed to persist SEO report", { error: String(error) });
     }
   }
 

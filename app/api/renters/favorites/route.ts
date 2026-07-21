@@ -22,6 +22,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 
@@ -44,6 +45,12 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/renters/favorites",
+    userId: user.id, agencyId: null, renterId: null,
+  });
 
   const { data: profile, error: profileError } = await supabase
     .from("renter_profiles")
@@ -70,7 +77,7 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (error) {
-    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    rlog.error("Favorites operation error", { error: String(error), code: error.code });
     return NextResponse.json(
       { error: "Failed to process favorites request." },
       { status: 500 }
@@ -116,6 +123,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/renters/favorites",
+    userId: user.id, agencyId: null, renterId: null,
+  });
+
   const { data: profile, error: profileError } = await supabase
     .from("renter_profiles")
     .select("id")
@@ -140,7 +153,7 @@ export async function POST(request: NextRequest) {
     if (error.code === "23505") {
       return NextResponse.json({ ok: true });
     }
-    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    rlog.error("Favorites operation error", { error: String(error), code: error.code });
     return NextResponse.json(
       { error: "Failed to process favorites request." },
       { status: 500 }
@@ -175,6 +188,12 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/renters/favorites",
+    userId: user.id, agencyId: null, renterId: null,
+  });
+
   const { data: profile, error: profileError } = await supabase
     .from("renter_profiles")
     .select("id")
@@ -195,7 +214,7 @@ export async function DELETE(request: NextRequest) {
     .eq("property_id", propertyId);
 
   if (error) {
-    logger.error("Favorites operation error", { error: String(error), code: error.code });
+    rlog.error("Favorites operation error", { error: String(error), code: error.code });
     return NextResponse.json(
       { error: "Failed to process favorites request." },
       { status: 500 }

@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runCrawl } from "@/lib/crawler/adapter";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { requireVerifiedAgency } from "@/lib/auth";
 
@@ -33,6 +34,16 @@ export async function POST(request: NextRequest) {
 
   const auth = await requireVerifiedAgency();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId,
+    method: request.method,
+    path: "/api/crawler/run",
+    userId: auth.user.id,
+    agencyId: auth.agencyId,
+    renterId: null,
+  });
 
   let body: unknown;
   try {
@@ -50,7 +61,7 @@ export async function POST(request: NextRequest) {
     const status = result.error?.message?.includes("required")
       ? 400
       : 500;
-    logger.warn("Crawl failed", {
+    rlog.warn("Crawl failed", {
       error: result.error?.message ?? "unknown",
     });
     return NextResponse.json(

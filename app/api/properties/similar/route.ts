@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 
 const logger = new DefaultStructuredLogger({
   source: "api/properties/similar",
@@ -102,6 +103,16 @@ export async function GET(request: NextRequest) {
   const rl = await rateLimit(request, RateLimitPresets.light);
   if (rl.blocked) return rl.response;
 
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId,
+    method: request.method,
+    path: "/api/properties/similar",
+    userId: null,
+    agencyId: null,
+    renterId: null,
+  });
+
   const supabase = await createClient();
   const searchParams = request.nextUrl.searchParams;
 
@@ -145,7 +156,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (result.length === 0 && errors.length > 0) {
-    logger.error("Similar properties all fallbacks failed", { errors });
+    rlog.error("Similar properties all fallbacks failed", { errors });
     return NextResponse.json({ error: "Failed to fetch similar properties" }, { status: 500 });
   }
 

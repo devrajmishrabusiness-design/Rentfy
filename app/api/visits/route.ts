@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 import { requireUser } from "@/lib/auth";
 
@@ -26,6 +27,12 @@ export async function POST(request: NextRequest) {
 
   const auth = await requireUser();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/visits",
+    userId: auth.user.id, agencyId: null, renterId: null,
+  });
 
   const supabase = auth.supabase;
 
@@ -110,7 +117,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    logger.error("Visit creation error", { error: String(error) });
+    rlog.error("Visit creation error", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to schedule visit" },
       { status: 500 }
@@ -126,6 +133,12 @@ export async function GET(request: NextRequest) {
 
   const auth = await requireUser();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/visits",
+    userId: auth.user.id, agencyId: null, renterId: null,
+  });
 
   const searchParams = request.nextUrl.searchParams;
   const propertyId = searchParams.get("property_id");
@@ -187,7 +200,7 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (error) {
-    logger.error("Visits fetch error", { error: String(error) });
+    rlog.error("Visits fetch error", { error: String(error) });
     return NextResponse.json({ error: "Failed to fetch visits" }, { status: 500 });
   }
 
@@ -211,6 +224,12 @@ export async function PATCH(request: NextRequest) {
 
   const auth = await requireUser();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId, method: request.method, path: "/api/visits",
+    userId: auth.user.id, agencyId: null, renterId: null,
+  });
 
   const body = await request.json();
   const { visit_id, status } = body;
@@ -279,7 +298,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    logger.error("Visit update error", { error: String(error) });
+    rlog.error("Visit update error", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to update visit" },
       { status: 500 }

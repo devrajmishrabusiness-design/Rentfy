@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getReportByPropertyId } from "@/lib/seo/report-service";
 import { DefaultStructuredLogger, ConsoleLogTransport } from "@rentfy/engine-sdk";
 import { rateLimit, RateLimitPresets } from "@/lib/rate-limit";
+import { REQUEST_ID_HEADER, createRequestLogger, generateRequestId } from "@/lib/observability";
 import { requireVerifiedAgency, requirePropertyOwnership } from "@/lib/auth";
 
 const logger = new DefaultStructuredLogger({
@@ -42,6 +43,16 @@ export async function GET(
     return NextResponse.json({ error: ownership.error }, { status: ownership.status });
   }
 
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? generateRequestId();
+  const rlog = createRequestLogger(logger, {
+    requestId,
+    method: request.method,
+    path: "/api/seo/reports/[propertyId]",
+    userId: auth.user.id,
+    agencyId: auth.agencyId,
+    renterId: null,
+  });
+
   try {
     const report = await getReportByPropertyId(propertyId);
 
@@ -63,7 +74,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    logger.error("Failed to retrieve SEO report", { error: String(error) });
+    rlog.error("Failed to retrieve SEO report", { error: String(error) });
     return NextResponse.json(
       { error: "Failed to retrieve SEO report." },
       { status: 500 }
