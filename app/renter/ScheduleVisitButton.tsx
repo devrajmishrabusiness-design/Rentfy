@@ -127,13 +127,13 @@ function ScheduleVisitModal({
 
   if (success) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="visit-success-title" onClick={onClose}>
         <div className="card w-full max-w-md animate-scale-in" onClick={(e) => e.stopPropagation()}>
           <div className="p-8 text-center">
             <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-3xl">
               ✓
             </div>
-            <h2 className="text-2xl font-bold text-[var(--brand-text)]">Visit Requested!</h2>
+            <h2 id="visit-success-title" className="text-2xl font-bold text-[var(--brand-text)]">Visit Requested!</h2>
             <p className="mt-2 text-sm text-[var(--brand-muted)]">
               The agency will confirm your visit request shortly. You&apos;ll receive a notification.
             </p>
@@ -144,11 +144,17 @@ function ScheduleVisitModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="visit-modal-title"
+      onClick={onClose}
+    >
       <div className="card w-full max-w-md animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <div className="p-6">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[var(--brand-text)]">Schedule a Visit</h2>
+            <h2 id="visit-modal-title" className="text-xl font-bold text-[var(--brand-text)]">Schedule a Visit</h2>
             <button
               onClick={onClose}
               className="grid h-8 w-8 place-items-center rounded-full hover:bg-stone-100 transition"

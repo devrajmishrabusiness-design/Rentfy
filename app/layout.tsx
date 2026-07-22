@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
-import RenterAuthDialog from "./renter/RenterAuthDialog";
 import { RenterSessionProvider } from "./renter/RenterSessionProvider";
 import { ToastProvider } from "./Toast";
 import { ConfirmProvider } from "./ConfirmDialog";
+
+const RenterAuthDialog = dynamic(() => import("./renter/RenterAuthDialog"));
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,11 +56,17 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--brand-background)]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-[var(--brand-primary)] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <ToastProvider>
           <ConfirmProvider>
             <RenterSessionProvider>
               <Navbar />
-              {children}
+              <div id="main-content">{children}</div>
               <RenterAuthDialog />
             </RenterSessionProvider>
           </ConfirmProvider>

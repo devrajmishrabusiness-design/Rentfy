@@ -7,6 +7,8 @@ import type { Property } from "../../types";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 import { listingPropertyColumns } from "@/lib/listing-query";
 
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Flats & Apartments for Rent in Noida | RenterEasy",
   description:
@@ -37,17 +39,11 @@ export default async function NoidaRentPage({
     )
   ));
 
-  const { count: totalCount } = await supabase
-    .from("properties")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "approved")
-    .ilike("city", "noida");
-
   const [from, to] = toRange(pagination);
 
-  const { data: properties } = await supabase
+  const { data: properties, count: totalCount } = await supabase
     .from("properties")
-    .select(listingPropertyColumns)
+    .select(listingPropertyColumns, { count: "exact" })
     .eq("status", "approved")
     .ilike("city", "noida")
     .order("created_at", { ascending: false })

@@ -19,7 +19,7 @@ export default function AgencyReviews({ agencyId }: { agencyId: string }) {
   const loadReviews = useCallback(async () => {
     const { data, error: queryError } = await supabase
       .from("agency_reviews")
-      .select("*")
+      .select("id, renter_id, rating, comment, reviewer_name, updated_at")
       .eq("agency_id", agencyId)
       .order("updated_at", { ascending: false })
       .returns<AgencyReview[]>();

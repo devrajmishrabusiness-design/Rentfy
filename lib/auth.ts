@@ -7,6 +7,7 @@
  */
 
 import { createClient } from "@/lib/supabase-server";
+import { cache } from "react";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 // ---------------------------------------------------------------------------
@@ -34,7 +35,7 @@ export type RequireVerifiedAgencyResult =
  * Returns the `User` and the `SupabaseClient` so the caller can
  * reuse the same client for data queries without creating a second one.
  */
-export async function requireUser(
+export const requireUser = cache(async function requireUser(
   existingClient?: SupabaseClient,
 ): Promise<RequireUserResult> {
   const supabase = existingClient ?? (await createClient());
@@ -53,7 +54,7 @@ export async function requireUser(
   }
 
   return { ok: true, user, supabase };
-}
+});
 
 // ---------------------------------------------------------------------------
 // requireVerifiedAgency
@@ -65,7 +66,7 @@ export async function requireUser(
  * Calls `requireUser()` first, then looks up the agency row using
  * the same client. Returns `user`, `agencyId`, and `supabase`.
  */
-export async function requireVerifiedAgency(
+export const requireVerifiedAgency = cache(async function requireVerifiedAgency(
   existingClient?: SupabaseClient,
 ): Promise<RequireVerifiedAgencyResult> {
   const userResult = await requireUser(existingClient);
@@ -83,7 +84,7 @@ export async function requireVerifiedAgency(
   }
 
   return { ok: true, user: userResult.user, agencyId: agency.id, supabase: userResult.supabase };
-}
+});
 
 // ---------------------------------------------------------------------------
 // requirePropertyOwnership

@@ -7,6 +7,8 @@ import type { Property } from "../../../types";
 import { extractPagination, toRange, respondPaginated } from "@/lib/pagination";
 import { listingPropertyColumns } from "@/lib/listing-query";
 
+export const revalidate = 300;
+
 const popularSectors = [
   "Sector 18",
   "Sector 50",
@@ -48,18 +50,11 @@ export default async function SectorPage({
 
   const formattedSector = sector.replace(/-/g, " ");
 
-  const { count: totalCount } = await supabase
-    .from("properties")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "approved")
-    .ilike("city", "noida")
-    .ilike("location", formattedSector);
-
   const [from, to] = toRange(pagination);
 
-  const { data: properties } = await supabase
+  const { data: properties, count: totalCount } = await supabase
     .from("properties")
-    .select(listingPropertyColumns)
+    .select(listingPropertyColumns, { count: "exact" })
     .eq("status", "approved")
     .ilike("city", "noida")
     .ilike("location", formattedSector)

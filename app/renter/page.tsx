@@ -7,6 +7,7 @@ import PropertyCard from "../PropertyCard";
 import ErrorMessage from "../ErrorMessage";
 import type { Property, RenterProfile } from "../types";
 import { supabase } from "@/lib/supabase-browser";
+import { listingPropertyColumns } from "@/lib/listing-query";
 import { useRenterSession } from "./useRenterSession";
 
 type TabKey = "shortlisted" | "account";
@@ -159,7 +160,7 @@ export default function RenterProfilePage() {
 
       const { data: savedProperties, error: propertiesError } = await supabase
         .from("properties")
-        .select("*")
+        .select(listingPropertyColumns)
         .in("id", ids)
         .returns<Property[]>();
 

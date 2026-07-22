@@ -9,7 +9,7 @@ import ApprovePropertyButton from "@/app/ApprovePropertyButton";
 import RejectPropertyButton from "@/app/RejectPropertyButton";
 import StatusBadge from "@/app/StatusBadge";
 import StatCard from "@/app/StatCard";
-import type { Agency, Lead, Property } from "../types";
+import type { Agency, Property } from "../types";
 import { requireUser } from "@/lib/auth";
 
 export default async function AdminPage() {
@@ -35,23 +35,25 @@ export default async function AdminPage() {
   // us from reading every agency / property / lead.
   const { data: agencies } = await supabaseAdmin
     .from("agencies")
-    .select("*")
+    .select("id, agency_name, verified, is_admin, owner_name, city, email, phone")
     .returns<Agency[]>();
 
   const { data: properties } = await supabaseAdmin
     .from("properties")
-    .select("*")
+    .select("id, title, rent, location, city, status")
+    .order("created_at", { ascending: false })
     .returns<Property[]>();
 
-  const { data: leads } = await supabaseAdmin
+  const { count: totalLeads } = await supabaseAdmin
     .from("leads")
-    .select("*")
-    .returns<Lead[]>();
+    .select("*", { count: "exact", head: true });
 
   const totalAgencies = agencies?.length || 0;
   const totalProperties = properties?.length || 0;
-  const totalLeads = leads?.length || 0;
   const verifiedAgencies =
+    agencies?.filter((agency) => agency.verified === true).length || 0;
+  const pendingProperties =
+    properties?.filter((p) => p.status === "pending").length || 0;
     agencies?.filter((agency) => agency.verified === true).length || 0;
   const pendingProperties =
     properties?.filter((p) => p.status === "pending").length || 0;

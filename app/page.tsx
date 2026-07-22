@@ -247,15 +247,9 @@ export default async function Home({
     )
   ));
 
-  const { count: totalCount } = await supabase
-    .from("properties")
-    .select("id, agencies!inner (verified)", { count: "exact", head: true })
-    .eq("agencies.verified", true)
-    .eq("status", "approved");
-
   const [from, to] = toRange(pagination);
 
-  const { data: properties } = await supabase
+  const { data: properties, count: totalCount } = await supabase
     .from("properties")
     .select(
       `
@@ -263,7 +257,7 @@ export default async function Home({
       agencies!inner (
        verified
       )
-    `
+    `, { count: "exact" }
     )
     .eq("agencies.verified", true)
     .eq("status", "approved")
