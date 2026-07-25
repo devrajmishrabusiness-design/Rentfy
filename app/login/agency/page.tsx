@@ -7,7 +7,7 @@ import Link from "next/link";
 import Footer from "@/app/Footer";
 import ErrorMessage from "@/app/ErrorMessage";
 
-type LoginState = "form" | "unverified";
+type LoginState = "form" | "unverified" | "wrong-portal";
 
 export default function AgencyLoginPage() {
   const [email, setEmail] = useState("");
@@ -71,6 +71,17 @@ export default function AgencyLoginPage() {
 
     if (data.user && !data.user.email_confirmed_at) {
       setLoginState("unverified");
+      return;
+    }
+
+    const { data: renterRow } = await supabase
+      .from("renter_profiles")
+      .select("id")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
+
+    if (renterRow) {
+      setLoginState("wrong-portal");
       return;
     }
 
@@ -153,6 +164,41 @@ export default function AgencyLoginPage() {
                 type="button"
                 onClick={() => router.push("/login/agency")}
                 className="mt-4 block w-full text-center text-sm font-bold text-[var(--brand-primary)] hover:underline"
+              >
+                Try a different account
+              </button>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
+  if (loginState === "wrong-portal") {
+    return (
+      <main className="min-h-screen bg-[var(--brand-background)]">
+        <section className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md">
+            <div className="card p-8 text-center">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-amber-100">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <h1 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Wrong portal</h1>
+              <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                This account belongs to a <span className="font-bold">Renter</span>. Please use the Renter login instead.
+              </p>
+              <Link href="/login/renter" className="btn-primary mt-6 w-full block">
+                Go to Renter login
+              </Link>
+              <button
+                type="button"
+                onClick={() => setLoginState("form")}
+                className="mt-3 block w-full text-center text-sm font-bold text-[var(--brand-primary)] hover:underline"
               >
                 Try a different account
               </button>

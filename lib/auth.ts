@@ -33,6 +33,17 @@ export type RequireRenterResult =
   | { ok: true; user: User; renterId: string; supabase: SupabaseClient }
   | { ok: false; error: string; status: number };
 
+export type RequireRoleResult =
+  | { ok: true; user: User; role: "agency" | "renter"; supabase: SupabaseClient }
+  | { ok: false; error: string; status: number };
+
+// ---------------------------------------------------------------------------
+// Types for backward compatibility
+// ---------------------------------------------------------------------------
+
+export type AgencyRole = "agency";
+export type RenterRole = "renter";
+
 // ---------------------------------------------------------------------------
 // requireUser
 // ---------------------------------------------------------------------------
@@ -132,3 +143,30 @@ export async function requirePropertyOwnership(
 
   return { ok: true };
 }
+
+// ---------------------------------------------------------------------------
+// requireRole
+// ---------------------------------------------------------------------------
+
+export const requireRole = cache(async function requireRole(
+  existingClient?: SupabaseClient,
+): Promise<RequireRoleResult> {
+  const userResult = await requireUser(existingClient);
+  if (!userResult.ok) return userResult;
+
+  const { data: userRole, error } = await userResult.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("auth_user_id", userResult.user.id)
+    .single();
+
+  if (error || !userRole) {
+    return { ok: false, error: "User role not found.", status: 404 };
+  }
+
+  if (userRole.role !== "agency" && userRole.role !== "renter") {
+    return { ok: false, error: "Invalid user role.", status: 400 };
+  }
+
+  return { ok: true, user: userResult.user, role: userRole.role, supabase: userResult.supabase };
+});

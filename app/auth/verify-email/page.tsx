@@ -94,6 +94,30 @@ function Spinner() {
   return <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--brand-border)] border-t-[var(--brand-primary)] mx-auto" />;
 }
 
+async function resolvePostVerificationDestination(userId: string): Promise<string> {
+  const { data: agencyRow } = await supabase
+    .from("agency_profiles")
+    .select("id, verified")
+    .eq("auth_user_id", userId)
+    .maybeSingle<{ id: string; verified: boolean }>();
+
+  if (agencyRow) {
+    return agencyRow.verified ? "/dashboard" : "/onboarding/agency";
+  }
+
+  const { data: renterRow } = await supabase
+    .from("renter_profiles")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle<{ id: string }>();
+
+  if (renterRow) {
+    return "/renter";
+  }
+
+  return "/";
+}
+
 export default function VerifyEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,7 +135,7 @@ export default function VerifyEmailPage() {
     const next = searchParams.get("next");
 
     if (code && type === "signup") {
-      supabase.auth.exchangeCodeForSession(code).then(({ data, error: exchangeError }) => {
+      supabase.auth.exchangeCodeForSession(code).then(async ({ data, error: exchangeError }) => {
         if (exchangeError) {
           setError(exchangeError.message);
           setIsChecking(false);
@@ -125,19 +149,19 @@ export default function VerifyEmailPage() {
         }
         if (user) {
           setIsVerified(true);
-          const redirectTo = next || "/";
-          router.push(redirectTo);
+          const destination = next || await resolvePostVerificationDestination(user.id);
+          router.push(destination);
           setShowSuccess(true);
         }
       });
       return;
     }
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user && user.email_confirmed_at) {
         setIsVerified(true);
-        const redirectTo = next || "/";
-        router.push(redirectTo);
+        const destination = next || await resolvePostVerificationDestination(user.id);
+        router.push(destination);
         setShowSuccess(true);
         return;
       }

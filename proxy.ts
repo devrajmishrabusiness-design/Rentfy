@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { requireRole } from "./lib/auth";
 
 /**
  * PDD v2.0 – Route Protection via Middleware (Separate Auth Architecture)
@@ -108,21 +109,27 @@ export default async function proxy(request: NextRequest) {
   }
 
   if (isLoggedIn && isEmailVerified && isPublicAuthRoute) {
-    const [{ data: agencyRow }, { data: renterRow }] = await Promise.all([
-      supabase.from("agency_profiles").select("id, verified, is_admin").eq("auth_user_id", user!.id).maybeSingle(),
-      supabase.from("renter_profiles").select("id").eq("user_id", user!.id).maybeSingle(),
-    ]);
+    const roleResult = await requireRole();
 
-    const isAgency = Boolean(agencyRow);
-    const isRenter = Boolean(renterRow);
+    if (!roleResult.ok) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
 
-    if (isAgency) {
+    const { role } = roleResult;
+
+    if (role === "agency") {
+      const { data: agencyRow } = await supabase
+        .from("agency_profiles")
+        .select("verified")
+        .eq("auth_user_id", user!.id)
+        .maybeSingle();
+
       const redirectParam = searchParams.get("redirect");
-      const dest = redirectParam || (agencyRow!.verified ? "/dashboard" : "/onboarding/agency");
+      const dest = redirectParam || (agencyRow?.verified ? "/dashboard" : "/onboarding/agency");
       return NextResponse.redirect(new URL(dest, request.url));
     }
 
-    if (isRenter) {
+    if (role === "renter") {
       const redirectParam = searchParams.get("redirect");
       const dest = redirectParam || "/renter";
       return NextResponse.redirect(new URL(dest, request.url));
@@ -133,37 +140,29 @@ export default async function proxy(request: NextRequest) {
 
   if (isProtectedRoute && isLoggedIn && isEmailVerified) {
     const requiredRoles = protectedMatch!.roles;
-    let hasRole = false;
 
-    const [{ data: agencyRow }, { data: renterRow }] = await Promise.all([
-      supabase.from("agency_profiles").select("id, verified, is_admin").eq("auth_user_id", user!.id).maybeSingle(),
-      supabase.from("renter_profiles").select("id").eq("user_id", user!.id).maybeSingle(),
-    ]);
+    const roleResult = await requireRole();
 
-    const isVerifiedAgency = agencyRow?.verified === true;
-    const isAgency = Boolean(agencyRow);
-    const isAdmin = agencyRow?.is_admin === true;
-    const isRenter = Boolean(renterRow);
+    if (!roleResult.ok || !requiredRoles.includes(roleResult.role === "agency" ? "verified-agency" : roleResult.role)) {
+      const { data: agencyRow } = await supabase
+        .from("agency_profiles")
+        .select("verified, is_admin")
+        .eq("auth_user_id", user!.id)
+        .maybeSingle();
 
-    if (requiredRoles.includes("admin") && isAdmin) hasRole = true;
-    if (requiredRoles.includes("verified-agency") && isVerifiedAgency) hasRole = true;
-    if (requiredRoles.includes("agency") && isAgency) hasRole = true;
-    if (requiredRoles.includes("renter") && isRenter) hasRole = true;
+      const isVerifiedAgency = agencyRow?.verified === true;
+      const isAdmin = agencyRow?.is_admin === true;
 
-    if (!hasRole) {
       if (isAdmin) {
         return NextResponse.redirect(new URL("/admin", request.url));
       }
       if (isVerifiedAgency) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
-      if (isAgency) {
+      if (agencyRow) {
         return NextResponse.redirect(new URL("/onboarding/agency", request.url));
       }
-      if (isRenter) {
-        return NextResponse.redirect(new URL("/renter", request.url));
-      }
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/renter", request.url));
     }
   }
 

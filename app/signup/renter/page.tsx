@@ -59,7 +59,12 @@ export default function RenterSignupPage() {
     setLoading(false);
 
     if (signUpError) {
-      setError(signUpError.message);
+      const message = signUpError.message.toLowerCase();
+      if (message.includes("already") || message.includes("exists") || message.includes("duplicate")) {
+        setError("An account with this email already exists. Please log in instead.");
+      } else {
+        setError(signUpError.message);
+      }
       return;
     }
 

@@ -131,6 +131,41 @@ describe("Agency Login - /login/agency", () => {
     });
   });
 
+  it("shows wrong-portal message when renter profile exists", async () => {
+    const user = userEvent.setup();
+    mockSupabase.auth.signInWithPassword.mockResolvedValue({
+      data: { user: { id: "user-1", email: "test@test.com", email_confirmed_at: "2024-01-01" } },
+      error: null,
+    });
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === "renter_profiles") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { id: "renter-1" } }),
+        };
+      }
+      if (table === "agency_profiles") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+        };
+      }
+      return mockSupabase.from(table);
+    });
+
+    renderWithProviders(<AgencyLoginPage />);
+    await user.type(screen.getByLabelText(/^email$/i), "test@test.com");
+    await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/wrong portal/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => content.includes("This account belongs to a") && content.includes("Renter"), { exact: false })).toBeInTheDocument();
+    });
+  });
+
   it("links to agency signup", () => {
     renderWithProviders(<AgencyLoginPage />);
     const signupLink = screen.getByRole("link", { name: /create an account/i });
@@ -181,6 +216,28 @@ describe("Agency Signup - /signup/agency", () => {
     await waitFor(() => {
       expect(screen.getByText(/check your inbox/i)).toBeInTheDocument();
       expect(screen.getByText(/agency@test.com/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows duplicate email error when signup fails with already registered", async () => {
+    const user = userEvent.setup();
+    mockSupabase.auth.signUp.mockResolvedValue({
+      data: { user: null },
+      error: { message: "User already registered" },
+    });
+
+    renderWithProviders(<AgencySignupPage />);
+    await user.type(screen.getByLabelText(/agency name/i), "Test Agency");
+    await user.type(screen.getByLabelText(/owner name/i), "John Doe");
+    await user.type(screen.getByLabelText(/contact number/i), "9876543210");
+    await user.type(screen.getByLabelText(/city/i), "Noida");
+    await user.type(screen.getByLabelText(/^email$/i), "existing@test.com");
+    await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/an account with this email already exists/i)).toBeInTheDocument();
     });
   });
 
@@ -240,6 +297,41 @@ describe("Renter Login - /login/renter", () => {
     });
   });
 
+  it("shows wrong-portal message when agency profile exists", async () => {
+    const user = userEvent.setup();
+    mockSupabase.auth.signInWithPassword.mockResolvedValue({
+      data: { user: { id: "user-1", email: "test@test.com", email_confirmed_at: "2024-01-01" } },
+      error: null,
+    });
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === "agency_profiles") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { id: "agency-1" } }),
+        };
+      }
+      if (table === "renter_profiles") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+        };
+      }
+      return mockSupabase.from(table);
+    });
+
+    renderWithProviders(<RenterLoginPage />);
+    await user.type(screen.getByLabelText(/^email$/i), "test@test.com");
+    await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/wrong portal/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => content.includes("This account belongs to an") && content.includes("Agency"), { exact: false })).toBeInTheDocument();
+    });
+  });
+
   it("links to renter signup", () => {
     renderWithProviders(<RenterLoginPage />);
     const signupLink = screen.getByRole("link", { name: /create an account/i });
@@ -280,6 +372,26 @@ describe("Renter Signup - /signup/renter", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/check your inbox/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows duplicate email error when signup fails with already registered", async () => {
+    const user = userEvent.setup();
+    mockSupabase.auth.signUp.mockResolvedValue({
+      data: { user: null },
+      error: { message: "duplicate key value violates unique constraint" },
+    });
+
+    renderWithProviders(<RenterSignupPage />);
+    await user.type(screen.getByLabelText(/full name/i), "John Doe");
+    await user.type(screen.getByLabelText(/contact number/i), "9876543210");
+    await user.type(screen.getByLabelText(/^email$/i), "existing@test.com");
+    await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/an account with this email already exists/i)).toBeInTheDocument();
     });
   });
 
