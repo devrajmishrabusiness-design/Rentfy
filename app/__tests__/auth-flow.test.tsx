@@ -485,7 +485,7 @@ describe("Verify Email - /verify-email", () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { email: "test@test.com" } } });
   });
 
-  it("shows verification failed for invalid code", async () => {
+  it("shows verification pending for invalid code", async () => {
     mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({
       data: { session: null },
       error: { message: "Invalid code" },
@@ -494,7 +494,7 @@ describe("Verify Email - /verify-email", () => {
     renderWithProviders(<VerifyEmailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/verification failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/verification pending/i)).toBeInTheDocument();
     });
   });
 });

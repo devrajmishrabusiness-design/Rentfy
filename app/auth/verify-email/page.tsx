@@ -28,12 +28,15 @@ function ResendEmailSent({ email, onResend, loading }: { email: string; onResend
   );
 }
 
-function VerificationFailed({ error, email, emailRequired, onResend, loading }: {
+function VerificationFailed({ error, email, emailRequired, onResend, loading, onCheckVerification, isCheckingVerification, checkMessage }: {
   error: string | null;
   email: string;
   emailRequired: boolean;
   onResend: () => void;
   loading: boolean;
+  onCheckVerification: () => void;
+  isCheckingVerification: boolean;
+  checkMessage: string | null;
 }) {
   return (
     <main className="min-h-screen bg-[var(--brand-background)]">
@@ -43,26 +46,31 @@ function VerificationFailed({ error, email, emailRequired, onResend, loading }: 
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100">
               <CrossIcon />
             </div>
-            <h1 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Verification failed</h1>
+            <h1 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Verification pending</h1>
             <p className="mt-2 text-sm text-[var(--brand-muted)]">
-              {error || "The verification link is invalid or has expired."}
+              {error || "We're waiting for you to confirm your email."}
             </p>
+            {checkMessage && (
+              <div className="mt-4 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-4">
+                <p className="text-sm leading-6 text-[var(--brand-text)]">{checkMessage}</p>
+              </div>
+            )}
             <div className="mt-6 space-y-3">
               <div className="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] p-6">
                 <p className="text-sm leading-6 text-[var(--brand-text)]">
                   We sent a confirmation link to{" "}
                   <strong>{email || "your email"}</strong> when you signed up.
-                  Click that link first, then sign in again.
+                  Click that link first, then check your verification status below.
                 </p>
               </div>
+              <button type="button" onClick={onCheckVerification} disabled={isCheckingVerification} className="btn-primary w-full disabled:cursor-wait">
+                {isCheckingVerification ? "Checking..." : "I've Clicked the Verification Link"}
+              </button>
               <button type="button" onClick={onResend} disabled={loading || emailRequired} className="btn-secondary w-full disabled:cursor-wait">
                 {loading ? "Sending..." : "Resend verification email"}
               </button>
-              <Link href="/" className="btn-primary w-full block text-center">
-                Sign in
-              </Link>
               <Link href="/" className="block w-full text-center text-sm font-bold text-[var(--brand-primary)] hover:underline">
-                Create a new account
+                Back to home
               </Link>
             </div>
           </div>
@@ -128,6 +136,8 @@ export default function VerifyEmailPage() {
   const [email, setEmail] = useState("");
   const [isChecking, setIsChecking] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const [isCheckingVerification, setIsCheckingVerification] = useState(false);
+  const [checkMessage, setCheckMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -189,6 +199,26 @@ export default function VerifyEmailPage() {
     });
   };
 
+  const handleCheckVerification = async () => {
+    setIsCheckingVerification(true);
+    setCheckMessage(null);
+    setError(null);
+
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+
+    if (user?.email_confirmed_at) {
+      setIsVerified(true);
+      setCheckMessage("Email verified successfully!");
+      const destination = next || await resolvePostVerificationDestination(user.id);
+      router.push(destination);
+      setShowSuccess(true);
+    } else {
+      setCheckMessage("We couldn't verify your email yet. Please make sure you clicked the link in your inbox.");
+      setIsCheckingVerification(false);
+    }
+  };
+
   if (isChecking) {
     return (
       <main className="min-h-screen bg-[var(--brand-background)]">
@@ -215,7 +245,9 @@ export default function VerifyEmailPage() {
                 <CheckIcon />
               </div>
               <h1 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Email verified!</h1>
-              <p className="mt-2 text-sm text-[var(--brand-muted)]">Welcome to RenterEasy. Redirecting...</p>
+              <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                {checkMessage || "Welcome to RenterEasy. Redirecting..."}
+              </p>
               <div className="mt-6 flex justify-center gap-3">
                 <Link href="/" className="btn-secondary">Go Home</Link>
               </div>
@@ -230,5 +262,16 @@ export default function VerifyEmailPage() {
     return <ResendEmailSent email={email} onResend={handleResend} loading={loading} />;
   }
 
-  return <VerificationFailed error={error} email={email} emailRequired={!email} onResend={handleResend} loading={loading} />;
+  return (
+    <VerificationFailed
+      error={error}
+      email={email}
+      emailRequired={!email}
+      onResend={handleResend}
+      loading={loading}
+      onCheckVerification={handleCheckVerification}
+      isCheckingVerification={isCheckingVerification}
+      checkMessage={checkMessage}
+    />
+  );
 }

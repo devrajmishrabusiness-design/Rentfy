@@ -1,9 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import ProfileDropdown from "./ProfileDropdown";
 import DesktopNavLinks from "./nav/DesktopNavLinks";
-import { requireUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase-browser";
+import type { User } from "@supabase/supabase-js";
 
 const PUBLIC_LINKS = [
   { label: "Home", href: "/" },
@@ -13,10 +17,73 @@ const PUBLIC_LINKS = [
   { label: "Contact", href: "/#contact" },
 ];
 
-export default async function Navbar() {
-  const userResult = await requireUser();
+export default function Navbar() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAgency, setIsAgency] = useState(false);
+  const [isVerifiedAgency, setIsVerifiedAgency] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isRenter, setIsRenter] = useState(false);
+  const [agencyName, setAgencyName] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
-  if (!userResult.ok) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      const currentUser = data.user;
+      setUser(currentUser);
+
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      const [{ data: agencyRow }, { data: renterRow }] = await Promise.all([
+        supabase.from("agency_profiles").select("id, verified, is_admin, agency_name").eq("auth_user_id", currentUser.id).maybeSingle(),
+        supabase.from("renter_profiles").select("id").eq("user_id", currentUser.id).maybeSingle(),
+      ]);
+
+      if (cancelled) return;
+
+      setIsAgency(Boolean(agencyRow));
+      setIsVerifiedAgency(agencyRow?.verified === true);
+      setIsAdmin(agencyRow?.is_admin === true);
+      setIsRenter(Boolean(renterRow));
+      setAgencyName(agencyRow?.agency_name ?? undefined);
+      setLoading(false);
+    }
+
+    load();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      load();
+    });
+
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <nav className="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-white/85 shadow-sm backdrop-blur-md" role="navigation" aria-label="Main navigation">
+        <div className="container-app flex h-16 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center" aria-label="RenterEasy home">
+              <Logo />
+            </Link>
+          </div>
+          <DesktopNavLinks />
+        </div>
+      </nav>
+    );
+  }
+
+  if (!user) {
     return (
       <nav className="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-white/85 shadow-sm backdrop-blur-md" role="navigation" aria-label="Main navigation">
         <div className="container-app flex h-16 items-center justify-between">
@@ -53,26 +120,6 @@ export default async function Navbar() {
       </nav>
     );
   }
-
-  const user = userResult.user;
-  const supabase = userResult.supabase;
-
-  let isVerifiedAgency = false;
-  let isAgency = false;
-  let isRenter = false;
-  let isAdmin = false;
-  let agencyName: string | undefined;
-
-  const [{ data: agencyRow }, { data: renterRow }] = await Promise.all([
-    supabase.from("agency_profiles").select("id, verified, is_admin, agency_name").eq("auth_user_id", user.id).maybeSingle(),
-    supabase.from("renter_profiles").select("id, full_name").eq("user_id", user.id).maybeSingle(),
-  ]);
-
-  isAgency = Boolean(agencyRow);
-  isVerifiedAgency = agencyRow?.verified === true;
-  isAdmin = agencyRow?.is_admin === true;
-  isRenter = Boolean(renterRow);
-  agencyName = agencyRow?.agency_name ?? undefined;
 
   return (
     <nav className="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-white/85 shadow-sm backdrop-blur-md" role="navigation" aria-label="Main navigation">
