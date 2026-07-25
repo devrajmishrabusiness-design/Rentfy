@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase-server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import Footer from "@/app/Footer";
 import PropertyList from "@/app/PropertyList";
 import Link from "next/link";
@@ -40,7 +40,7 @@ export default async function SectorPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { sector } = await params;
-  const supabase = await createClient();
+  const supabase = supabaseAdmin;
   const resolvedParams = await searchParams;
   const pagination = extractPagination(new URLSearchParams(
     Object.entries(resolvedParams).flatMap(([k, v]) =>

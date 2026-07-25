@@ -4,6 +4,10 @@
  * Every helper optionally accepts a Supabase client so the caller
  * can reuse a single client across auth checks + data queries.
  * When no client is provided the helper creates one internally.
+ *
+ * Agency accounts use agency_profiles table.
+ * Renter accounts use renter_profiles table.
+ * These are completely isolated — a user can NEVER have both.
  */
 
 import { createClient } from "@/lib/supabase-server";
@@ -25,16 +29,14 @@ export type RequireVerifiedAgencyResult =
   | { ok: true; user: User; agencyId: string; supabase: SupabaseClient }
   | { ok: false; error: string; status: number };
 
+export type RequireRenterResult =
+  | { ok: true; user: User; renterId: string; supabase: SupabaseClient }
+  | { ok: false; error: string; status: number };
+
 // ---------------------------------------------------------------------------
 // requireUser
 // ---------------------------------------------------------------------------
 
-/**
- * Confirm the caller is signed in AND has confirmed their email.
- *
- * Returns the `User` and the `SupabaseClient` so the caller can
- * reuse the same client for data queries without creating a second one.
- */
 export const requireUser = cache(async function requireUser(
   existingClient?: SupabaseClient,
 ): Promise<RequireUserResult> {
@@ -60,12 +62,6 @@ export const requireUser = cache(async function requireUser(
 // requireVerifiedAgency
 // ---------------------------------------------------------------------------
 
-/**
- * Confirm the caller is a verified agency.
- *
- * Calls `requireUser()` first, then looks up the agency row using
- * the same client. Returns `user`, `agencyId`, and `supabase`.
- */
 export const requireVerifiedAgency = cache(async function requireVerifiedAgency(
   existingClient?: SupabaseClient,
 ): Promise<RequireVerifiedAgencyResult> {
@@ -73,7 +69,7 @@ export const requireVerifiedAgency = cache(async function requireVerifiedAgency(
   if (!userResult.ok) return userResult;
 
   const { data: agency } = await userResult.supabase
-    .from("agencies")
+    .from("agency_profiles")
     .select("id, verified")
     .eq("auth_user_id", userResult.user.id)
     .single();
@@ -87,15 +83,32 @@ export const requireVerifiedAgency = cache(async function requireVerifiedAgency(
 });
 
 // ---------------------------------------------------------------------------
+// requireRenter
+// ---------------------------------------------------------------------------
+
+export const requireRenter = cache(async function requireRenter(
+  existingClient?: SupabaseClient,
+): Promise<RequireRenterResult> {
+  const userResult = await requireUser(existingClient);
+  if (!userResult.ok) return userResult;
+
+  const { data: renterProfile } = await userResult.supabase
+    .from("renter_profiles")
+    .select("id")
+    .eq("user_id", userResult.user.id)
+    .single();
+
+  if (!renterProfile) {
+    return { ok: false, error: "Renter profile not found.", status: 404 };
+  }
+
+  return { ok: true, user: userResult.user, renterId: renterProfile.id, supabase: userResult.supabase };
+});
+
+// ---------------------------------------------------------------------------
 // requirePropertyOwnership
 // ---------------------------------------------------------------------------
 
-/**
- * Verify the property exists and belongs to the given agency.
- *
- * Does NOT verify the agency itself — call `requireVerifiedAgency()`
- * first and pass its `supabase` client to avoid creating a new one.
- */
 export async function requirePropertyOwnership(
   propertyId: string,
   agencyId: string,
@@ -105,15 +118,15 @@ export async function requirePropertyOwnership(
 
   const { data: property, error } = await supabase
     .from("properties")
-    .select("agency_id")
+    .select("agency_profile_id")
     .eq("id", propertyId)
-    .maybeSingle<{ agency_id: string }>();
+    .maybeSingle<{ agency_profile_id: string }>();
 
   if (error || !property) {
     return { ok: false, error: "Property not found.", status: 404 };
   }
 
-  if (property.agency_id !== agencyId) {
+  if (property.agency_profile_id !== agencyId) {
     return { ok: false, error: "You do not own this property.", status: 403 };
   }
 

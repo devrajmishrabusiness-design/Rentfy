@@ -290,7 +290,7 @@ export default function RenterAuthDialog() {
           </form>
 
           <p className="mt-4 text-center text-xs leading-5 text-[var(--brand-muted)]">
-            Are you an agency? <a href="/login" className="font-bold text-[var(--brand-primary)] hover:underline">Use agency login</a>
+            Are you an agency? <a href="/login/agency" className="font-bold text-[var(--brand-primary)] hover:underline">Use agency login</a>
           </p>
         </section>
       </div>

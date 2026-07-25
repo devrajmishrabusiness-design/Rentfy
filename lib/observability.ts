@@ -89,7 +89,7 @@ export async function getRequestContext(
     // Resolve agency & renter in parallel — cheap lookups.
     const [agencyResult, renterResult] = await Promise.all([
       supabase
-        .from("agencies")
+        .from("agency_profiles")
         .select("id")
         .eq("auth_user_id", user.id)
         .maybeSingle<{ id: string }>(),

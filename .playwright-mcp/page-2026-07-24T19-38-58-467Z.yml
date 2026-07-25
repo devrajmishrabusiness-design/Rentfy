@@ -1,0 +1,530 @@
+- generic [active] [ref=f11e1]:
+  - link "Skip to content" [ref=f11e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f11e3]:
+    - navigation "Main navigation" [ref=f11e4]:
+      - generic [ref=f11e5]:
+        - link "RenterEasy home" [ref=f11e7] [cursor=pointer]:
+          - /url: /
+          - generic "RenterEasy home" [ref=f11e8]:
+            - generic [ref=f11e9]: R
+            - generic [ref=f11e10]:
+              - generic [ref=f11e11]: RenterEasy
+              - generic [ref=f11e12]: Verified rentals · Noida & NCR
+        - generic [ref=f11e13]:
+          - link "Home" [ref=f11e14] [cursor=pointer]:
+            - /url: /
+          - link "Browse Rentals" [ref=f11e15] [cursor=pointer]:
+            - /url: /rent
+          - link "Popular Areas" [ref=f11e16] [cursor=pointer]:
+            - /url: /#areas
+          - link "For Agencies" [ref=f11e17] [cursor=pointer]:
+            - /url: /#agencies
+          - link "Contact" [ref=f11e18] [cursor=pointer]:
+            - /url: /#contact
+        - generic [ref=f11e19]:
+          - link "Dashboard Verified" [ref=f11e20] [cursor=pointer]:
+            - /url: /dashboard
+            - text: Dashboard
+            - generic [ref=f11e22]: Verified
+          - button "User menu" [ref=f11e24]:
+            - generic [ref=f11e25]: O
+  - main [ref=f11e26]:
+    - main [ref=f11e27]:
+      - generic [ref=f11e30]:
+        - generic [ref=f11e31]:
+          - generic [ref=f11e32]: Trusted by verified rental agencies
+          - heading "Find a rental home you'll love to live in." [level=1] [ref=f11e34]:
+            - text: Find a rental home
+            - generic [ref=f11e35]: you'll love to live in.
+          - paragraph [ref=f11e36]: Browse apartments, flats, villas and houses across Noida & NCR — only from agencies reviewed before they publish.
+          - generic [ref=f11e37]:
+            - link "Browse listings" [ref=f11e38] [cursor=pointer]:
+              - /url: "#listings"
+              - text: Browse listings
+              - generic [ref=f11e39]: →
+            - link "List as an agency" [ref=f11e40] [cursor=pointer]:
+              - /url: /signup
+          - search "Property search" [ref=f11e42]:
+            - generic [ref=f11e43]:
+              - searchbox "Location" [ref=f11e45]
+              - generic [ref=f11e46]:
+                - generic [ref=f11e47]: Property Type
+                - combobox "Property Type" [ref=f11e48]:
+                  - option "All Types" [selected]
+                  - option "Apartment"
+                  - option "Flat"
+                  - option "Villa"
+                  - option "House"
+              - generic [ref=f11e49]:
+                - generic [ref=f11e50]: Bedrooms
+                - combobox "Bedrooms" [ref=f11e51]:
+                  - option "Any BHK" [selected]
+                  - option "1 BHK"
+                  - option "2 BHK"
+                  - option "3 BHK"
+                  - option "4+ BHK"
+              - generic [ref=f11e52]:
+                - generic [ref=f11e53]: Max Rent
+                - combobox "Max Rent" [ref=f11e54]:
+                  - option "Any Budget" [selected]
+                  - option "Under 15K"
+                  - option "15K - 25K"
+                  - option "25K - 35K"
+                  - option "35K - 50K"
+                  - option "50K - 75K"
+                  - option "75K - 1L"
+                  - option "1L+"
+            - button "Search properties" [ref=f11e55]: Search
+          - generic [ref=f11e56]:
+            - generic [ref=f11e57]:
+              - paragraph [ref=f11e58]: "9"
+              - paragraph [ref=f11e59]: Active listings
+            - generic [ref=f11e60]:
+              - paragraph [ref=f11e61]: 100%
+              - paragraph [ref=f11e62]: Verified agencies
+            - generic [ref=f11e63]:
+              - paragraph [ref=f11e64]: NCR
+              - paragraph [ref=f11e65]: Local coverage
+        - generic [ref=f11e68]:
+          - img "testinggggg" [ref=f11e69]
+          - generic [ref=f11e70]:
+            - paragraph [ref=f11e71]: Rental search snapshot
+            - heading "Move from shortlist to site visit faster" [level=2] [ref=f11e72]
+            - list [ref=f11e73]:
+              - listitem [ref=f11e74]: Verified agency profiles
+              - listitem [ref=f11e78]: Location, rent, furnishing, and parking filters
+              - listitem [ref=f11e82]: Direct contact flow with lead tracking
+      - generic [ref=f11e88]:
+        - generic [ref=f11e89]: ID-verified agencies
+        - generic [ref=f11e95]: Zero brokerage for tenants
+        - generic [ref=f11e100]: Direct agency chat
+        - generic [ref=f11e105]: Listings reviewed within 24h
+      - generic [ref=f11e112]:
+        - generic [ref=f11e113]:
+          - paragraph [ref=f11e114]: Why RenterEasy
+          - heading "A premium rental marketplace built on trust." [level=2] [ref=f11e115]
+          - paragraph [ref=f11e116]: We make renting in Noida & NCR simple, safe and predictable — for both tenants and verified agencies.
+        - generic [ref=f11e117]:
+          - generic [ref=f11e118]:
+            - heading "Verified Agencies" [level=3] [ref=f11e122]
+            - paragraph [ref=f11e123]: Every agency is reviewed before they can publish a listing.
+          - generic [ref=f11e124]:
+            - heading "Safe Rentals" [level=3] [ref=f11e129]
+            - paragraph [ref=f11e130]: Real photos, real owners, real listings — no surprises later.
+          - generic [ref=f11e131]:
+            - heading "Simple Process" [level=3] [ref=f11e135]
+            - paragraph [ref=f11e136]: Search, compare, contact — without the typical rental chase.
+          - generic [ref=f11e137]:
+            - heading "Local Coverage" [level=3] [ref=f11e142]
+            - paragraph [ref=f11e143]: Focused on Noida and NCR with curated rental inventory.
+      - generic [ref=f11e145]:
+        - generic [ref=f11e146]:
+          - generic [ref=f11e147]:
+            - paragraph [ref=f11e148]: How it works
+            - heading "Simple steps from search to contact." [level=2] [ref=f11e149]
+          - link "List as an agency" [ref=f11e150] [cursor=pointer]:
+            - /url: /signup
+        - generic [ref=f11e151]:
+          - generic [ref=f11e152]:
+            - generic [ref=f11e153]: "01"
+            - heading "Search verified homes" [level=3] [ref=f11e154]
+            - paragraph [ref=f11e155]: Filter available rentals by location, type, bedrooms, furnishing and parking.
+          - generic [ref=f11e156]:
+            - generic [ref=f11e157]: "02"
+            - heading "Review the details" [level=3] [ref=f11e158]
+            - paragraph [ref=f11e159]: Open a listing to compare rent, photos, location and specifications.
+          - generic [ref=f11e160]:
+            - generic [ref=f11e161]: "03"
+            - heading "Connect with the agency" [level=3] [ref=f11e162]
+            - paragraph [ref=f11e163]: Share your details once and chat directly with the verified agency.
+      - generic [ref=f11e165]:
+        - generic [ref=f11e167]:
+          - paragraph [ref=f11e168]: Available properties
+          - heading "Browse current rentals" [level=2] [ref=f11e169]
+          - paragraph [ref=f11e170]: Use the filters to narrow the list and open a property for full details.
+        - generic [ref=f11e171]:
+          - generic [ref=f11e172]:
+            - generic [ref=f11e173]:
+              - searchbox "Search properties" [ref=f11e175]
+              - generic [ref=f11e176]:
+                - button "Filters" [ref=f11e177]
+                - generic [ref=f11e180]:
+                  - generic [ref=f11e181]: Sort properties
+                  - combobox "Sort properties" [ref=f11e182]:
+                    - option "Recommended" [selected]
+                    - 'option "Rent: Low to High"'
+                    - 'option "Rent: High to Low"'
+                    - option "Newest First"
+                    - option "Most Viewed"
+            - paragraph [ref=f11e183]: 9 properties found
+          - generic [ref=f11e184]:
+            - link "View testinggggg" [ref=f11e185] [cursor=pointer]:
+              - generic [ref=f11e186]:
+                - img "testinggggg" [ref=f11e187]
+                - generic [ref=f11e188]:
+                  - generic [ref=f11e189]: Verified
+                  - generic [ref=f11e192]: bxhxss
+                - generic [ref=f11e193]: Available now
+                - button "Save testinggggg" [ref=f11e199]
+              - generic [ref=f11e202]:
+                - heading "testinggggg" [level=2] [ref=f11e203]
+                - paragraph [ref=f11e204]:
+                  - generic [ref=f11e208]: hsvxhsw, ggduhhdss
+                - paragraph [ref=f11e210]: ₹11,111/month
+                - generic [ref=f11e211]:
+                  - generic [ref=f11e212]: 2 BHK
+                  - generic [ref=f11e213]: 1 Bath
+                  - generic [ref=f11e214]: Unfurnished
+                  - generic [ref=f11e215]: Parking
+                - link "View details" [ref=f11e217]:
+                  - /url: /property/2494a893-333f-417f-9feb-7e01d72392bc
+            - link "View photo test 3" [ref=f11e220] [cursor=pointer]:
+              - generic [ref=f11e221]:
+                - img "photo test 3" [ref=f11e222]
+                - generic [ref=f11e223]:
+                  - generic [ref=f11e224]: Verified
+                  - generic [ref=f11e227]: flat
+                - generic [ref=f11e228]: Available now
+                - button "Save photo test 3" [ref=f11e234]
+              - generic [ref=f11e237]:
+                - heading "photo test 3" [level=2] [ref=f11e238]
+                - paragraph [ref=f11e239]:
+                  - generic [ref=f11e243]: sector 51, noida
+                - paragraph [ref=f11e245]: ₹77,77,777/month
+                - generic [ref=f11e246]:
+                  - generic [ref=f11e247]: 3 BHK
+                  - generic [ref=f11e248]: 2 Bath
+                  - generic [ref=f11e249]: Unfurnished
+                  - generic [ref=f11e250]: Parking
+                - link "View details" [ref=f11e252]:
+                  - /url: /property/87193a60-976b-4836-a4dc-eb202ac4584c
+            - link "View photo test 2" [ref=f11e255] [cursor=pointer]:
+              - generic [ref=f11e256]:
+                - img "photo test 2" [ref=f11e257]
+                - generic [ref=f11e258]:
+                  - generic [ref=f11e259]: Verified
+                  - generic [ref=f11e262]: flat
+                - generic [ref=f11e263]: Available now
+                - button "Save photo test 2" [ref=f11e269]
+              - generic [ref=f11e272]:
+                - heading "photo test 2" [level=2] [ref=f11e273]
+                - paragraph [ref=f11e274]:
+                  - generic [ref=f11e278]: sector 5, noida
+                - paragraph [ref=f11e280]: ₹1,111/month
+                - generic [ref=f11e281]:
+                  - generic [ref=f11e282]: 2 BHK
+                  - generic [ref=f11e283]: 1 Bath
+                  - generic [ref=f11e284]: Semi Furnished
+                  - generic [ref=f11e285]: Parking
+                - link "View details" [ref=f11e287]:
+                  - /url: /property/cee947bd-1978-423b-8176-fe244d11133a
+            - link "View photo test" [ref=f11e290] [cursor=pointer]:
+              - generic [ref=f11e291]:
+                - img "photo test" [ref=f11e292]
+                - generic [ref=f11e293]:
+                  - generic [ref=f11e294]: Verified
+                  - generic [ref=f11e297]: flat
+                - generic [ref=f11e298]: Available now
+                - button "Save photo test" [ref=f11e304]
+              - generic [ref=f11e307]:
+                - heading "photo test" [level=2] [ref=f11e308]
+                - paragraph [ref=f11e309]:
+                  - generic [ref=f11e313]: sector 7, noida
+                - paragraph [ref=f11e315]: ₹56/month
+                - generic [ref=f11e316]:
+                  - generic [ref=f11e317]: 3 BHK
+                  - generic [ref=f11e318]: 2 Bath
+                  - generic [ref=f11e319]: Unfurnished
+                - link "View details" [ref=f11e321]:
+                  - /url: /property/45f83a55-e064-49af-8020-1514d10497e9
+            - link "View best" [ref=f11e324] [cursor=pointer]:
+              - generic [ref=f11e325]:
+                - img "best" [ref=f11e326]
+                - generic [ref=f11e327]:
+                  - generic [ref=f11e328]: Verified
+                  - generic [ref=f11e331]: flat
+                - generic [ref=f11e332]: Available now
+                - button "Save best" [ref=f11e338]
+              - generic [ref=f11e341]:
+                - heading "best" [level=2] [ref=f11e342]
+                - paragraph [ref=f11e343]:
+                  - generic [ref=f11e347]: b block, lucknow
+                - paragraph [ref=f11e349]: ₹9,99,999/month
+                - generic [ref=f11e350]:
+                  - generic [ref=f11e351]: 3 BHK
+                  - generic [ref=f11e352]: 2 Bath
+                - link "View details" [ref=f11e354]:
+                  - /url: /property/4590ef57-28c6-4053-a2ff-dc02a3b3b729
+            - link "View test" [ref=f11e357] [cursor=pointer]:
+              - generic [ref=f11e358]:
+                - img "test" [ref=f11e359]
+                - generic [ref=f11e360]:
+                  - generic [ref=f11e361]: Verified
+                  - generic [ref=f11e364]: apartment
+                - generic [ref=f11e365]: Available now
+                - button "Save test" [ref=f11e371]
+              - generic [ref=f11e374]:
+                - heading "test" [level=2] [ref=f11e375]
+                - paragraph [ref=f11e376]:
+                  - generic [ref=f11e380]: sector2, noida
+                - paragraph [ref=f11e382]: ₹7,777/month
+                - generic [ref=f11e383]:
+                  - generic [ref=f11e384]: 3 BHK
+                  - generic [ref=f11e385]: 2 Bath
+                - link "View details" [ref=f11e387]:
+                  - /url: /property/cfd4b5f4-8933-4781-8e59-f6a088959d30
+            - link "View 1 BHK Apartment in Delhi" [ref=f11e390] [cursor=pointer]:
+              - generic [ref=f11e391]:
+                - img "1 BHK Apartment in Delhi" [ref=f11e392]
+                - generic [ref=f11e393]:
+                  - generic [ref=f11e394]: Verified
+                  - generic [ref=f11e397]: apartment
+                - generic [ref=f11e398]: Available now
+                - button "Save 1 BHK Apartment in Delhi" [ref=f11e404]
+              - generic [ref=f11e407]:
+                - heading "1 BHK Apartment in Delhi" [level=2] [ref=f11e408]
+                - paragraph [ref=f11e409]:
+                  - generic [ref=f11e413]: rohini, delhi
+                - paragraph [ref=f11e415]: ₹18,000/month
+                - generic [ref=f11e416]:
+                  - generic [ref=f11e417]: 2 BHK
+                  - generic [ref=f11e418]: 2 Bath
+                - link "View details" [ref=f11e420]:
+                  - /url: /property/57aa8085-e05c-4fd6-8e66-c38c2f206065
+            - link "View 3 BHK Apartment in Gurgaon" [ref=f11e423] [cursor=pointer]:
+              - generic [ref=f11e424]:
+                - img "3 BHK Apartment in Gurgaon" [ref=f11e425]
+                - generic [ref=f11e426]:
+                  - generic [ref=f11e427]: Verified
+                  - generic [ref=f11e430]: apartment
+                - generic [ref=f11e431]: Available now
+                - button "Save 3 BHK Apartment in Gurgaon" [ref=f11e437]
+              - generic [ref=f11e440]:
+                - heading "3 BHK Apartment in Gurgaon" [level=2] [ref=f11e441]
+                - paragraph [ref=f11e442]:
+                  - generic [ref=f11e446]: sector 56, gurgaon
+                - paragraph [ref=f11e448]: ₹5,000/month
+                - generic [ref=f11e449]:
+                  - generic [ref=f11e450]: 3 BHK
+                  - generic [ref=f11e451]: 2 Bath
+                - link "View details" [ref=f11e453]:
+                  - /url: /property/225001dd-9c94-4a0f-87e2-9df255293b58
+            - link "View 2 BHK Apartment in Noida Sector 70" [ref=f11e456] [cursor=pointer]:
+              - generic [ref=f11e457]:
+                - img "2 BHK Apartment in Noida Sector 70" [ref=f11e458]
+                - generic [ref=f11e459]:
+                  - generic [ref=f11e460]: Verified
+                  - generic [ref=f11e463]: Apartment
+                - generic [ref=f11e464]: Available now
+                - button "Save 2 BHK Apartment in Noida Sector 70" [ref=f11e470]
+              - generic [ref=f11e473]:
+                - heading "2 BHK Apartment in Noida Sector 70" [level=2] [ref=f11e474]
+                - paragraph [ref=f11e475]:
+                  - generic [ref=f11e479]: sector 70, noida
+                - paragraph [ref=f11e481]: ₹25,000/month
+                - generic [ref=f11e482]:
+                  - generic [ref=f11e483]: 2 BHK
+                  - generic [ref=f11e484]: 2 Bath
+                - link "View details" [ref=f11e486]:
+                  - /url: /property/0d0cc5e8-a270-439b-9143-5e25a922582b
+      - generic [ref=f11e490]:
+        - generic [ref=f11e492]:
+          - paragraph [ref=f11e493]: Popular areas
+          - heading "Explore top Noida sectors" [level=2] [ref=f11e494]
+        - generic [ref=f11e495]:
+          - link [ref=f11e496] [cursor=pointer]:
+            - /url: /rent/noida/sector-18
+            - generic [ref=f11e502]:
+              - paragraph [ref=f11e503]: Sector 18, Noida
+              - paragraph [ref=f11e504]: Browse verified rentals
+            - generic [ref=f11e505]: →
+          - link [ref=f11e506] [cursor=pointer]:
+            - /url: /rent/noida/sector-50
+            - generic [ref=f11e512]:
+              - paragraph [ref=f11e513]: Sector 50, Noida
+              - paragraph [ref=f11e514]: Browse verified rentals
+            - generic [ref=f11e515]: →
+          - link [ref=f11e516] [cursor=pointer]:
+            - /url: /rent/noida/sector-62
+            - generic [ref=f11e522]:
+              - paragraph [ref=f11e523]: Sector 62, Noida
+              - paragraph [ref=f11e524]: Browse verified rentals
+            - generic [ref=f11e525]: →
+          - link [ref=f11e526] [cursor=pointer]:
+            - /url: /rent/noida/sector-70
+            - generic [ref=f11e532]:
+              - paragraph [ref=f11e533]: Sector 70, Noida
+              - paragraph [ref=f11e534]: Browse verified rentals
+            - generic [ref=f11e535]: →
+          - link [ref=f11e536] [cursor=pointer]:
+            - /url: /rent/noida/sector-78
+            - generic [ref=f11e542]:
+              - paragraph [ref=f11e543]: Sector 78, Noida
+              - paragraph [ref=f11e544]: Browse verified rentals
+            - generic [ref=f11e545]: →
+          - link [ref=f11e546] [cursor=pointer]:
+            - /url: /rent/noida/sector-137
+            - generic [ref=f11e552]:
+              - paragraph [ref=f11e553]: Sector 137, Noida
+              - paragraph [ref=f11e554]: Browse verified rentals
+            - generic [ref=f11e555]: →
+      - generic [ref=f11e557]:
+        - generic [ref=f11e558]:
+          - paragraph [ref=f11e559]: Testimonials
+          - heading "Loved by tenants and agencies" [level=2] [ref=f11e560]
+        - generic [ref=f11e561]:
+          - figure "A Aman Verma Tenant · Sector 62" [ref=f11e562]:
+            - generic [ref=f11e563]:
+              - generic [ref=f11e564]: ★
+              - generic [ref=f11e565]: ★
+              - generic [ref=f11e566]: ★
+              - generic [ref=f11e567]: ★
+              - generic [ref=f11e568]: ★
+            - blockquote [ref=f11e569]: “Found a clean 2 BHK in two weekends. The agency was already verified, which made me trust the listing instantly.”
+            - generic [ref=f11e570]:
+              - generic [ref=f11e571]: A
+              - generic [ref=f11e572]:
+                - paragraph [ref=f11e573]: Aman Verma
+                - paragraph [ref=f11e574]: Tenant · Sector 62
+          - figure "P Priya Sharma Agency Owner" [ref=f11e575]:
+            - generic [ref=f11e576]:
+              - generic [ref=f11e577]: ★
+              - generic [ref=f11e578]: ★
+              - generic [ref=f11e579]: ★
+              - generic [ref=f11e580]: ★
+              - generic [ref=f11e581]: ★
+            - blockquote [ref=f11e582]: “RenterEasy brought me serious, high-intent tenants. The dashboard makes lead tracking effortless.”
+            - generic [ref=f11e583]:
+              - generic [ref=f11e584]: P
+              - generic [ref=f11e585]:
+                - paragraph [ref=f11e586]: Priya Sharma
+                - paragraph [ref=f11e587]: Agency Owner
+          - figure "R Rahul Khanna Tenant · Sector 50" [ref=f11e588]:
+            - generic [ref=f11e589]:
+              - generic [ref=f11e590]: ★
+              - generic [ref=f11e591]: ★
+              - generic [ref=f11e592]: ★
+              - generic [ref=f11e593]: ★
+              - generic [ref=f11e594]: ★
+            - blockquote [ref=f11e595]: “Honestly the cleanest rental experience I've had in Noida. Photos matched reality, agent was responsive.”
+            - generic [ref=f11e596]:
+              - generic [ref=f11e597]: R
+              - generic [ref=f11e598]:
+                - paragraph [ref=f11e599]: Rahul Khanna
+                - paragraph [ref=f11e600]: Tenant · Sector 50
+      - generic [ref=f11e604]:
+        - generic [ref=f11e605]:
+          - paragraph [ref=f11e606]: 9+
+          - paragraph [ref=f11e607]: Active rentals
+        - generic [ref=f11e608]:
+          - paragraph [ref=f11e609]: 100%
+          - paragraph [ref=f11e610]: Verified agencies
+        - generic [ref=f11e611]:
+          - paragraph [ref=f11e612]: 24h
+          - paragraph [ref=f11e613]: Approval turnaround
+        - generic [ref=f11e614]:
+          - paragraph [ref=f11e615]: 10k+
+          - paragraph [ref=f11e616]: Tenant searches
+      - generic [ref=f11e620]:
+        - generic [ref=f11e621]:
+          - paragraph [ref=f11e622]: FAQ
+          - heading "Frequently asked questions" [level=2] [ref=f11e623]
+          - paragraph [ref=f11e624]:
+            - text: Still curious? Reach our team at
+            - link "support@rentereasy.in" [ref=f11e625] [cursor=pointer]:
+              - /url: mailto:support@rentereasy.in
+            - text: .
+        - generic [ref=f11e626]:
+          - group [ref=f11e627]:
+            - generic "Are the agencies verified?" [ref=f11e628] [cursor=pointer]:
+              - text: Are the agencies verified?
+              - generic [ref=f11e629]: +
+          - group [ref=f11e630]:
+            - generic "How do I contact a property owner?" [ref=f11e631] [cursor=pointer]:
+              - text: How do I contact a property owner?
+              - generic [ref=f11e632]: +
+          - group [ref=f11e633]:
+            - generic "Is RenterEasy free for tenants?" [ref=f11e634] [cursor=pointer]:
+              - text: Is RenterEasy free for tenants?
+              - generic [ref=f11e635]: +
+          - group [ref=f11e636]:
+            - generic "Which cities are covered?" [ref=f11e637] [cursor=pointer]:
+              - text: Which cities are covered?
+              - generic [ref=f11e638]: +
+      - generic [ref=f11e641]:
+        - paragraph [ref=f11e642]: For Agencies
+        - heading "List your properties with verified credibility" [level=2] [ref=f11e643]
+        - paragraph [ref=f11e644]: Join hundreds of verified agencies in Noida & NCR. Get direct access to high-intent tenants, lead tracking dashboard, and priority listing placement.
+        - generic [ref=f11e645]:
+          - link "Create Agency Account" [ref=f11e646] [cursor=pointer]:
+            - /url: /auth/signup?role=agency
+          - link "Already have an account?" [ref=f11e647] [cursor=pointer]:
+            - /url: /auth/login
+      - generic [ref=f11e649]:
+        - generic [ref=f11e650]:
+          - paragraph [ref=f11e651]: Contact us
+          - heading "Need help finding or listing a rental?" [level=2] [ref=f11e652]
+          - paragraph [ref=f11e653]: Reach the RenterEasy team for agency onboarding, listing support, or tenant questions about verified rentals.
+        - generic [ref=f11e655]:
+          - generic [ref=f11e656]:
+            - paragraph [ref=f11e657]: Email
+            - link "support@rentereasy.in" [ref=f11e658] [cursor=pointer]:
+              - /url: mailto:support@rentereasy.in
+          - generic [ref=f11e659]:
+            - paragraph [ref=f11e660]: Service area
+            - paragraph [ref=f11e661]: Noida & NCR
+          - link "Create agency account" [ref=f11e662] [cursor=pointer]:
+            - /url: /signup
+      - contentinfo [ref=f11e663]:
+        - generic [ref=f11e664]:
+          - generic [ref=f11e665]:
+            - generic [ref=f11e666]:
+              - link "RenterEasy home" [ref=f11e667] [cursor=pointer]:
+                - /url: /
+                - generic "RenterEasy home" [ref=f11e668]:
+                  - generic [ref=f11e669]: R
+                  - generic [ref=f11e670]:
+                    - generic [ref=f11e671]: RenterEasy
+                    - generic [ref=f11e672]: Verified rentals · Noida & NCR
+              - paragraph [ref=f11e673]: RenterEasy is a premium rental marketplace connecting tenants with verified agencies in Noida and NCR. Discover homes you can trust.
+            - generic [ref=f11e674]:
+              - heading "Explore" [level=4] [ref=f11e675]
+              - list [ref=f11e676]:
+                - listitem [ref=f11e677]:
+                  - link "Home" [ref=f11e678] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=f11e679]:
+                  - link "Rentals in Noida" [ref=f11e680] [cursor=pointer]:
+                    - /url: /rent/noida
+                - listitem [ref=f11e681]:
+                  - link "Agency login" [ref=f11e682] [cursor=pointer]:
+                    - /url: /auth/login
+                - listitem [ref=f11e683]:
+                  - link "List your agency" [ref=f11e684] [cursor=pointer]:
+                    - /url: /auth/signup
+            - generic [ref=f11e685]:
+              - heading "Support" [level=4] [ref=f11e686]
+              - list [ref=f11e687]:
+                - listitem [ref=f11e688]:
+                  - link "Help Center" [ref=f11e689] [cursor=pointer]:
+                    - /url: /support
+                - listitem [ref=f11e690]:
+                  - link "Contact Us" [ref=f11e691] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=f11e692]:
+                  - link "support@rentereasy.in" [ref=f11e693] [cursor=pointer]:
+                    - /url: mailto:support@rentereasy.in
+            - generic [ref=f11e694]:
+              - heading "Legal" [level=4] [ref=f11e695]
+              - list [ref=f11e696]:
+                - listitem [ref=f11e697]:
+                  - link "Privacy Policy" [ref=f11e698] [cursor=pointer]:
+                    - /url: /privacy
+                - listitem [ref=f11e699]:
+                  - link "Terms of Service" [ref=f11e700] [cursor=pointer]:
+                    - /url: /terms
+          - generic [ref=f11e701]:
+            - paragraph [ref=f11e702]: © 2026 RenterEasy. All rights reserved.
+            - paragraph [ref=f11e703]: Built with care for verified rental experiences.
+  - button "Open Next.js Dev Tools" [ref=f11e709] [cursor=pointer]

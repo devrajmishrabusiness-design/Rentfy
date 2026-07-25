@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase-server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import PropertyList from "./PropertyList";
 import Footer from "./Footer";
 import Link from "next/link";
@@ -239,7 +239,7 @@ export default async function Home({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const supabase = await createClient();
+  const supabase = supabaseAdmin;
   const resolvedParams = await searchParams;
   const pagination = extractPagination(new URLSearchParams(
     Object.entries(resolvedParams).flatMap(([k, v]) =>
@@ -294,12 +294,12 @@ export default async function Home({
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="#listings" className="btn-primary">
-                Browse listings
+              <Link href="/signup/renter" className="btn-primary">
+                I&apos;m looking to rent
                 <span aria-hidden>→</span>
               </Link>
-              <Link href="/signup" className="btn-secondary">
-                List as an agency
+              <Link href="/signup/agency" className="btn-secondary">
+                I want to list my rentals
               </Link>
             </div>
 
@@ -454,9 +454,9 @@ export default async function Home({
               eyebrow="How it works"
               title="Simple steps from search to contact."
             />
-            <Link href="/signup" className="btn-secondary">
-              List as an agency
-            </Link>
+          <Link href="/signup/agency" className="btn-secondary">
+            List as an agency
+          </Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -681,6 +681,38 @@ export default async function Home({
         </div>
       </section>
 
+      {/* Agency CTA */}
+      <section className="bg-[var(--brand-background)] py-20">
+        <div className="container-app">
+          <div className="rounded-3xl bg-white border border-[var(--brand-border)] p-8 sm:p-12 lg:p-16 text-center">
+            <p className="text-sm font-bold uppercase tracking-wider text-[var(--brand-primary)]">
+              For Agencies
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl lg:text-5xl">
+              List your properties with verified credibility
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg leading-8 text-[var(--brand-muted)]">
+              Join hundreds of verified agencies in Noida & NCR. Get direct access to
+              high-intent tenants, lead tracking dashboard, and priority listing placement.
+            </p>
+            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <Link
+                href="/signup/agency"
+                className="btn-primary w-full sm:w-auto"
+              >
+                Create Agency Account
+              </Link>
+              <Link
+                href="/login/agency"
+                className="btn-secondary w-full sm:w-auto"
+              >
+                Already have an account?
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact */}
       <section
         id="contact"
@@ -720,7 +752,7 @@ export default async function Home({
                 <p className="mt-1 text-lg font-semibold">Noida &amp; NCR</p>
               </div>
               <Link
-                href="/signup"
+                href="/signup/agency"
                 className="inline-flex w-full justify-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-stone-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-50"
               >
                 Create agency account

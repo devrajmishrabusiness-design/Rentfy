@@ -1,0 +1,40 @@
+[     147ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[     158ms] [LOG] [Fast Refresh] done in 119ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    1729ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    1828ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    2309ms] [ERROR] %o
+
+%s Error: Event handlers cannot be passed to Client Component props.
+  <... error=... onRetry={function onRetry}>
+                         ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>:1:18)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:1919:105)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2689:13) The above error occurred in the <RentErrorState> component. It was handled by the <ErrorBoundaryHandler> error boundary. @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:1998
+[    2331ms] [ERROR] Rent page error: Error: Event handlers cannot be passed to Client Component props.
+  <... error=... onRetry={function onRetry}>
+                         ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>:1:18)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:1919:105)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2689:13) @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:3318
+[    2338ms] [ERROR] Rent page error: Error: Event handlers cannot be passed to Client Component props.
+  <... error=... onRetry={function onRetry}>
+                         ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>:1:18)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:1919:105)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/0wrr_next_dist_compiled_react-server-dom-turbopack_09xcrlp._.js:2689:13) @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:3318
+[    2488ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    2576ms] [LOG] [Fast Refresh] done in 202ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  139456ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=OKf2M6VQU8SoSQes-QiKs' failed: Error in connection establishment: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  140469ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477

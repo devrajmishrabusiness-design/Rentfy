@@ -22,7 +22,7 @@ async function requireAdmin(): Promise<RequireAdminResult> {
   if (!userResult.ok) return { ok: false, error: userResult.error };
 
   const { data: agencyRow } = await supabaseAdmin
-    .from("agencies")
+    .from("agency_profiles")
     .select("is_admin")
     .eq("auth_user_id", userResult.user.id)
     .maybeSingle();
@@ -63,7 +63,7 @@ export async function verifyAgency(agencyId: string): Promise<ActionResult> {
   if (rl) return rl;
 
   const { error } = await supabaseAdmin
-    .from("agencies")
+    .from("agency_profiles")
     .update({ verified: true })
     .eq("id", agencyId);
 
@@ -81,7 +81,7 @@ export async function unverifyAgency(agencyId: string): Promise<ActionResult> {
   if (rl) return rl;
 
   const { error } = await supabaseAdmin
-    .from("agencies")
+    .from("agency_profiles")
     .update({ verified: false })
     .eq("id", agencyId);
 
@@ -155,7 +155,7 @@ export async function deleteAgency(agencyId: string): Promise<ActionResult> {
   if (rl) return rl;
 
   const { error } = await supabaseAdmin
-    .from("agencies")
+    .from("agency_profiles")
     .delete()
     .eq("id", agencyId);
 

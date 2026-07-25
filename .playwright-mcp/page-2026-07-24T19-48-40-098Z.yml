@@ -1,0 +1,85 @@
+- generic [active] [ref=f16e1]:
+  - link "Skip to content" [ref=f16e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f16e3]:
+    - navigation "Main navigation" [ref=f16e4]:
+      - generic [ref=f16e5]:
+        - link "RenterEasy home" [ref=f16e7] [cursor=pointer]:
+          - /url: /
+          - generic "RenterEasy home" [ref=f16e8]:
+            - generic [ref=f16e9]: R
+            - generic [ref=f16e10]:
+              - generic [ref=f16e11]: RenterEasy
+              - generic [ref=f16e12]: Verified rentals · Noida & NCR
+        - generic [ref=f16e13]:
+          - link "Home" [ref=f16e14] [cursor=pointer]:
+            - /url: /
+          - link "Browse Rentals" [ref=f16e15] [cursor=pointer]:
+            - /url: /rent
+          - link "Popular Areas" [ref=f16e16] [cursor=pointer]:
+            - /url: /#areas
+          - link "For Agencies" [ref=f16e17] [cursor=pointer]:
+            - /url: /#agencies
+          - link "Contact" [ref=f16e18] [cursor=pointer]:
+            - /url: /#contact
+        - generic [ref=f16e19]:
+          - link "Dashboard Verified" [ref=f16e20] [cursor=pointer]:
+            - /url: /dashboard
+            - text: Dashboard
+            - generic [ref=f16e22]: Verified
+          - button "User menu" [ref=f16e24]:
+            - generic [ref=f16e25]: O
+  - main [ref=f16e26]:
+    - main [ref=f16e27]:
+      - contentinfo [ref=f16e119]:
+        - generic [ref=f16e120]:
+          - generic [ref=f16e121]:
+            - generic [ref=f16e122]:
+              - link "RenterEasy home" [ref=f16e123] [cursor=pointer]:
+                - /url: /
+                - generic "RenterEasy home" [ref=f16e124]:
+                  - generic [ref=f16e125]: R
+                  - generic [ref=f16e126]:
+                    - generic [ref=f16e127]: RenterEasy
+                    - generic [ref=f16e128]: Verified rentals · Noida & NCR
+              - paragraph [ref=f16e129]: RenterEasy is a premium rental marketplace connecting tenants with verified agencies in Noida and NCR. Discover homes you can trust.
+            - generic [ref=f16e130]:
+              - heading "Explore" [level=4] [ref=f16e131]
+              - list [ref=f16e132]:
+                - listitem [ref=f16e133]:
+                  - link "Home" [ref=f16e134] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=f16e135]:
+                  - link "Rentals in Noida" [ref=f16e136] [cursor=pointer]:
+                    - /url: /rent/noida
+                - listitem [ref=f16e137]:
+                  - link "Agency login" [ref=f16e138] [cursor=pointer]:
+                    - /url: /auth/login
+                - listitem [ref=f16e139]:
+                  - link "List your agency" [ref=f16e140] [cursor=pointer]:
+                    - /url: /auth/signup
+            - generic [ref=f16e141]:
+              - heading "Support" [level=4] [ref=f16e142]
+              - list [ref=f16e143]:
+                - listitem [ref=f16e144]:
+                  - link "Help Center" [ref=f16e145] [cursor=pointer]:
+                    - /url: /support
+                - listitem [ref=f16e146]:
+                  - link "Contact Us" [ref=f16e147] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=f16e148]:
+                  - link "support@rentereasy.in" [ref=f16e149] [cursor=pointer]:
+                    - /url: mailto:support@rentereasy.in
+            - generic [ref=f16e150]:
+              - heading "Legal" [level=4] [ref=f16e151]
+              - list [ref=f16e152]:
+                - listitem [ref=f16e153]:
+                  - link "Privacy Policy" [ref=f16e154] [cursor=pointer]:
+                    - /url: /privacy
+                - listitem [ref=f16e155]:
+                  - link "Terms of Service" [ref=f16e156] [cursor=pointer]:
+                    - /url: /terms
+          - generic [ref=f16e157]:
+            - paragraph [ref=f16e158]: © 2026 RenterEasy. All rights reserved.
+            - paragraph [ref=f16e159]: Built with care for verified rental experiences.
+  - button "Open Next.js Dev Tools" [ref=f16e165] [cursor=pointer]

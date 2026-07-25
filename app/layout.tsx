@@ -3,9 +3,11 @@ import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
+import BottomNav from "./BottomNav";
 import { RenterSessionProvider } from "./renter/RenterSessionProvider";
 import { ToastProvider } from "./Toast";
 import { ConfirmProvider } from "./ConfirmDialog";
+import { FocusManager } from "./FocusManager";
 
 const RenterAuthDialog = dynamic(() => import("./renter/RenterAuthDialog"));
 
@@ -45,6 +47,7 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -65,12 +68,18 @@ export default function RootLayout({
         <ToastProvider>
           <ConfirmProvider>
             <RenterSessionProvider>
-              <Navbar />
-              <div id="main-content">{children}</div>
+              <header role="banner">
+                <Navbar />
+              </header>
+              <main id="main-content" tabIndex={-1} role="main">
+                {children}
+              </main>
+              <BottomNav />
               <RenterAuthDialog />
             </RenterSessionProvider>
           </ConfirmProvider>
         </ToastProvider>
+        <FocusManager />
       </body>
     </html>
   );

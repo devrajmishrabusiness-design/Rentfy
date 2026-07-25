@@ -1,35 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Footer from "../Footer";
-import ErrorMessage from "../ErrorMessage";
-
-function safeRedirect(redirect: string | null): string | null {
-  if (!redirect || typeof redirect !== "string") return null;
-  if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect;
-  return null;
-}
-
-async function resolvePostLoginDestination(
-  explicitRedirect: string | null
-): Promise<string> {
-  if (explicitRedirect) return explicitRedirect;
-
-  const { data: agency } = await supabase
-    .from("agencies")
-    .select("id")
-    .eq("auth_user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
-    .maybeSingle<{ id: string }>();
-
-  return agency ? "/dashboard" : "/onboarding/agency";
-}
+import Footer from "@/app/Footer";
+import ErrorMessage from "@/app/ErrorMessage";
 
 type LoginState = "form" | "unverified";
 
-export default function LoginPage() {
+export default function RenterLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,10 +33,21 @@ export default function LoginPage() {
           router.push("/verify-email");
           return;
         }
-        const dest = await resolvePostLoginDestination(
-          safeRedirect(searchParams.get("redirect"))
-        );
-        router.push(dest);
+        const dest = searchParams.get("redirect");
+        if (dest && dest.startsWith("/")) {
+          router.push(dest);
+          return;
+        }
+        const { data: renterRow } = await supabase
+          .from("renter_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (renterRow) {
+          router.push("/renter");
+        } else {
+          router.push("/signup/renter");
+        }
       }
     });
   }, [router, searchParams]);
@@ -83,16 +74,28 @@ export default function LoginPage() {
       return;
     }
 
-    const dest = await resolvePostLoginDestination(
-      safeRedirect(searchParams.get("redirect"))
-    );
-    router.push(dest);
+    const dest = searchParams.get("redirect");
+    if (dest && dest.startsWith("/")) {
+      router.push(dest);
+      return;
+    }
+
+    const { data: renterRow } = await supabase
+      .from("renter_profiles")
+      .select("id")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
+    if (renterRow) {
+      router.push("/renter");
+    } else {
+      router.push("/signup/renter");
+    }
   };
 
   const resendVerification = async () => {
     setError(null);
     setLoading(true);
-const { error: resendError } = await supabase.auth.resend({
+    const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email,
       options: { emailRedirectTo: `${window.location.origin}/verify-email` },
@@ -100,6 +103,7 @@ const { error: resendError } = await supabase.auth.resend({
     if (resendError) {
       setError(resendError.message);
     }
+    setLoading(false);
   };
 
   if (loginState === "unverified") {
@@ -147,7 +151,7 @@ const { error: resendError } = await supabase.auth.resend({
 
               <button
                 type="button"
-                onClick={() => { setLoginState("form"); setError(null); }}
+                onClick={() => router.push("/login/renter")}
                 className="mt-4 block w-full text-center text-sm font-bold text-[var(--brand-primary)] hover:underline"
               >
                 Try a different account
@@ -166,33 +170,38 @@ const { error: resendError } = await supabase.auth.resend({
         <div className="w-full max-w-md">
           <div className="card p-8">
             <div className="mb-6 text-center">
-              <span className="badge-info mx-auto">Agency access</span>
+              <span className="badge-info mx-auto">Renter sign in</span>
               <h1 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)]">
-                Welcome back to RenterEasy
+                Welcome back
               </h1>
               <p className="mt-2 text-sm text-[var(--brand-muted)]">
-                Manage your listings, profile and rental leads.
+                Find your next rental home
               </p>
-              {sessionExpired && (
-                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
-                  Your session expired. Please sign in again to continue.
-                </div>
-              )}
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            {sessionExpired && (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                Your session expired. Please sign in again to continue.
+              </div>
+            )}
+
+            <ErrorMessage message={error} className="mt-4" />
+
+            <form onSubmit={handleLogin} className="space-y-4 mt-6">
               <div>
                 <label htmlFor="email" className="label">
-                  Agency email
+                  Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   required
-                  placeholder="you@agency.com"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="input"
+                  autoComplete="email"
+                  disabled={loading}
                 />
               </div>
 
@@ -208,10 +217,10 @@ const { error: resendError } = await supabase.auth.resend({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input"
+                  autoComplete="current-password"
+                  disabled={loading}
                 />
               </div>
-
-              <ErrorMessage message={error} />
 
               <button
                 type="submit"
@@ -223,12 +232,18 @@ const { error: resendError } = await supabase.auth.resend({
             </form>
 
             <p className="mt-6 text-center text-sm text-[var(--brand-muted)]">
-              New agency?{" "}
+              New to RenterEasy?{" "}
               <Link
-                href="/signup"
+                href="/signup/renter"
                 className="font-bold text-[var(--brand-primary)] hover:underline"
               >
                 Create an account
+              </Link>
+            </p>
+
+            <p className="mt-4 text-center text-sm text-[var(--brand-muted)]">
+              <Link href="/forgot-password" className="font-bold text-[var(--brand-primary)] hover:underline">
+                Forgot password?
               </Link>
             </p>
           </div>

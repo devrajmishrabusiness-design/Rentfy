@@ -5,10 +5,10 @@ import { requireUser } from "@/lib/auth";
 
 export default async function ProfilePage() {
   const userResult = await requireUser();
-  if (!userResult.ok) redirect("/login");
+  if (!userResult.ok) redirect("/login/agency");
 
   const { data: agency } = await userResult.supabase
-    .from("agencies")
+    .from("agency_profiles")
     .select("*")
     .eq("auth_user_id", userResult.user.id)
     .maybeSingle();

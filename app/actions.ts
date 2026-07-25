@@ -95,7 +95,7 @@ export async function completeAgencyOnboarding(params: {
 
   // Idempotency: if the user already has an agency row, treat as success.
   const { data: existing } = await auth.supabase
-    .from("agencies")
+    .from("agency_profiles")
     .select("id")
     .eq("auth_user_id", auth.user.id)
     .maybeSingle<{ id: string }>();
@@ -106,7 +106,7 @@ export async function completeAgencyOnboarding(params: {
 
   const email = auth.user.email ?? "";
 
-  const { error } = await auth.supabase.from("agencies").insert({
+  const { error } = await auth.supabase.from("agency_profiles").insert({
     auth_user_id: auth.user.id,
     agency_name: agencyName,
     owner_name: ownerName,
@@ -696,7 +696,7 @@ export async function updateAgencyProfile(
   }
 
   const { error } = await auth.supabase
-    .from("agencies")
+    .from("agency_profiles")
     .update(cleanUpdates)
     .eq("id", agencyId);
 

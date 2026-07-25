@@ -3,42 +3,71 @@ import Footer from "../Footer";
 export default function DashboardLoading() {
   return (
     <main className="min-h-screen bg-[var(--brand-background)]">
-      <section className="container-app py-10">
-        <div className="mb-4 space-y-2">
-          <div className="skeleton h-5 w-28 rounded-full" />
-          <div className="skeleton h-9 w-72 rounded" />
-          <div className="skeleton h-4 w-48 rounded" />
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="card p-5 space-y-3">
-              <div className="skeleton h-4 w-20 rounded" />
-              <div className="skeleton h-8 w-28 rounded" />
-              <div className="skeleton h-3 w-32 rounded" />
+      <div className="flex flex-col lg:flex-row">
+        <div className="hidden lg:block lg:w-64 xl:w-72 shrink-0">
+          <div className="sticky top-[57px]">
+            <div className="card p-4 space-y-3">
+              <div className="skeleton h-5 w-20 rounded" />
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((item) => (
+                <div key={item} className="skeleton h-9 w-full rounded-xl" />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
-        <div className="mt-10 card p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="skeleton h-5 w-32 rounded" />
-            <div className="skeleton h-6 w-20 rounded-full" />
+        <div className="flex-1 min-w-0">
+          <div className="border-b border-[var(--brand-border)] bg-white">
+            <div className="container-app py-6 space-y-3">
+              <div className="skeleton h-8 w-64 rounded" />
+              <div className="skeleton h-4 w-48 rounded" />
+            </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="card overflow-hidden">
-                <div className="skeleton h-48 w-full" />
-                <div className="space-y-3 p-5">
-                  <div className="skeleton h-5 w-3/4 rounded" />
-                  <div className="skeleton h-4 w-1/2 rounded" />
-                  <div className="skeleton h-6 w-2/3 rounded" />
+
+          <section className="container-app py-6 sm:py-8 space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="card p-5 space-y-3">
+                  <div className="skeleton h-4 w-24 rounded" />
+                  <div className="skeleton h-8 w-16 rounded" />
+                  <div className="skeleton h-3 w-32 rounded" />
+                </div>
+              ))}
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="card p-6 space-y-3">
+                  <div className="skeleton h-5 w-32 rounded" />
+                  <div className="skeleton h-4 w-56 rounded" />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[0, 1, 2, 3].map((item) => (
+                      <div key={item} className="skeleton h-20 rounded-xl" />
+                    ))}
+                  </div>
+                </div>
+                <div className="card overflow-hidden">
+                  <div className="border-b border-[var(--brand-border)] px-6 py-4">
+                    <div className="skeleton h-5 w-32 rounded" />
+                  </div>
+                  <div className="p-6 space-y-3">
+                    {[0, 1, 2].map((item) => (
+                      <div key={item} className="skeleton h-12 w-full rounded-xl" />
+                    ))}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="space-y-4">
+                <div className="card p-6 space-y-3">
+                  <div className="skeleton h-5 w-32 rounded" />
+                  {[0, 1, 2].map((item) => (
+                    <div key={item} className="skeleton h-16 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
       <Footer />
     </main>
   );

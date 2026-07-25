@@ -64,7 +64,7 @@ function setupAdmin() {
   });
 
   supabaseAdminMock.from.mockImplementation((table: string) => {
-    if (table === "agencies") {
+    if (table === "agency_profiles") {
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -83,6 +83,9 @@ function setupAdmin() {
     }
     if (table === "properties") {
       return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ error: null }),
         }),
@@ -91,7 +94,7 @@ function setupAdmin() {
         }),
       };
     }
-    return { update: vi.fn(), delete: vi.fn() };
+    return { from: vi.fn() };
   });
 }
 
@@ -102,7 +105,7 @@ function setupNonAdmin() {
     supabase: { from: vi.fn() },
   });
   supabaseAdminMock.from.mockImplementation((table: string) => {
-    if (table === "agencies") {
+    if (table === "agency_profiles") {
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({

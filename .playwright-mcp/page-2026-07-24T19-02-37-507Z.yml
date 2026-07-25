@@ -1,0 +1,94 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation "Main navigation" [ref=e4]:
+      - generic [ref=e5]:
+        - link "RenterEasy home" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - generic "RenterEasy home" [ref=e8]:
+            - generic [ref=e9]: R
+            - generic [ref=e10]:
+              - generic [ref=e11]: RenterEasy
+              - generic [ref=e12]: Verified rentals · Noida & NCR
+        - generic [ref=e13]:
+          - link "Home" [ref=e14] [cursor=pointer]:
+            - /url: /
+          - link "Browse Rentals" [ref=e15] [cursor=pointer]:
+            - /url: /rent
+          - link "Popular Areas" [ref=e16] [cursor=pointer]:
+            - /url: /#areas
+          - link "For Agencies" [ref=e17] [cursor=pointer]:
+            - /url: /#agencies
+          - link "Contact" [ref=e18] [cursor=pointer]:
+            - /url: /#contact
+        - generic [ref=e19]:
+          - link "Login" [ref=e20] [cursor=pointer]:
+            - /url: /auth/login
+          - link "Sign Up" [ref=e21] [cursor=pointer]:
+            - /url: /auth/signup
+  - main [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: Welcome back
+          - heading "Sign in to RenterEasy" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Choose how you'd like to continue
+        - generic [ref=e31]:
+          - button "Renter Find your next home" [ref=e32]:
+            - text: Renter
+            - generic [ref=e36]: Find your next home
+          - button "Agency Manage your listings" [ref=e37]:
+            - text: Agency
+            - generic [ref=e43]: Manage your listings
+      - contentinfo [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - link "RenterEasy home" [ref=e48] [cursor=pointer]:
+                - /url: /
+                - generic "RenterEasy home" [ref=e49]:
+                  - generic [ref=e50]: R
+                  - generic [ref=e51]:
+                    - generic [ref=e52]: RenterEasy
+                    - generic [ref=e53]: Verified rentals · Noida & NCR
+              - paragraph [ref=e54]: RenterEasy is a premium rental marketplace connecting tenants with verified agencies in Noida and NCR. Discover homes you can trust.
+            - generic [ref=e55]:
+              - heading "Explore" [level=4] [ref=e56]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "Home" [ref=e59] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e60]:
+                  - link "Rentals in Noida" [ref=e61] [cursor=pointer]:
+                    - /url: /rent/noida
+                - listitem [ref=e62]:
+                  - link "Agency login" [ref=e63] [cursor=pointer]:
+                    - /url: /auth/login
+                - listitem [ref=e64]:
+                  - link "List your agency" [ref=e65] [cursor=pointer]:
+                    - /url: /auth/signup
+            - generic [ref=e66]:
+              - heading "Support" [level=4] [ref=e67]
+              - list [ref=e68]:
+                - listitem [ref=e69]:
+                  - link "Help Center" [ref=e70] [cursor=pointer]:
+                    - /url: /support
+                - listitem [ref=e71]:
+                  - link "Contact Us" [ref=e72] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=e73]:
+                  - link "support@rentereasy.in" [ref=e74] [cursor=pointer]:
+                    - /url: mailto:support@rentereasy.in
+            - generic [ref=e75]:
+              - heading "Legal" [level=4] [ref=e76]
+              - list [ref=e77]:
+                - listitem [ref=e78]:
+                  - link "Privacy Policy" [ref=e79] [cursor=pointer]:
+                    - /url: /privacy
+                - listitem [ref=e80]:
+                  - link "Terms of Service" [ref=e81] [cursor=pointer]:
+                    - /url: /terms
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: © 2026 RenterEasy. All rights reserved.
+            - paragraph [ref=e84]: Built with care for verified rental experiences.

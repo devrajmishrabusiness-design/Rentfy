@@ -276,7 +276,7 @@ export async function PATCH(request: NextRequest) {
   const callerOwnsAgency =
     !!visit.properties && visit.properties.agency_id != null &&
     (await auth.supabase
-      .from("agencies")
+      .from("agency_profiles")
       .select("id")
       .eq("id", visit.properties.agency_id)
       .eq("auth_user_id", auth.user.id)

@@ -5,7 +5,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-20 border-t border-[var(--brand-border)] bg-white">
+    <footer className="mt-20 border-t border-[var(--brand-border)] bg-white" role="contentinfo">
       <div className="container-app py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
@@ -42,7 +42,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href="/login/agency"
                   className="transition hover:text-[var(--brand-primary)]"
                 >
                   Agency login
@@ -50,7 +50,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/signup"
+                  href="/signup/agency"
                   className="transition hover:text-[var(--brand-primary)]"
                 >
                   List your agency
@@ -61,9 +61,25 @@ export default function Footer() {
 
           <div>
             <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--brand-text)]">
-              Contact
+              Support
             </h4>
             <ul className="space-y-3 text-sm text-[var(--brand-muted)]">
+              <li>
+                <Link
+                  href="/support"
+                  className="transition hover:text-[var(--brand-primary)]"
+                >
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="transition hover:text-[var(--brand-primary)]"
+                >
+                  Contact Us
+                </Link>
+              </li>
               <li>
                 <a
                   href="mailto:support@rentereasy.in"
@@ -72,8 +88,30 @@ export default function Footer() {
                   support@rentereasy.in
                 </a>
               </li>
-              <li>Noida &amp; NCR, India</li>
-              <li>Mon – Sat · 9 AM – 7 PM</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--brand-text)]">
+              Legal
+            </h4>
+            <ul className="space-y-3 text-sm text-[var(--brand-muted)]">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="transition hover:text-[var(--brand-primary)]"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="transition hover:text-[var(--brand-primary)]"
+                >
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

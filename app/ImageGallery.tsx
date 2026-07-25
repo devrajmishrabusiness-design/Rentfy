@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+
+const SWIPE_THRESHOLD = 50;
 
 export default function ImageGallery({
   images,
@@ -10,10 +12,66 @@ export default function ImageGallery({
   images: string[];
   title: string;
 }) {
-  const [selectedImage, setSelectedImage] = useState(images[0] || "");
+  const safeImages = useMemo(() => images?.filter(Boolean) ?? [], [images]);
+  const [selectedImage, setSelectedImage] = useState(() => safeImages[0] || "");
   const [fullscreen, setFullscreen] = useState(false);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
-  if (!images || images.length === 0) {
+  const currentIndex = safeImages.indexOf(selectedImage);
+
+  const nextImage = useCallback(() => {
+    setSelectedImage(safeImages[(currentIndex + 1) % safeImages.length]);
+  }, [safeImages, currentIndex]);
+
+  const prevImage = useCallback(() => {
+    setSelectedImage(
+      safeImages[(currentIndex - 1 + safeImages.length) % safeImages.length]
+    );
+  }, [safeImages, currentIndex]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (diff > 0) {
+        nextImage();
+      } else {
+        prevImage();
+      }
+    }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setFullscreen(false);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevImage();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextImage();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [fullscreen, nextImage, prevImage]);
+
+  if (safeImages.length === 0) {
     return (
       <div className="mb-10 grid h-72 w-full place-items-center rounded-2xl bg-gradient-to-br from-stone-50 to-orange-50 text-sm font-medium text-[var(--brand-muted)]">
         No photos available
@@ -21,21 +79,14 @@ export default function ImageGallery({
     );
   }
 
-  const currentIndex = images.indexOf(selectedImage);
-
-  const nextImage = () => {
-    setSelectedImage(images[(currentIndex + 1) % images.length]);
-  };
-
-  const prevImage = () => {
-    setSelectedImage(
-      images[(currentIndex - 1 + images.length) % images.length]
-    );
-  };
-
   return (
     <div className="mb-10">
-      <div className="relative overflow-hidden rounded-3xl bg-stone-100">
+      <div
+        className="relative overflow-hidden rounded-3xl bg-stone-100"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <Image
           src={selectedImage}
           alt={title}
@@ -48,10 +99,10 @@ export default function ImageGallery({
         />
 
         <div className="absolute right-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
-          {currentIndex + 1} / {images.length}
+          {currentIndex + 1} / {safeImages.length}
         </div>
 
-        {images.length > 1 && (
+        {safeImages.length > 1 && (
           <>
             <button
               type="button"
@@ -79,9 +130,9 @@ export default function ImageGallery({
         )}
       </div>
 
-      {images.length > 1 && (
+      {safeImages.length > 1 && (
         <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-3">
-          {images.map((image) => (
+          {safeImages.map((image) => (
             <button
               key={image}
               type="button"
@@ -94,7 +145,7 @@ export default function ImageGallery({
             >
               <Image
                 src={image}
-                alt={`Photo ${images.indexOf(image) + 1} of ${images.length}`}
+                alt={`Photo ${safeImages.indexOf(image) + 1} of ${safeImages.length}`}
                 width={240}
                 height={160}
                 loading="lazy"
@@ -116,7 +167,7 @@ export default function ImageGallery({
         >
           <button
             type="button"
-            aria-label="Close"
+            aria-label="Close gallery"
             onClick={(e) => {
               e.stopPropagation();
               setFullscreen(false);
@@ -126,39 +177,55 @@ export default function ImageGallery({
             ✕
           </button>
 
-          <button
-            type="button"
-            aria-label="Previous image"
-            onClick={(e) => {
-              e.stopPropagation();
-              prevImage();
-            }}
-            className="absolute left-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
-          >
-            ‹
-          </button>
+          {safeImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="Previous image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage();
+                }}
+                className="absolute left-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
+              >
+                ‹
+              </button>
 
-          <div className="relative h-[90vh] w-[90vw]">
-            <Image
-              src={selectedImage}
-              alt={title}
-              fill
-              sizes="90vw"
-              className="rounded-2xl object-contain"
-            />
-          </div>
+              <div className="relative h-[90vh] w-[90vw]">
+                <Image
+                  src={selectedImage}
+                  alt={title}
+                  fill
+                  sizes="90vw"
+                  className="rounded-2xl object-contain"
+                />
+              </div>
 
-          <button
-            type="button"
-            aria-label="Next image"
-            onClick={(e) => {
-              e.stopPropagation();
-              nextImage();
-            }}
-            className="absolute right-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
-          >
-            ›
-          </button>
+              <button
+                type="button"
+                aria-label="Next image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage();
+                }}
+                className="absolute right-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/20"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {safeImages.length === 1 && (
+            <div className="relative h-[90vh] w-[90vw]">
+              <Image
+                src={selectedImage}
+                alt={title}
+                fill
+                sizes="90vw"
+                className="rounded-2xl object-contain"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

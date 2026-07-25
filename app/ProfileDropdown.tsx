@@ -1,28 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { useRenterSession } from "./renter/useRenterSession";
+import { RenterMenuItems, AgencyMenuItems } from "./nav/ProfileMenuItems";
 
 interface ProfileDropdownProps {
-  userName: string;
-  userInitial: string;
   isRenter: boolean;
   isAgency: boolean;
   isVerifiedAgency: boolean;
+  agencyName?: string;
 }
 
 export default function ProfileDropdown({
-  userName,
-  userInitial,
   isRenter,
   isAgency,
   isVerifiedAgency,
+  agencyName,
 }: ProfileDropdownProps) {
-  void userName;
-  void userInitial;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -38,9 +34,20 @@ export default function ProfileDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.refresh();
+    router.push("/");
   };
 
   const getInitials = () => {
@@ -48,7 +55,7 @@ export default function ProfileDropdown({
       return renterProfile.full_name.charAt(0).toUpperCase();
     }
     if (isAgency) {
-      return "A";
+      return agencyName?.charAt(0).toUpperCase() || "A";
     }
     return "U";
   };
@@ -58,7 +65,7 @@ export default function ProfileDropdown({
       return renterProfile.full_name.split(" ")[0];
     }
     if (isAgency) {
-      return "Agency";
+      return agencyName || "Agency";
     }
     return "User";
   };
@@ -89,7 +96,12 @@ export default function ProfileDropdown({
                 {renterProfile.full_name}
               </p>
             )}
-            {isAgency && isVerifiedAgency && (
+            {isAgency && agencyName && (
+              <p className="text-xs text-[var(--brand-muted)] truncate">
+                {agencyName}
+              </p>
+            )}
+            {isVerifiedAgency && (
               <span className="inline-flex items-center gap-1 mt-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                 Verified Agency
               </span>
@@ -97,124 +109,28 @@ export default function ProfileDropdown({
           </div>
 
           <nav className="py-1">
-            {isRenter && (
+            {isRenter && !isAgency && (
+              <RenterMenuItems closeMenu={() => setIsOpen(false)} onSignOut={handleSignOut} />
+            )}
+            {isAgency && !isRenter && (
+              <AgencyMenuItems closeMenu={() => setIsOpen(false)} onSignOut={handleSignOut} />
+            )}
+            {!isRenter && !isAgency && (
               <>
-                <Link
-                  href="/renter"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-error)] hover:bg-[var(--brand-background)]"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
                   </svg>
-                  Profile
-                </Link>
-                <Link
-                  href="/renter?tab=favorites"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                  Shortlisted Properties
-                </Link>
-                <Link
-                  href="/renter?tab=settings"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                  </svg>
-                  Settings
-                </Link>
+                  Sign out
+                </button>
               </>
             )}
-
-            {isAgency && (
-              <>
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  Profile
-                </Link>
-                <Link
-                  href="/profile?tab=account"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <rect x="2" y="3" width="20" height="14" rx="2" />
-                    <path d="M8 21h8" />
-                    <path d="M12 17v4" />
-                  </svg>
-                  Account
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                  </svg>
-                  My Listings
-                </Link>
-                <Link
-                  href="/dashboard#leads"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                  Leads
-                </Link>
-              </>
-            )}
-
-            <hr className="my-1 border-[var(--brand-border)]" />
-
-            <Link
-              href="/profile"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-text)] hover:bg-[var(--brand-background)]"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-              Settings
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--brand-error)] hover:bg-[var(--brand-background)]"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-              Sign out
-            </button>
           </nav>
         </div>
       )}

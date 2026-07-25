@@ -1,0 +1,7 @@
+[    1853ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    1903ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    4039ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3000/_next/image?url=https%3A%2F%2Fvznobifmkcqxnzvtjbnh.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fproperty-images%2F1781815517401-witch.png&w=640&q=75:0
+[   24672ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[   24732ms] [LOG] [Fast Refresh] done in 160ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[   24794ms] [WARNING] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[ 1030772ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477

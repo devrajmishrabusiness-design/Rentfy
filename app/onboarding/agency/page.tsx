@@ -5,13 +5,13 @@ import AgencyOnboardingForm from "./AgencyOnboardingForm";
 
 export default async function AgencyOnboardingPage() {
   const userResult = await requireUser();
-  if (!userResult.ok) redirect("/login");
+  if (!userResult.ok) redirect("/login/agency");
 
   // If the user already has an agency profile, send them to the dashboard.
   // The "finish setup" empty state previously lived on /dashboard; it now
   // lives here, exclusively.
   const { data: agency } = await userResult.supabase
-    .from("agencies")
+    .from("agency_profiles")
     .select("id, verified")
     .eq("auth_user_id", userResult.user.id)
     .maybeSingle<{ id: string; verified: boolean }>();

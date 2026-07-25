@@ -4,7 +4,8 @@ import path from 'path';
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
+    setupFiles: ['@testing-library/jest-dom/vitest'],
     include: [
       'seo-agent/**/*.test.ts',
       'lib/seo/**/*.test.ts',
@@ -13,6 +14,7 @@ export default defineConfig({
       'app/api/crawler/**/*.test.ts',
       'crawler/**/*.test.ts',
       'app/__tests__/**/*.test.ts',
+      'app/__tests__/**/*.test.tsx',
     ],
     coverage: {
       provider: 'v8',

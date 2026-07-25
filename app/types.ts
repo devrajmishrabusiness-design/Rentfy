@@ -27,6 +27,7 @@ export type Property = {
   available_from?: string | null;
   contact_number?: string | null;
   agency_id?: string | null;
+  agency_profile_id?: string | null;
   status?: string | null;
   area_sqft?: number | null;
   views_count?: number | null;
@@ -47,6 +48,11 @@ export type Lead = {
   notes?: string | null;
   properties?: {
     title?: string | null;
+    location?: string | null;
+    city?: string | null;
+  } | null;
+  agencies?: {
+    agency_name?: string | null;
   } | null;
 };
 
@@ -64,6 +70,29 @@ export type RenterFavorite = {
   renter_id: string;
   property_id: string;
   created_at: string;
+};
+
+export type PropertyVisit = {
+  id: string;
+  property_id: string;
+  renter_id: string;
+  visit_date: string;
+  visit_time: string;
+  visit_type: string;
+  status: string;
+  notes?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  properties?: {
+    title?: string | null;
+    location?: string | null;
+    city?: string | null;
+    image_url?: string | null;
+  } | null;
+  agencies?: {
+    agency_name?: string | null;
+    verified?: boolean | null;
+  } | null;
 };
 
 export type AgencyReview = {

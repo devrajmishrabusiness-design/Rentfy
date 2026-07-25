@@ -71,16 +71,16 @@ export default function AddProperty() {
       const { data: userData } = await supabase.auth.getUser();
       if (cancelled) return;
       if (!userData.user) {
-        router.replace("/login");
+        router.replace("/login/agency");
         return;
       }
       const { data: agency } = await supabase
-        .from("agencies")
+        .from("agency_profiles")
         .select("id")
         .eq("auth_user_id", userData.user.id)
         .maybeSingle<{ id: string }>();
       if (cancelled) return;
-      if (!agency) router.replace("/onboarding/agency");
+      if (!agency) router.replace("/signup/agency");
     })();
     return () => { cancelled = true; };
   }, [router]);
@@ -97,12 +97,12 @@ export default function AddProperty() {
 
       if (!user) {
         sessionStorage.setItem("rentfy.sessionExpired", "1");
-        router.push("/login");
+        router.push("/login/agency");
         return;
       }
 
       const { data: agency, error: agencyError } = await supabase
-        .from("agencies")
+        .from("agency_profiles")
         .select("id, verified")
         .eq("auth_user_id", user.id)
         .single();

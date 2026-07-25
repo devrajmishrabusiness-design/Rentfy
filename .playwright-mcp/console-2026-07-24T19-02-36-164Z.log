@@ -1,0 +1,55 @@
+[    1018ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[    1203ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  636302ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  639655ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  643015ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  646384ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  649752ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  657120ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  664470ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  671826ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  679211ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  686560ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  693963ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  701421ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=P-pN96vbL4E2f9kxpwSYP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  730773ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login:0
+[  730989ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  731152ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  735408ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  735518ms] [LOG] [Fast Refresh] done in 213ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  735561ms] [WARNING] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  737385ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  737455ms] [LOG] [Fast Refresh] done in 198ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  776937ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login?_rsc=AuIN5InvkbCy_sLU:0
+[  777084ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  777138ms] [LOG] [Fast Refresh] done in 155ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  777174ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login:0
+[  777337ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  777380ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  783329ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  783346ms] [LOG] [Fast Refresh] done in 129ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  783378ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login:0
+[  783458ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  783518ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791233ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/signup?_rsc=wyzvv3oyi20ygu8A:0
+[  791262ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791265ms] [LOG] [Fast Refresh] done in 111ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791381ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791446ms] [LOG] [Fast Refresh] done in 175ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791485ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/signup:0
+[  791587ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  791635ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  824816ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login?_rsc=wyzvv3oyi20ygu8A:0
+[  824979ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  825016ms] [LOG] [Fast Refresh] done in 149ms @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  825045ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/auth/login:0
+[  825209ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  825264ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  968570ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=CrKjEA_P0kIPgbd0GDXlg' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  971920ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=CrKjEA_P0kIPgbd0GDXlg' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  975271ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=CrKjEA_P0kIPgbd0GDXlg' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_client_16z7tt0._.js:13422
+[  980471ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  983113ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  983218ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0wrr_next_dist_213clmm._.js:2477
+[  986572ms] [WARNING] The resource http://localhost:3000/_next/static/media/797e433ab948586e-s.p.0r6juujl39pe6.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/auth/login:0
+[  986572ms] [WARNING] The resource http://localhost:3000/_next/static/media/caa3a2e1cccd8315-s.p.0wgildi0cnwt9.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/auth/login:0
